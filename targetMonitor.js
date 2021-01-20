@@ -110,7 +110,7 @@ await fetch("http://localhost:5003/api/items", {
     console.log(response)
 });
 } 
-//  createItemsinDB()
+  createItemsinDB()
 async function updateItemsinDB2 () {
 let updateItem = await fetch(`http://localhost:5003/api/items/${getIdByName}`, {
   "headers": {
