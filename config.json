@@ -1,0 +1,10 @@
+{
+    "prefix" : "!",
+    "token" : "ODAyNzQ4MDMyOTk4MTc4ODM2.YAzvXQ._xkiSjprasz0rz8zTiTno2zVHGQ",
+    "bot_age" : 1,
+    "words_array" : ["Hi", "Bye", "This is array"],
+    "bot_info" : {
+        "name" : "Better Bot",
+        "version" : 1.0
+    }
+}
