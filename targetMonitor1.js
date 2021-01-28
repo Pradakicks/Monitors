@@ -116,8 +116,14 @@ class targetMonitor {
                 // console.log(parsed)
                 console.log(`Searching for TCIN ${this.tcin}`)
                 // console.log(string)
-                this.getStatusByName = string.split(`"name":"${this.tcin}","status":`)[1]?.split(',')[0]
-                this.getIdByName = string.split(`","name":"${this.tcin}"`)[0]?.slice(-24)
+                
+                if(string.split(`"name":"${this.tcin}","status":`)[1]){
+                    this.getStatusByName = string.split(`"name":"${this.tcin}","status":`)[1].split(',')[0]
+                }
+                if (string.split(`","name":"${this.tcin}"`)[0]){
+                    this.getIdByName = string.split(`","name":"${this.tcin}"`)[0].slice(-24)
+                }
+                
                 // console.log(getIdByName)
                 // console.log(getStatusByName)
             } else if(!body){
@@ -218,25 +224,34 @@ class targetMonitor {
                            
                         await rp.get({proxy : `http://${item.proxyUserAuth}:${item.proxyPassAuth}@${item.proxyFull}`, url: this.redURL},
                                (error, response, body)  => {
-                                
-                   console.log(response?.statusCode)
+                                if(response) console.log(response.statusCode)
+
                    if(body){
                        
                        if(!body.includes("No product found with tcin")){
                            this.ProductTCIN = (body.split('"tcin":"')[1].split('"')[0])
-                           this.availability = (body.split('"shipping_options":{"availability_status":"')[1]?.split('"')[0])
-                           this.stockNum = (body.split('"available_to_promise_quantity":')[1]?.split(',')[0])
+                           
+                           if(body.split('"shipping_options":{"availability_status":"')[1]) {
+                            this.availability = (body.split('"shipping_options":{"availability_status":"')[1].split('"')[0])
+                           }
+                           if(body.split('"available_to_promise_quantity":')[1]){
+                            this.stockNum = (body.split('"available_to_promise_quantity":')[1].split(',')[0])
+                           }
+                           
                            console.log(this.ProductTCIN)  
                            console.log(this.availability)
                            console.log(this.stockNum)
-                           if(this.availability?.includes('OUT_OF_STOCK') || this.availability?.includes('PRE_ORDER_UNSELLABLE')){
-                              this.outOfStock()       
-                           } else if (this.availability?.includes('IN_STOCK') || this.availability?.includes("PRE_ORDER_SELLABLE")){
-                            this.inStock()
-                           } else {
-                               console.log('Unknown Error')
-                               console.log(body)
+                           if(this.availability){
+                            if(this.availability.includes('OUT_OF_STOCK') || this.availability.includes('PRE_ORDER_UNSELLABLE')){
+                                this.outOfStock()       
+                             } else if (this.availability.includes('IN_STOCK') || this.availability.includes("PRE_ORDER_SELLABLE")){
+                              this.inStock()
+                             } else {
+                                 console.log('Unknown Error')
+                                 console.log(body)
+                             }
                            }
+                           
                            
                        } else {
                            console.log(`No product found with tcin - ${this.tcin}`)
