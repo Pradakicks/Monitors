@@ -1,4 +1,4 @@
-const targetMonitor = require('./targetMonitor');
+
 const TargetMonitor = require('./targetMonitor1');
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
