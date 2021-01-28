@@ -222,7 +222,7 @@ class targetMonitor {
                        }
                        this.g++
                        console.log(item)
-                       for (let h = 0; h < 100; h++){
+                       for (let h = 0; h < 100; h--){
                            
                         await rp.get({proxy : `http://${item.proxyUserAuth}:${item.proxyPassAuth}@${item.proxyFull}`, url: this.redURL},
                                (error, response, body)  => {
