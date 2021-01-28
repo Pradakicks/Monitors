@@ -9,6 +9,8 @@ const { resolve } = require('path');
 const { json } = require('body-parser');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
+require ('newrelic');
+
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
 	resolveWithFullResponse: true,

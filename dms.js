@@ -1,5 +1,7 @@
 
 const TargetMonitor = require('./targetMonitor1');
+require ('newrelic');
+
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
 	resolveWithFullResponse: true,

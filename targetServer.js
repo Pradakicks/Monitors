@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const items = require("./routes/api/items");
+require ('newrelic');
 
 
 const app = express();
