@@ -1,2 +1,2 @@
 web: node targetServer.js
-web: node discord.js
+worker: node bot.js
