@@ -230,7 +230,7 @@ class targetMonitor {
 
                    if(body){
                        
-                       if(!body.includes("No product found with tcin")){
+                       if(!body.includes("No product found with tcin")  && response.statusCode == 200){
                            this.ProductTCIN = (body.split('"tcin":"')[1].split('"')[0])
                            
                            if(body.split('"shipping_options":{"availability_status":"')[1]) {
