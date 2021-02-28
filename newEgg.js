@@ -128,3 +128,5 @@ const monitoring = new newEggMonitor(`19-113-569`);
 (async ()=>{
     await monitoring.task()
 })()
+
+module.exports = newEggMonitor

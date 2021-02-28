@@ -78,98 +78,109 @@ class gameStopMonitor {
 		}
     }
     async getCookies (){
-        console.log('Fetching Page')
-        this.browser = await chromium.launch({
-            headless: false
-        });
-        const context = await this.browser.newContext();
-        const page = await context.newPage();
-        await page.goto(`https://www.gamestop.com/pradaIsTalented/${this.sku}.html`);
-        await page.waitForSelector('h1')
-        console.log('Fetching Cookies')
-        const cookies = await context.cookies();
-        console.log('Cookies Fetched')
-        cookies.forEach(json => {
-                            const { name, domain } = json
-                            json.key = name
-                            json.expires = json.expires > 0 ? new Date(json.expires * 1000) : 'Infinity'
-                            const cookie = Cookie.fromJSON(json)
-                            let url = 'https://' + domain
-                            cookieJar.setCookie(cookie.toString(), url)
-                        })
-            console.log('Cookies Stored')
-            // console.log(cookieJar)
-        let body = ''
-        setInterval(async ()=>{
-            await page.reload()
-        }, 600000)
-        let monitorInterval = setInterval(async ()=>{
-            try {
-                let stock = await page.evaluate(async (sku) => {
-                    try {
-                        let test  = await fetch(`https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?pid=${sku}&redesignFlag=true&rt=productDetailsRedesign`).then(res => res.text().then(res => {
-                            body = res
-                       //     console.log(res)
-                        }))
-                        
-                    } catch (error) {
-                        console.log(error)
-                    }
-                   return body
-                   
-            }, this.sku)
-           // console.log(stock.statusCode)
-            let parsedBody = JSON.parse(stock)
-            let productName = parsedBody?.gtmData?.productInfo?.name
-            let productSku = parsedBody?.gtmData?.productInfo?.sku
-            let originalPrice = parsedBody?.gtmData?.price?.basePrice
-            let currentPrice = parsedBody?.gtmData?.price?.sellingPrice
-            let image = parsedBody?.product?.images?.large[0]?.url
-            this.availability = parsedBody?.gtmData?.productInfo?.availability
-            console.log({
-                productName : productName,
-                productSku : productSku,
-                originalPrice : originalPrice,
-                currentPrice :  currentPrice,
-                image : image,
-                availability : this.availability
-            })
-            if(this.availability == 'Available'){
-            this.availability = true
-            } else if (this.availability == 'Not Available'){
-                this.availability = false
-            }
-
-
-            if(!this.isStock && this.availability){
-                 // Send in stock webhook
-                 this.isStock = true
-                 let embed1 = new Discord.MessageEmbed()
-                 .setColor('#00FF00')
-                 .setTitle('Game Stop Monitor')
-                 .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
-                 .addField('Product Name', `${productName}`)
-                 .addField('Product Availability', 'Product In Stock',true)
-                 .addField('Product Pid', productSku , true)
-                 .addField('Original Price', originalPrice)
-                 .addField('Current Price', currentPrice)
-                 .setImage(`${image}`)
-                 .setTimestamp()
-                 .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                 webhookClient1.send('Restock!', {
-                     username: 'Game Stop',
-                     avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
-                     embeds: [embed1],
-                 })
-            } else if (!this.availability && this.isStock) {
-                this.isStock = false
-            }
-
-
-            } catch (error) {
-                console.log(error)
-            }
-        }, 1000)
+        try {
+            console.log('Fetching Page')
+            this.browser = await chromium.launch({
+                headless: false
+            });
+            console.log('First Check')
+            const context = await this.browser.newContext();
+            console.log('Second Check')
+            const page = await context.newPage();
+            console.log('Third Check')
+            await page.goto(`https://www.gamestop.com/pradaIsTalented/${this.sku}.html`);
+            console.log('Fourth Check')
+            await page.waitForSelector('h1')
+            console.log('Fetching Cookies')
+            const cookies = await context.cookies();
+            console.log('Cookies Fetched')
+            cookies.forEach(json => {
+                                const { name, domain } = json
+                                json.key = name
+                                json.expires = json.expires > 0 ? new Date(json.expires * 1000) : 'Infinity'
+                                const cookie = Cookie.fromJSON(json)
+                                let url = 'https://' + domain
+                                cookieJar.setCookie(cookie.toString(), url)
+                            })
+                console.log('Cookies Stored')
+                // console.log(cookieJar)
+            let body = ''
+            setInterval(async ()=>{
+                await page.reload()
+            }, 600000)
+            let monitorInterval = setInterval(async ()=>{
+                try {
+                    
+                    let stock = await page.evaluate(async (sku) => {
+                        try {
+                            let test  = await fetch(`https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?pid=${sku}&redesignFlag=true&rt=productDetailsRedesign`).then(res => res.text().then(res => {
+                                body = res
+                           //     console.log(res)
+                            }))
+                            
+                        } catch (error) {
+                            console.log(error)
+                        }
+                       return body
+                       
+                }, this.sku)
+               // console.log(stock.statusCode)
+                let parsedBody = JSON.parse(stock)
+                let productName = parsedBody?.gtmData?.productInfo?.name
+                let productSku = parsedBody?.gtmData?.productInfo?.sku
+                let originalPrice = parsedBody?.gtmData?.price?.basePrice
+                let currentPrice = parsedBody?.gtmData?.price?.sellingPrice
+                let image = parsedBody?.product?.images?.large[0]?.url
+                this.availability = parsedBody?.gtmData?.productInfo?.availability
+                console.log({
+                    productName : productName,
+                    productSku : productSku,
+                    originalPrice : originalPrice,
+                    currentPrice :  currentPrice,
+                    image : image,
+                    availability : this.availability
+                })
+                if(this.availability == 'Available'){
+                this.availability = true
+                } else if (this.availability == 'Not Available'){
+                    this.availability = false
+                }
+    
+    
+                if(!this.isStock && this.availability){
+                     // Send in stock webhook
+                     this.isStock = true
+                     let embed1 = new Discord.MessageEmbed()
+                     .setColor('#00FF00')
+                     .setTitle('Game Stop Monitor')
+                     .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
+                     .addField('Product Name', `${productName}`)
+                     .addField('Product Availability', 'Product In Stock',true)
+                     .addField('Product Pid', productSku , true)
+                     .addField('Original Price', originalPrice)
+                     .addField('Current Price', currentPrice)
+                     .setImage(`${image}`)
+                     .setTimestamp()
+                     .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                     webhookClient1.send('Restock!', {
+                         username: 'Game Stop',
+                         avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
+                         embeds: [embed1],
+                     })
+                } else if (!this.availability && this.isStock) {
+                    this.isStock = false
+                }
+    
+    
+                } catch (error) {
+                    console.log(error)
+                }
+            }, 1000)
+        } catch (error) {
+            console.log(error)
+        }
+       
+        
        
         
      //   await page.close()

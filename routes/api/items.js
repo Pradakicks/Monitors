@@ -5,7 +5,7 @@ const router = express.Router();
 // Item Model
 const Item = require('../../models/Item');
 const gameStopMonitor = require('../../gameStop')
-
+const newEggMonitor = require('../../newEgg')
 async function findSKU (req, res) {
     let sku
     try {
@@ -31,22 +31,29 @@ router.get('/', (req, res) => {
     .then(items => res.json(items));
 });
 
-router.get('/gameStop:params', (req, res) => {
-    console.log(req.params)
+router.get('/gameStop/:params', (req, res) => {
+    console.log(req.params.params)
+    let sku = req.params.params
     console.log('Starting Game Stop Monitors')
-    
-    const monitoring = new gameStopMonitor(`B158467A`);
+    let monitoring = new gameStopMonitor(sku);
 
     (async ()=>{
         await monitoring.task()
     })()
+
     res.send('Starting Game Stop')
 });
 
 
 
-router.get('/newEgg', (req, res) => {
-    console.log('Starting Game Stop Monitors')
+router.get('/newEgg/:params', (req, res) => {
+    console.log(req.params.params)
+    let sku = req.params.params
+    console.log('Starting New Egg Monitors')
+    let monitoring = new newEggMonitor(sku)
+    (async ( )=> {
+        await monitoring.task()
+    })()
     res.send('Starting Game Stop')
 });
 
