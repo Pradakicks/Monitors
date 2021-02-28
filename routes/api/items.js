@@ -46,14 +46,12 @@ router.get('/gameStop/:params', (req, res) => {
 
 
 
-router.get('/newEgg/:params', (req, res) => {
+router.get('/newEgg/:params', async (req, res) => {
     console.log(req.params.params)
     let sku = req.params.params
     console.log('Starting New Egg Monitors')
     let monitoring = new newEggMonitor(sku.toString())
-    (async ( )=> {
-        await monitoring.task()
-    })()
+    await monitoring.task()
     res.send('Starting Game Stop')
 });
 
