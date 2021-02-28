@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Harvester</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        color: white;
+        width: 100vw;
+        height: 100vh;
+        /* background-color: #485461; */
+        /* background-image: linear-gradient(315deg, #485461 0%, #28313b 74%); */
+        font-family: 'Ubuntu', sans-serif;
+        background-color: rgb(32, 33, 54);
+        /* background-repeat: no-repeat; */
+        /* background-size: cover; */
+
+        /* display: flex; */
+        /* justify-content: flex-end; */
+        /* align-items: center; */
+
+    }
+
+    .harvester-ctn {
+        width: 100vw;
+        height: 100vh;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        /* background-color: red; */
+    }
+
+    .harvester-title {
+        font-size: 60px;
+    }
+
+    .harvester-token-total {
+        font-size: 30px;
+        display: flex;
+    }
+
+
+    /* animation*/
+    .lds-dual-ring {
+        display: inline-block;
+        width: 270px;
+        height: 270px;
+        margin-top: 20px;
+    }
+
+    .lds-dual-ring:after {
+        content: " ";
+        display: block;
+        width: 250px;
+        height: 250px;
+        margin: 8px;
+        border-radius: 50%;
+        border: 12px solid #fff;
+        border-color: #fff transparent #fff transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+    }
+
+    @keyframes lds-dual-ring {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+
+    h2 {
+        position: relative;
+        color: rgba(0, 0, 0, .3);
+        font-size: 30px;
+    }
+
+    h2:before {
+        content: attr(data-text);
+        position: absolute;
+        overflow: hidden;
+        max-width: 7em;
+        white-space: nowrap;
+        color: #fff;
+        animation: loading 2s linear;
+        animation-iteration-count: infinite;
+
+    }
+
+    @keyframes loading {
+        0% {
+            max-width: 0;
+        }
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    webview {
+        width: 95vw;
+        height: 75vh;
+    }
+</style>
+
+<body>
+
+    <div class="harvester-ctn">
+        <div class="harvester-title">
+            Harvester
+        </div>
+
+        <!-- <div class="loader"></div>
+        <div class="lds-dual-ring"></div> -->
+
+        <div class="captcha-login">
+            <!-- <webview src="https://accounts.google.com/ServiceLogin?service=chromiumsync" partition="test"></webview> -->
+        </div>
+        <h2 data-text="Waiting For Captcha">Waiting For Captcha</h2>
+
+        <div class="google-flinks">
+            <button style="font-size:24px; color: black;background-color: whitesmoke;">Google <i style="color: #4285F4;"
+                    class="fa fa-google"></i></button>
+            <button style="font-size:24px; color: black;background-color: red;">Youtube <i style="color: white;"
+                    class="fa fa-youtube-play"></i></button>
+        </div>
+    </div>
+
+    <script>
+        let myPartition = global.location.search.replace("?id=", "");
+        // let myPartition= "persist:captcha";
+     //   const { ipcRenderer } = require("electron");
+        document.querySelectorAll('button')[1].onclick = function () {
+            var myobj = document.getElementById("google");
+            myobj?.remove();
+            var s = document.createElement("webview");
+            s.id = "youtube";
+            s.partition = `${myPartition}`
+            s.useragent = "Chrome";
+            s.src = "https://www.youtube.com/channel/UCPOQH2T7odfT3fTq7rzlkZQ"
+            document.querySelector(".captcha-login").append(s);
+
+        }
+
+        document.querySelectorAll('button')[0].onclick = function () {
+            var myobj = document.getElementById("youtube");
+            myobj?.remove();
+            var s = document.createElement("webview");
+            s.id = "google";
+            s.useragent = "Chrome";
+            s.partition = `${myPartition}`
+            s.src = "https://accounts.google.com/signin/v2/identifier?flowName=GlifWebSignIn&flowEntry=ServiceLogin"
+            document.querySelector(".captcha-login").append(s);
+        }  
+    </script>
+    <script type="text/javascript">
+        // let currentTask;
+        // const { ipcRenderer } =require("electron");
+
+        // async function openCaptcha() {
+        //     var s = document.createElement("script");
+        //     s.type = "text/javascript";
+        //     s.src = "https://www.google.com/recaptcha/api.js";
+        //     $("head").append(s);
+        //     return
+        // }
+        // var sendCaptcha = (token) => {
+        //     console.log(token);
+        //     ipcRenderer.send('captcha:solved', { id: currentTask.id, token: token })
+        // }
+
+        // ipcRenderer.on("captcha:needed", async (_, data) => {
+        //     currentTask = data;
+        //     await openCaptcha();
+        //     document.body.innerHTML = `<div id='captchaFrame' class='g-recaptcha' data-callback='sendCaptcha' data-sitekey='${data.siteKey}' data-theme='dark'></div>`;
+        // })  
+    </script>
+</body>
+
+</html>

@@ -25,11 +25,18 @@ async function findSKU (req, res) {
 // @desc Get All Items
 // @access Public
 router.get('/', (req, res) => {
- //   console.log('Items Retrieved')
+    console.log('Items Retrieved')
     Item.find()
     .sort({date : -1 })
     .then(items => res.json(items));
 });
+
+router.get('/', (req, res) => {
+    //   console.log('Items Retrieved')
+       Item.find()
+       .sort({date : -1 })
+       .then(items => res.json(items));
+   });
 
 // @route POST api.items
 // @desc Create a Item
