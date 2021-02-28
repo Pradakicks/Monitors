@@ -1,2 +1,2 @@
-web: npm i playwright node targetServer.js 
+web: node targetServer.js 
 worker: node discord.js
