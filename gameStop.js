@@ -91,7 +91,7 @@ class gameStopMonitor {
             console.log('Fetching Page')
             this.browser = await chromium.launch({
                 headless: false,
-                getChromiumExecPath()
+                executablePath :getChromiumExecPath()
             });
             console.log('First Check')
             const context = await this.browser.newContext();
