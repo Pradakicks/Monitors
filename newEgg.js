@@ -119,7 +119,7 @@ class newEggMonitor {
     
                 } catch (error) {
                     console.log(error)
-                    if(error.includes('Unexpected token')){
+                    if(error.message.includes('Unexpected token')){
                         console.log(testing)
                         clearInterval(monitorInterval)
                         resolve('g')
