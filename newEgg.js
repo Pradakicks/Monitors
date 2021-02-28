@@ -73,6 +73,7 @@ class newEggMonitor {
         console.log('Starting Monitoring')
         return new Promise( async ( resolve, reject) => {
             let montiorInterval = setInterval(async () => {
+                
                 try {
                     let fetchSite = await rp.get({
                         url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`
