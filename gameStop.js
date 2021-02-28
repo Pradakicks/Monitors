@@ -27,7 +27,16 @@ const webhookClient = new Discord.WebhookClient('797249480410923018', 'NPL3ktXS7
 const webhook = require("webhook-discord");
  // https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
 const Hook = new webhook.Webhook("https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM")
-
+function getChromiumExecPath() {
+    let platform = process.platform;
+    if (platform === "win32") {
+        return "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+    } else if (platform === "darwin") {
+        return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    } else {
+        return chromium.executablePath().replace("app.asar", "app.asar.unpacked");
+    }
+}
 class gameStopMonitor {
     constructor(sku) {
         this.sku = sku;
@@ -44,7 +53,7 @@ class gameStopMonitor {
         try {
             console.log('Start')
          //   await this.getProxies()
-      //   await this.getCookies()
+         await this.getCookies()
          
          //   await this.monitor()
         } catch (error) {
@@ -81,7 +90,8 @@ class gameStopMonitor {
         try {
             console.log('Fetching Page')
             this.browser = await chromium.launch({
-                headless: false
+                headless: false,
+                getChromiumExecPath()
             });
             console.log('First Check')
             const context = await this.browser.newContext();

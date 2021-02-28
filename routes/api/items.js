@@ -50,7 +50,7 @@ router.get('/newEgg/:params', (req, res) => {
     console.log(req.params.params)
     let sku = req.params.params
     console.log('Starting New Egg Monitors')
-    let monitoring = new newEggMonitor(sku)
+    let monitoring = new newEggMonitor(sku.toString())
     (async ( )=> {
         await monitoring.task()
     })()
