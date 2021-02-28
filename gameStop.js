@@ -10,7 +10,8 @@ const { json } = require('body-parser');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const request = require('request')
-const {chromium} = require('playwright')
+// const {chromium} = require('playwright')
+const { chromium } = require("playwright-chromium");
 var tough = require('tough-cookie');
 var Cookie = tough.Cookie;
 // require ('newrelic');
@@ -91,7 +92,7 @@ class gameStopMonitor {
             console.log('Fetching Page')
             this.browser = await chromium.launch({
                 headless: false,
-                executablePath :getChromiumExecPath()
+                chromiumSandbox: false
             });
             console.log('First Check')
             const context = await this.browser.newContext();
