@@ -45,6 +45,7 @@ router.get('/gameStop/:params', (req, res) => {
 });
 
 
+   
 
 router.get('/newEgg/:params', async (req, res) => {
     console.log(req.params.params)
