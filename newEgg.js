@@ -71,15 +71,18 @@ class newEggMonitor {
 
     async monitor () {
         console.log('Starting Monitoring')
+        var testing = ''
         return new Promise( async ( resolve, reject) => {
-            let montiorInterval = setInterval(async () => {
+            let monitorInterval = setInterval(async () => {
 
                 try {
                     let fetchSite = await rp.get({
                         url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`
                     })   
                     console.log(fetchSite.statusCode)
+                    testing = fetchSite.body
                     let parsedBod = JSON.parse(fetchSite.body)
+                    
                     let productName = parsedBod.MainItem.Description.Title
                     let originalPrice = parsedBod.MainItem.OriginalUnitPrice
                     let currentPrice = parsedBod.MainItem.FinalPrice
@@ -116,6 +119,11 @@ class newEggMonitor {
     
                 } catch (error) {
                     console.log(error)
+                    if(error.includes('Unexpected token')){
+                        console.log(testing)
+                        clearInterval(monitorInterval)
+                        resolve('g')
+                    }
                 }
             }, 1000)
 
