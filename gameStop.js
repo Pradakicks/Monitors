@@ -140,7 +140,7 @@ class gameStopMonitor {
                 this.availability = false
             }
 
-            
+
             if(!this.isStock && this.availability){
                  // Send in stock webhook
                  this.isStock = true
@@ -239,3 +239,6 @@ const monitoring = new gameStopMonitor(`B158467A`);
 (async ()=>{
     await monitoring.task()
 })()
+
+
+module.exports = gameStopMonitor
