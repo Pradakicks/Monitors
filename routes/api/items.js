@@ -44,7 +44,7 @@ router.get('/gameStop/:params', (req, res) => {
     res.send('Starting Game Stop')
 });
 
-
+ 
 
 router.get('/newEgg/:params', (req, res) => {
     console.log(req.params.params)
