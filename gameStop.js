@@ -44,7 +44,7 @@ class gameStopMonitor {
         try {
             console.log('Start')
          //   await this.getProxies()
-         await this.getCookies()
+      //   await this.getCookies()
          
          //   await this.monitor()
         } catch (error) {
