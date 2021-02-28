@@ -252,4 +252,6 @@ class gameStopMonitor {
 // }) // ()
 
 
-module.exports = gameStopMonitor
+module.exports = {
+    gameStopMonitor
+}

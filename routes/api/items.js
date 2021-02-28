@@ -4,8 +4,8 @@ const router = express.Router();
 
 // Item Model
 const Item = require('../../models/Item');
-const gameStopMonitor = require('../../gameStop')
-const newEggMonitor = require('../../newEgg')
+const { gameStopMonitor } = require('../../gameStop')
+const {newEggMonitor} = require('../../newEgg')
 async function findSKU (req, res) {
     let sku
     try {

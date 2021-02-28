@@ -130,4 +130,6 @@ class newEggMonitor {
 //     await monitoring.task()
 // }) // ()
 
-module.exports = newEggMonitor
+module.exports = {
+    newEggMonitor
+}
