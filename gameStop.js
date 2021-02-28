@@ -245,11 +245,11 @@ class gameStopMonitor {
 
 }
 
-const monitoring = new gameStopMonitor(`B158467A`);
+// const monitoring = new gameStopMonitor(`B158467A`);
 
-(async ()=>{
-    await monitoring.task()
-}) // ()
+// (async ()=>{
+//     await monitoring.task()
+// }) // ()
 
 
 module.exports = gameStopMonitor
