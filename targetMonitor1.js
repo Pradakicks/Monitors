@@ -1,5 +1,5 @@
 const delay = require('delay');
-const puppeteer = require('puppeteer-extra');
+
 const cheerio = require('cheerio');
 const axios = require('axios').default;
 const fs = require('fs');
