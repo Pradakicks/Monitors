@@ -6,7 +6,6 @@ const fs = require('fs');
 const { gzip } = require('zlib');
 const { response } = require('express');
 const { resolve } = require('path');
-const { json } = require('body-parser');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const request = require('request')
