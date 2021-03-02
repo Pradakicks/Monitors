@@ -4,7 +4,7 @@ const router = express.Router();
 
 // Item Model
 const Item = require('../../models/Item');
-const { gameStopMonitor } = require('../../gameStop')
+const { gameStopMonitor } = require('../../sites/gameStop')
 const {newEggMonitor} = require('../../sites/newEgg')
 const {targetMonitor} = require('../../sites/targetEfficent')
 async function findSKU (req, res) {
@@ -44,6 +44,7 @@ router.get('/gameStop/:params', (req, res) => {
 
     res.send('Starting Game Stop')
 });
+
 router.get('/newEgg/:params', async (req, res) => {
     console.log(req.params.params)
     let sku = req.params.params
