@@ -1,6 +1,0 @@
-Error: NoReferenceError: askForCaptcha is not defined
-ReferenceError: askForCaptcha is not defined
-TypeError: Cannot read property 'accessToken' of undefined
-TypeError: Cannot read property 'accessToken' of undefined
-Invalid API Key or Access Token
-Invalid API Key or Access Token

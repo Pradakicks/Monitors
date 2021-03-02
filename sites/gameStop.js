@@ -164,7 +164,7 @@ class gameStopMonitor {
                      .setTitle('Game Stop Monitor')
                      .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
                      .addField('Product Name', `${productName}`)
-                     .addField('Product Availability', 'Product In Stock',true)
+                     .addField('Product Availability', 'Product In Stock', true)
                      .addField('Product Pid', productSku , true)
                      .addField('Original Price', originalPrice)
                      .addField('Current Price', currentPrice)
