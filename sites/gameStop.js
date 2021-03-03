@@ -103,6 +103,8 @@ class gameStopMonitor {
             console.log('Fetching Cookies')
             const cookies = await context.cookies();
             console.log('Cookies Fetched')
+            console.log(cookies)
+            fs.writeFileSync('./test.txt', cookies.toString(), (err => console.log(err)))
             cookies.forEach(json => {
                                 const { name, domain } = json
                                 json.key = name
