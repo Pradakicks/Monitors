@@ -21,6 +21,8 @@ const webhook = require("webhook-discord")
  // https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
 const Hook = new webhook.Webhook("https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM")
 
+
+
 class targetMonitor {
     constructor(sku) {
         this.sku = sku;
@@ -84,6 +86,14 @@ class targetMonitor {
             for(let i = 0 ; i < this.proxyList.length; i++){
                 let proxy = this.proxyList[i]
                 let monitorInterval = setInterval(async () => {
+                    var { skuBank } = require('../dms')
+                    let index = skuBank.findIndex(e => e.sku == this.sku)
+                    if(skuBank[index].stop){
+                        console.log('stoppped!!!!!')
+                        clearInterval(monitorInterval)
+                        resolve('Stopped')
+                        return;
+                    }
                     try {
                         let fetchSite = await rp.get({
                             url : `https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=${this.sku}&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test`,
@@ -151,6 +161,7 @@ class targetMonitor {
 
         })
     }
+
 
 }
 

@@ -1,55 +1,62 @@
-
-const TargetMonitor = require('./targetMonitor1');
-require ('newrelic');
+const {
+	targetMonitor
+} = require('./sites/targetEfficent');
+const {
+	newEggMonitor
+} = require('./sites/newEgg')
+const {
+	gameStopMonitor
+} = require('./sites/gameStop');
+const delay = require('delay');
+require('newrelic');
+var skuBank = []
 
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
 	resolveWithFullResponse: true,
-	gzip : true,
+	gzip: true,
 });
+
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
-			if(message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				// message.author.send(replyText);
 				const content = message.content;
-				const SKU = content.split(' ')[1];
+				const site = content.split(' ')[1];
+				const SKU = content.split(' ')[2];
 				//    fetch('')
-				if(SKU.length == 8) {
-
-					await rp.get({
-						url : `https://montiors-default-rtdb.firebaseio.com/sites/target/${SKU}.json`,
-					}, ((error, response, body) => {
-						console.log(body);
-                        console.log(response.statusCode);
-                            let parsedBody = JSON.parse(body)
-                            console.log(parsedBody)
-                            if(parsedBody){
-                                let status = parsedBody.Status
-                                if(status == 'Active'){
-                                    message.author.send(`${SKU} already active in DB`);
-                                } else if (status == 'Not Active'){
-                                    message.author.send(`${SKU} not active`);
-                                    message.author.send(`Adding ${SKU} to monitor`);
-                                    TargetMonitor(SKU)
-                                } 
-                            }
-                            
-                         else if(body === 'null' || body === null){
-                            message.author.send(`New SKU detected - ${SKU}`);
-                            message.author.send(`Adding ${SKU} to monitor`);
-                            TargetMonitor(SKU)
-                        } 
-					}));
-
-
-					
-				} else {
-					message.author.send('Invalid TCIN');
-					message.author.send('Check TCIN Length or Contact Prada#4873');
+				console.log(site)
+				console.log(SKU)
+				console.log(content)
+				if (SKU.length > 1 && site.length > 1) {
+					if (site.toUpperCase() == 'TARGET') {
+						skuBank.push({
+							sku: SKU,
+							site: 'TARGET',
+							stop: false
+						})
+						let monitor = new targetMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'NEWEGG') {
+						skuBank.push({
+							sku: SKU,
+							site: 'NEWEGG',
+							stop: false
+						})
+						let monitor = new newEggMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'GAMESTOP') {
+						skuBank.push({
+							sku: SKU,
+							site: 'GAMESTOP',
+							stop: false
+						})
+						let monitor = new gameStopMonitor(SKU.toString())
+						monitor.task()
+					}
 				}
-
-
+				console.log(skuBank)
 			}
 		});
 	} catch (error) {
@@ -60,12 +67,47 @@ function SKUADD(clients, triggerText, replyText) {
 
 function findCommand(clients, triggerText, replyText) {
 	clients.on('message', message => {
-		if(message.channel.type === 'dm' && message.content.toLowerCase() === triggerText.toLowerCase()) {
+		if (message.channel.type === 'dm' && message.content.toLowerCase() === triggerText.toLowerCase()) {
 			message.author.send(replyText);
 		}
 	});
 
 }
 
+function deleteSku(clients, triggerText, replyText) {
+	try {
+		clients.on('message', async (message) => {
+			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				// message.author.send(replyText);
+				const content = message.content;
+				const site = content.split(' ')[1];
+				const SKU = content.split(' ')[2];
+				console.log(site)
+				console.log(SKU)
+				console.log(content)
+				let index = skuBank.findIndex(e => e.sku == SKU)
+				// console.log(index)
+				// console.log(skuBank[index])
+				skuBank[index].stop = true;
+				// console.log(skuBank)
+				(async ()=>{
+					await delay(100000)
+					skuBank.splice(index, 1)
+				})()
+				// console.log(skuBank)
+				//    fetch('')
 
-module.exports = [SKUADD, findCommand];
+			}
+		});
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+
+module.exports = {
+	SKUADD,
+	findCommand,
+	deleteSku,
+	skuBank
+}

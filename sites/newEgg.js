@@ -77,7 +77,14 @@ class newEggMonitor {
                 let proxy = this.proxyList[i]
                 console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
                 let monitorInterval = setInterval(async () => {
-
+                    var { skuBank } = require('../dms')
+                    let index = skuBank.findIndex(e => e.sku == this.sku)
+                    if(skuBank[index].stop){
+                        console.log('stoppped!!!!!')
+                        clearInterval(monitorInterval)
+                        resolve('Stopped')
+                        return;
+                    }
                     try {
                         let fetchSite = await rp.get({
                             url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`,
