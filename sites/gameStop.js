@@ -45,6 +45,7 @@ class gameStopMonitor {
         this.proxyList = [];
         this.isStock = false
         this.browser = ''
+        this.stop = ''
 
     }
 
@@ -113,13 +114,30 @@ class gameStopMonitor {
                                 let url = 'https://' + domain
                                 cookieJar.setCookie(cookie.toString(), url)
                             })
-                console.log('Cookies Stored')
+
+            console.log('Cookies Stored')
                 // console.log(cookieJar)
             let body = ''
-            setInterval(async ()=>{
+            let reload = setInterval(async ()=> {
+                var { skuBank } = require('../dms')
+                let index = skuBank.findIndex(e => e.sku == this.sku)
+                if(skuBank[index].stop){
+                    console.log('stoppped!!!!!')
+                    clearInterval(reload)
+                    resolve('Stopped')
+                    return;
+                }
                 await page.reload()
             }, 600000)
-            let monitorInterval = setInterval(async ()=>{
+            let monitorInterval = setInterval(async () => {
+                var { skuBank } = require('../dms')
+                let index = skuBank.findIndex(e => e.sku == this.sku)
+                if(skuBank[index].stop){
+                    console.log('stoppped!!!!!')
+                    clearInterval(monitorInterval)
+                    resolve('Stopped')
+                    return;
+                }
                 try {
                     
                     let stock = await page.evaluate(async (sku) => {
@@ -187,6 +205,8 @@ class gameStopMonitor {
                     console.log(error)
                 }
             }, 1000)
+
+            await page.close()
         } catch (error) {
             console.log(error)
         }
@@ -194,65 +214,9 @@ class gameStopMonitor {
         
        
         
-     //   await page.close()
+
     }
-    // async monitor () {
-    //     console.log('Starting Monitoring')
-    //     return new Promise( async ( resolve, reject) => {
-    //         await rp.get({
-    //             url : 'https://www.gamestop.com'
-    //         })
-    //         let montiorInterval = setInterval(async () => {
-    //             try {
-    //                 let fetchSite = await rp.get({
-    //                     url : `https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?pid=${this.sku}`
-    //                 })
-    //                 console.log(fetchSite.statusCode)
-    //                 let parsedBody = JSON.parse(fetchSite.body)
-    //                 let productName = parsedBody?.gtmData?.productInfo?.name
-    //                 let productSku = parsedBody?.gtmData?.productInfo?.sku
-    //                 let originalPrice = parsedBody?.gtmData?.price?.basePrice
-    //                 let currentPrice = parsedBody?.gtmData?.price?.sellingPrice
-    //                 let image = parsedBody?.product?.images?.large[0]?.url
-    //                 this.availability = parsedBody?.gtmData?.productInfo?.availability
-    //                 if(this.availability == 'Available'){
-    //                 this.availability = true
-    //                 }
 
-
-
-    //                 if(!this.isStock && this.availability){
-    //                      // Send in stock webhook
-    //                      this.isStock = true
-    //                      let embed1 = new Discord.MessageEmbed()
-    //                      .setColor('#00FF00')
-    //                      .setTitle('Game Stop Monitor')
-    //                      .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
-    //                      .addField('Product Name', `${productName}`)
-    //                      .addField('Product Availability', 'Product In Stock',true)
-    //                      .addField('Product Pid', productSku , true)
-    //                      .addField('Original Price', originalPrice)
-    //                      .addField('Current Price', currentPrice)
-    //                      .setImage(`${image}`)
-    //                      .setTimestamp()
-    //                      .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-    //                      webhookClient1.send('Restock!', {
-    //                          username: 'Game Stop',
-    //                          avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
-    //                          embeds: [embed1],
-    //                      })
-    //                 } else if (!this.availability && this.isStock) {
-    //                     this.isStock = false
-    //                 }
-
-
-    //             } catch (error) {
-    //                 console.log(error)
-    //             }
-    //         }, 1000)
-
-    //     })
-    // }
 
 }
 
