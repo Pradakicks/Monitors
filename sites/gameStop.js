@@ -51,7 +51,7 @@ class gameStopMonitor {
     async task () {
         try {
             console.log('Start')
-         //   await this.getProxies()
+            await this.getProxies()
          await this.getCookies()
          
          //   await this.monitor()
@@ -87,10 +87,13 @@ class gameStopMonitor {
     }
     async getCookies (){
         try {
+            // ::
             console.log('Fetching Page')
             this.browser = await chromium.launch({
                 headless: false,
-                chromiumSandbox: false
+                chromiumSandbox: false,
+                proxy : {server : `134.195.155.61:8080`, username : 'bfe6yp', password : 'gsuep4'},
+                timeout : 0
             });
             console.log('First Check')
             const context = await this.browser.newContext();
@@ -103,7 +106,7 @@ class gameStopMonitor {
             console.log('Fetching Cookies')
             const cookies = await context.cookies();
             console.log('Cookies Fetched')
-            console.log(cookies)
+         //   console.log(cookies)
             fs.writeFileSync('./test.txt', cookies.toString(), (err => console.log(err)))
             cookies.forEach(json => {
                                 const { name, domain } = json
@@ -116,77 +119,84 @@ class gameStopMonitor {
                 console.log('Cookies Stored')
                 // console.log(cookieJar)
             let body = ''
-            setInterval(async ()=>{
+            setInterval(async () => {
                 await page.reload()
             }, 600000)
-            let monitorInterval = setInterval(async ()=>{
-                try {
-                    
-                    let stock = await page.evaluate(async (sku) => {
-                        try {
-                            let test  = await fetch(`https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?pid=${sku}&redesignFlag=true&rt=productDetailsRedesign`).then(res => res.text().then(res => {
-                                body = res
-                           //     console.log(res)
-                            }))
-                            
-                        } catch (error) {
-                            console.log(error)
-                        }
-                       return body
-                       
-                }, this.sku)
-               // console.log(stock.statusCode)
-                let parsedBody = JSON.parse(stock)
-                let productName = parsedBody?.gtmData?.productInfo?.name
-                let productSku = parsedBody?.gtmData?.productInfo?.sku
-                let originalPrice = parsedBody?.gtmData?.price?.basePrice
-                let currentPrice = parsedBody?.gtmData?.price?.sellingPrice
-                let image = parsedBody?.product?.images?.large[0]?.url
-                this.availability = parsedBody?.gtmData?.productInfo?.availability
-                console.log({
-                    productName : productName,
-                    productSku : productSku,
-                    originalPrice : originalPrice,
-                    currentPrice :  currentPrice,
-                    image : image,
-                    availability : this.availability
-                })
-                if(this.availability == 'Available'){
-                this.availability = true
-                } else if (this.availability == 'Not Available'){
-                    this.availability = false
-                }
-    
-    
-                if(!this.isStock && this.availability){
-                     // Send in stock webhook
-                     this.isStock = true
-                     let embed1 = new Discord.MessageEmbed()
-                     .setColor('#00FF00')
-                     .setTitle('Game Stop Monitor')
-                     .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
-                     .addField('Product Name', `${productName}`)
-                     .addField('Product Availability', 'Product In Stock', true)
-                     .addField('Product Pid', productSku , true)
-                     .addField('Original Price', originalPrice)
-                     .addField('Current Price', currentPrice)
-                     .setImage(`${image}`)
-                     .setTimestamp()
-                     .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                     webhookClient1.send('Restock!', {
-                         username: 'Game Stop',
-                         avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
-                         embeds: [embed1],
-                     })
-                } else if (!this.availability && this.isStock) {
-                    this.isStock = false
-                }
-    
-    
-                } catch (error) {
-                    console.log(error)
-                }
-            }, 1000)
+            for (let i = 0 ; i < this.proxyList.length; i++){
+                let proxy = this.proxyList[i]
+                console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                let monitorInterval = setInterval(async () => {
+                    try {
+                        
+                        let stock = await page.evaluate(async (sku) => {
+                            try {
+                                let test  = await fetch(`https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?pid=${sku}&redesignFlag=true&rt=productDetailsRedesign`).then(res => res.text().then(res => {
+                                    body = res
+                               //     console.log(res)
+                                }))
+                                
+                            } catch (error) {
+                                console.log(error)
+                            }
+                           return body
+                           
+                    }, this.sku)
+                   // console.log(stock.statusCode)
+                    let parsedBody = JSON.parse(stock)
+                    let productName = parsedBody?.gtmData?.productInfo?.name
+                    let productSku = parsedBody?.gtmData?.productInfo?.sku
+                    let originalPrice = parsedBody?.gtmData?.price?.basePrice
+                    let currentPrice = parsedBody?.gtmData?.price?.sellingPrice
+                    let image = parsedBody?.product?.images?.large[0]?.url
+                    this.availability = parsedBody?.gtmData?.productInfo?.availability
+                    console.log({
+                        task : i,
+                        productName : productName,
+                        productSku : productSku,
+                        originalPrice : originalPrice,
+                        currentPrice :  currentPrice,
+                        image : image,
+                        availability : this.availability
+                    })
+                    if(this.availability == 'Available'){
+                    this.availability = true
+                    } else if (this.availability == 'Not Available'){
+                        this.availability = false
+                    }
+        
+        
+                    if(!this.isStock && this.availability){
+                         // Send in stock webhook
+                         this.isStock = true
+                         let embed1 = new Discord.MessageEmbed()
+                         .setColor('#00FF00')
+                         .setTitle('Game Stop Monitor')
+                         .setURL(`https://www.gamestop.com/Prada/${this.sku}.html`)
+                         .addField('Product Name', `${productName}`)
+                         .addField('Product Availability', 'Product In Stock', true)
+                         .addField('Product Pid', productSku , true)
+                         .addField('Original Price', originalPrice)
+                         .addField('Current Price', currentPrice)
+                         .setImage(`${image}`)
+                         .setTimestamp()
+                         .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                         webhookClient1.send('Restock!', {
+                             username: 'Game Stop',
+                             avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
+                             embeds: [embed1],
+                         })
+                    } else if (!this.availability && this.isStock) {
+                        this.isStock = false
+                    }
+        
+        
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }, 1000)
+                await delay(100)
+            }
+           
         } catch (error) {
             console.log(error)
         }

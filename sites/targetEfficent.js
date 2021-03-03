@@ -82,10 +82,12 @@ class targetMonitor {
                       this.itemPicUrl = itemPic
                  }))
             for(let i = 0 ; i < this.proxyList.length; i++){
+                let proxy = this.proxyList[i]
                 let monitorInterval = setInterval(async () => {
                     try {
                         let fetchSite = await rp.get({
-                            url : `https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=${this.sku}&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test`
+                            url : `https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=${this.sku}&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test`,
+                            proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
                         })   
                         console.log(fetchSite.statusCode)
                         testing = fetchSite.body
@@ -108,7 +110,7 @@ class targetMonitor {
                             // Send in stock webhook
                             this.isStock = true
                             let embed1 = new Discord.MessageEmbed()
-                          //  .setColor('#00FF00')
+                            .setColor('#800080')
                             .setTitle('Target Monitor')
                             .setThumbnail(`${this.itemPicUrl}`)
                             .setURL(`https://www.target.com/prada/-/A-${this.sku}`)

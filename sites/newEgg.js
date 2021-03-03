@@ -35,7 +35,8 @@ class newEggMonitor {
     async task () {
         try {
             console.log('Start')
-         //   await this.getProxies()
+            await this.getProxies()
+         //   console.log(this.proxyList)
             await this.monitor()
         } catch (error) {
             
@@ -72,59 +73,72 @@ class newEggMonitor {
         console.log('Starting Monitoring')
         var testing = ''
         return new Promise( async ( resolve, reject) => {
-            let monitorInterval = setInterval(async () => {
+            for (let i = 0; i < this.proxyList.length; i++){
+                let proxy = this.proxyList[i]
+                console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                let monitorInterval = setInterval(async () => {
 
-                try {
-                    let fetchSite = await rp.get({
-                        url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`
-                    })   
-                    console.log(fetchSite.statusCode)
-                    testing = fetchSite.body
-                    let parsedBod = JSON.parse(fetchSite.body)
-                    
-                    let productName = parsedBod.MainItem.Description.Title
-                    let originalPrice = parsedBod.MainItem.OriginalUnitPrice
-                    let currentPrice = parsedBod.MainItem.FinalPrice
-                    this.availability = parsedBod.MainItem.Instock
-                    this.stockNumber = parsedBod.MainItem.Stock 
-                    if(!this.isStock && this.availability) {
-                        // Send in stock webhook
-                        this.isStock = true
-                        let embed1 = new Discord.MessageEmbed()
-                        .setColor('#00FF00')
-                        .setTitle('New Egg Monitor')
-                        .setURL(`https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg`)
-                        .addField('Product Name', `${productName}`)
-                        .addField('Product Availability', 'Product In Stock',true)
-                        .addField('Stock Number', `${this.stockNumber}`, true)
-                        .addField('Original Price', originalPrice)
-                        .addField('Current Price', currentPrice)
-                        .setImage(`https://c1.neweggimages.com/ProductImage/${this.sku}-V10.jpg`)
-                        .setTimestamp()
-                        .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                        webhookClient1.send('Restock!', {
-                            username: 'New Egg',
-                            avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
-                            embeds: [embed1],
-                        })
-                    } else if (!this.availability && this.isStock) {
-                        this.isStock = false
-                    }
-
-                    console.log(this.availability, this.stockNumber, productName)
-                    console.log(originalPrice, currentPrice)
-                   // console.log(parsedBod)
+                    try {
+                        let fetchSite = await rp.get({
+                            url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`,
+                            proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
+                        })   
+                        console.log(fetchSite.statusCode)
+                        testing = fetchSite.body
+                        let parsedBod = JSON.parse(fetchSite.body)
+                        
+                        let productName = parsedBod.MainItem.Description.Title
+                        let originalPrice = parsedBod.MainItem.OriginalUnitPrice
+                        let currentPrice = parsedBod.MainItem.FinalPrice
+                        this.availability = parsedBod.MainItem.Instock
+                        this.stockNumber = parsedBod.MainItem.Stock 
+                        if(!this.isStock && this.availability) {
+                            // Send in stock webhook
+                            this.isStock = true
+                            let embed1 = new Discord.MessageEmbed()
+                            .setColor('#800080')
+                            .setTitle('New Egg Monitor')
+                         //   .setURL(`https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg`)
+                            // .addField('Product Name', `${productName}`)
+                            // .addField('Product Availability', 'Product In Stock',true)
+                            // .addField('Stock Number', `${this.stockNumber}`, true)
+                            .addFields(
+                                { name : 'Product Name', value : `${productName}`},
+                                { name : 'Product Availability', value : `Product In Stock`, inline : true},
+                                { name : 'Stock Number', value : `${this.stockNumber}`, inline : true}, 
+                                { name : 'Original Price', value : originalPrice, inline : true} 
+                                )
+                            // .addField('Original Price', originalPrice, true)
+                            // .addField('Current Price', currentPrice, true)
+                            .setThumbnail(`https://c1.neweggimages.com/ProductImage/${this.sku}-V10.jpg`)
+                            .setTimestamp()
+                            .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                            webhookClient1.send('Restock!', {
+                                username: 'New Egg',
+                                avatarURL: 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg',
+                                embeds: [embed1],
+                            })
+                        } else if (!this.availability && this.isStock) {
+                            this.isStock = false
+                        }
     
-    
-                } catch (error) {
-                    console.log(error)
-                    if(error.message.includes('Unexpected token')){
-                        console.log(testing)
-                        clearInterval(monitorInterval)
-                        resolve('g')
+                        console.log(this.availability, this.stockNumber, productName)
+                        console.log(originalPrice, currentPrice)
+                       // console.log(parsedBod)
+        
+        
+                    } catch (error) {
+                        console.log(error)
+                        if(error.message.includes('Unexpected token')){
+                            console.log(testing)
+                            clearInterval(monitorInterval)
+                            resolve('g')
+                        }
                     }
-                }
-            }, 1000)
+                }, 1000)
+                await delay(100)
+            }
+          
 
         })
     }
@@ -135,7 +149,7 @@ class newEggMonitor {
 
 // (async ()=>{
 //     await monitoring.task()
-// }) // ()
+// })()
 
 module.exports = {
     newEggMonitor
