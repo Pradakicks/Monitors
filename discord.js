@@ -6,7 +6,7 @@ const {
 	bot_age,
 	bot_info,
 } = require('./config.json');
-const {SKUADD , findCommand , deleteSku} = require('./dms');
+const {SKUADD , findCommand , deleteSku, checkBank} = require('./dms');
 
 
 client.once('ready', () => {
@@ -20,6 +20,7 @@ client.once('ready', () => {
 	findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
 	SKUADD(client, '!SKUAdd', 'Testing');
 	deleteSku(client, '!deleteSku', 'Deleted')
+	checkBank(client, '!checkBank', 'Returned')
 
 	client.users.fetch('202862796965150720').then((user) =>{
 		user.send('Hello World');

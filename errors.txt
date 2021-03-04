@@ -1,0 +1,161 @@
+TypeError: Cannot read property 'fulfillment' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+StatusCodeError: 502 - "{\"errors\":[{\"message\":\"Exception while fetching data (/product) : Failed to retrieve product with tcin 76152363\",\"locations\":[{\"line\":16,\"column\":3}],\"path\":[\"product\"],\"extensions\":{\"backend\":{\"name\":\"product-details\",\"status\":408},\"classification\":\"DataFetchingException\"}}],\"data\":{}}"
+TypeError: Cannot read property 'fulfillment' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'fulfillment' of undefined
+SyntaxError: Unexpected token < in JSON at position 1
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.104:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.152:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 23.161.2.38:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.96:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 23.161.2.160:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.249:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.31:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.82:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.212:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.152:8080
+SyntaxError: Unexpected token < in JSON at position 1
+RequestError: Error: read ECONNRESET
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 23.161.2.128:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.115:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.246:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.82:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.104:8080
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+TypeError: Cannot read property 'shipping_options' of undefined
+SyntaxError: Unexpected token < in JSON at position 1
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 23.161.2.38:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.141:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.142:8080
+SyntaxError: Unexpected token < in JSON at position 1
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.153.117:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.199:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.114:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.195:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.249:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.141:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.153.202:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.53:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.91:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.152:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.199:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.82:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.39:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.164:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.139:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.153.117:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.154.141:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.31:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.153.243:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.148:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.98:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.75:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.111:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.152.111:8080
+RequestError: Error: tunneling socket could not be established, cause=connect ETIMEDOUT 134.195.155.139:8080
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+TypeError: Cannot read property 'shipping_options' of undefined
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1
+SyntaxError: Unexpected token < in JSON at position 1

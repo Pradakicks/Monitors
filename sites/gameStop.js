@@ -57,7 +57,9 @@ class gameStopMonitor {
          
          //   await this.monitor()
         } catch (error) {
-            
+            fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+                console.log(err)
+            }))
         }
     }
     async getProxies() {
@@ -155,6 +157,9 @@ class gameStopMonitor {
                                 
                             } catch (error) {
                                 console.log(error)
+                                fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+                                    console.log(err)
+                                }))
                             }
                            return body
                            
@@ -209,6 +214,9 @@ class gameStopMonitor {
         
         
                     } catch (error) {
+                        fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+                            console.log(err)
+                        }))
                         console.log(error)
                     }
                 }, 1000)

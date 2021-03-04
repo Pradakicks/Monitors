@@ -104,10 +104,25 @@ function deleteSku(clients, triggerText, replyText) {
 	}
 }
 
+function checkBank (clients, triggerText, replyText){
+	try {
+		clients.on('message', async (message) => {
+			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				let string = JSON.stringify(skuBank)
+			//	message.channel.send(JSON.parse(string))
+				message.channel.send(string)
+			}
+		});
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 
 module.exports = {
 	SKUADD,
 	findCommand,
 	deleteSku,
+	checkBank,
 	skuBank
 }
