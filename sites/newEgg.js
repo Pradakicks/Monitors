@@ -82,7 +82,7 @@ class newEggMonitor {
     }
 
     async monitor () {
-       
+       try {
         console.log('Starting Monitoring')
         var testing = ''
         return new Promise( async ( resolve, reject) => {
@@ -93,7 +93,7 @@ class newEggMonitor {
                     var { skuBank } = require('../dms')
                     let index = skuBank.findIndex(e => e.sku == this.trueSku)
                     if(skuBank[index]?.stop){
-                        console.log('stoppped!!!!!')
+                        console.log('stopped!')
                         clearInterval(monitorInterval)
                         resolve('Stopped')
                         return;
@@ -114,6 +114,9 @@ class newEggMonitor {
                         let currentPrice = parsedBod?.MainItem?.FinalPrice
                         this.availability = parsedBod?.MainItem?.Instock
                         this.stockNumber = parsedBod?.MainItem?.Stock 
+                        console.log(this.availability, this.stockNumber, productName)
+
+
                         if(!this.isStock && this.availability) {
                             // Send in stock webhook
                             this.isStock = true
@@ -140,10 +143,10 @@ class newEggMonitor {
                             })
                         } else if (!this.availability && this.isStock) {
                             this.isStock = false
-                        }
+                        } 
     
-                        console.log(this.availability, this.stockNumber, productName)
-                        console.log(originalPrice, currentPrice)
+                    
+                        // console.log(originalPrice, currentPrice)
                        // console.log(parsedBod)
         
         
@@ -164,6 +167,12 @@ class newEggMonitor {
           
 
         })
+       } catch (error) {
+        fs.appendFileSync('bigError.txt', error.toString() + '\n', (err =>{
+            console.log(err)
+        }))
+       }
+  
     }
 
 }
