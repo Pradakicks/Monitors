@@ -163,11 +163,16 @@ class targetMonitor {
                         } else if (!this.availability && this.isStock) {
                             this.isStock = false
                         } else if (!this.availability && !this.isStock){
+                            this.isStock = false
+                            this.availability = false
+                            // Not Important
                           //  console.log('False false')
                         } else if(this.availability && this.isStock){
+                            this.availability = true
+                            this.isStock = true
+                            // Not Important
                             // console.log(true, true)
-                        }
-                        else {
+                        } else {
                             fs.appendFileSync('what.txt', this.availability + this.isStock + '\n', (err =>{
                                 console.log(err)
                             }))
