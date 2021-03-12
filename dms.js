@@ -83,7 +83,7 @@ function deleteSku(clients, triggerText, replyText) {
 				const site = content.split(' ')[1];
 				const SKU = content.split(' ')[2];
 				console.log(site)
-				console.log(SKU)
+				console.log(`SKU - ${SKU}`)
 				console.log(content)
 				let index = skuBank.findIndex(e => e.sku == SKU)
 				// console.log(index)

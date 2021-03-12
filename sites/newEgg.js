@@ -28,7 +28,8 @@ class newEggMonitor {
         this.trueSku = sku
         this.sku = sku.split(':')[0];
         this.skuName = sku.split(':')[1]
-        this.delay = 175000;
+        this.delay = 390000;
+        this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -80,7 +81,6 @@ class newEggMonitor {
             }))
         }
     }
-
     async monitor () {
        try {
         console.log('Starting Monitoring')
@@ -114,11 +114,12 @@ class newEggMonitor {
                         let currentPrice = parsedBod?.MainItem?.FinalPrice
                         this.availability = parsedBod?.MainItem?.Instock
                         this.stockNumber = parsedBod?.MainItem?.Stock 
-                        console.log(this.availability, this.stockNumber, productName)
+                        console.log(this.availability, this.stockNumber, productName, this.isStock)
 
 
                         if(!this.isStock && this.availability) {
                             // Send in stock webhook
+                            console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
                             this.isStock = true
                             let embed1 = new Discord.MessageEmbed()
                             .setColor('#07bf6e')
@@ -143,7 +144,21 @@ class newEggMonitor {
                             })
                         } else if (!this.availability && this.isStock) {
                             this.isStock = false
-                        } 
+                        } else if (!this.availability && !this.isStock){
+                            this.isStock = false
+                            this.availability = false
+                            // Not Important
+                          //  console.log('False false')
+                        } else if(this.availability && this.isStock){
+                            this.availability = true
+                            this.isStock = true
+                            // Not Important
+                            // console.log(true, true)
+                        } else {
+                            fs.appendFileSync('what.txt', this.availability + this.isStock + '\n', (err =>{
+                                console.log(err)
+                            }))
+                        }
     
                     
                         // console.log(originalPrice, currentPrice)
@@ -159,10 +174,13 @@ class newEggMonitor {
                             console.log(testing)
                             clearInterval(monitorInterval)
                             resolve('g')
+                        } else if (error.message.includes('403')){
+                            await delay(100000)
+                            console.log('403 Access Denied')
                         }
                     }
                 }, this.delay)
-                await delay(3000)
+                await delay(this.startDelay)
             }
           
 
