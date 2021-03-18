@@ -7,6 +7,9 @@ const {
 const {
 	gameStopMonitor
 } = require('./sites/gameStop');
+
+const { amdMonitor } = require('./sites/amd')
+const { amdSiteMonitor } = require('./sites/amdSite')
 const delay = require('delay');
 require('newrelic');
 var skuBank = []
@@ -53,6 +56,22 @@ function SKUADD(clients, triggerText, replyText) {
 							stop: false
 						})
 						let monitor = new gameStopMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'AMD') {
+						skuBank.push({
+							sku: SKU,
+							site: 'AMD',
+							stop: false
+						})
+						let monitor = new amdMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'AMDSITE') {
+						skuBank.push({
+							sku: SKU,
+							site: 'AMDSITE',
+							stop: false
+						})
+						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
 					}
 				}

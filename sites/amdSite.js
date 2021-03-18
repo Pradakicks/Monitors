@@ -22,12 +22,16 @@ const rp = require('request-promise').defaults({
     resolveWithFullResponse: true,
     gzip: true,
 });
-const webhookClient1 = new Discord.WebhookClient('821965782132457523', '7DC5Rm6HxYf1PfnrwGoa9-LGq2AK76p7pMktWVVmIMkwpCMdewugDp-T2lk9RrMOPnRH');
+// Production 
+//const webhookClient1 = new Discord.WebhookClient('821965782132457523', '7DC5Rm6HxYf1PfnrwGoa9-LGq2AK76p7pMktWVVmIMkwpCMdewugDp-T2lk9RrMOPnRH');
 
 
+
+// Test 
+const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
 const webhook = require("webhook-discord")
 
-class amdMonitor {
+class amdSiteMonitor {
     constructor(sku) {
         this.sku = sku;
         this.delay = 1000;
@@ -37,7 +41,8 @@ class amdMonitor {
         this.isStock = false;
         this.productName = '';
         this.itemPicUrl = ''
-
+        this.skuArr = []
+        this.isAllowed = false
     }
 
     async task() {
@@ -45,6 +50,10 @@ class amdMonitor {
             console.log('Start')
             await this.getProxies()
             //   console.log(this.proxyList)
+            setTimeout(() =>{
+                this.isAllowed = true
+                console.log(this.isAllowed)
+            }, 5000)
             await this.monitor()
         } catch (error) {
             fs.appendFileSync('errors.txt', error.toString() + '\n', (err =>{
@@ -146,7 +155,7 @@ class amdMonitor {
                         // })
                         // console.log(check.statusCode)
                         let test = await rp.get({
-                            url : `https://www.amd.com/en/direct-buy/add-to-cart/${this.sku}`,
+                            url : `https://www.amd.com/en/direct-buy/us`,
                             headers : {
                                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                                 "accept-language": "en-US,en;q=0.9",
@@ -159,30 +168,88 @@ class amdMonitor {
                             },
                             proxy: `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
                         }, ((error, response, body) => {
-                          //  console.log(body)
-                        
-                            let parsed = JSON.parse(body.split('<textarea>')[1].split('</textarea>')[0])
-                         //   console.log(parsed.length)
-                            
-                            let data = (parsed[parsed?.length - 1])?.args[0]?.product?.inventoryStatus
-                            let productPricing = (parsed[parsed?.length - 1])?.args[0]?.pricing
-                            this.itemPicUrl = (parsed[parsed?.length - 1])?.args[0]?.product?.productImage
-                            this.productName = (parsed[parsed?.length - 1])?.args[0]?.product?.name
-                            this.stockNumber = data?.availableQuantity
-                            this.availability = data?.productIsInStock
-                            this.productPrice = productPricing?.listPrice?.value
-                            if(!this.availability){
-                                let text = body.split('"productIsInStock": "')[1].split('"')[0]
-                                if(text.toString() == 'true'){
-                                    this.availability = true
-                                } else if (text.toString() == 'false'){
-                                    this.availability = false
-                                } else {
-                                    this.availability = false
+                            const $ = cheerio.load(body)
+                            let length = $("a").length 
+                            let c = $('a')
+                         //   console.log(c)
+                            for (let i = 0; i < length;i++){
+                             //   console.log(c[i].attribs.href)
+                             
+                                if(c[i].attribs?.href?.includes('direct-buy/') && c[i].attribs?.class == 'shop-image-link'){
+                                    let sku = c[i].attribs?.href.split('direct-buy/')[1].split('/')[0]
+                                    let currentImage
+                                    if(sku.length == 10){
+                                        console.log(sku)
+                                        c[i].children.map(e =>{
+                                            if(e.attribs?.src) currentImage = (e.attribs?.src)
+                                         
+                                        })
+                                        let matchFound = false
+                                     //   console.log(currentImage)
+                                        if(this.skuArr.length > 0) {
+                                            this.skuArr.forEach(e => {
+                                                if(sku === e){
+                                                    matchFound = true
+                                                 //   console.log('Found')
+                                                } 
 
-                                }
+                                            })
+                                            if(!matchFound){
+                                                this.skuArr.push(sku)
+                                                console.log('Send Webhook')
+                                               
+                                                console.log(currentImage)
+                                             //   let productName = currentImage.split('direct-buy-')[1]?.split('-100x100')[0]
+                                                let productName = currentImage.split('thumbnail/')[1].split('-').join(' ')
+                                                if(productName.includes('direct buy')){
+                                                   productName = productName.split('direct buy')[1]
+                                                } else if(productName.includes('663934 ')){
+                                                    productName = productName.split('663934 ')[1]
+                                                 } if(productName.includes('100x100.png')){
+                                                    productName = productName.split('100x100.png')[0]
+                                                 } if(productName.includes('.png')){
+                                                    productName = productName.split('.png')[0]
+                                                 } 
+                                                // if(productName == undefined){
+                                                // console.log(currentImage.split('-')[1])
+                                                // let productName = currentImage.split('-')[1]
+
+                                                // }
+                                                console.log(productName)
+                                            if(this.isAllowed){
+                                                let embed1 = new Discord.MessageEmbed()
+                                                .setColor('#07bf6e')
+                                                .setTitle('AMD Monitor')
+                                                .setThumbnail(`${currentImage}`)
+                                                .setURL(`https://www.amd.com/en/direct-buy/${sku}/us`)
+                                                .addField('Product Name', `${productName}`)
+                                                .addField('Product Availability', 'In Stock!', true)
+                                              //  .addField('Stock Number', `${this.stockNumber}`, true)
+                                             //   .addField('Product Price', `$${this.productPrice}`, true)
+                                                .addField("Links", `[Product](https://www.amd.com/en/direct-buy/${sku}/us) | [Add To Cart](https://www.amd.com/en/direct-buy/add-to-cart/${sku}) | [Home](https://www.amd.com/en)`)
+                                                // .addField('Original Price', originalPrice)
+                                                // .addField('Current Price', currentPrice , true)
+                                            //    .setImage(`${this.itemPicUrl}`)
+                                                .setTimestamp()
+                                                .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                                            webhookClient1.send('Restock!', {
+                                                username: 'AMD',
+                                                avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                                embeds: [embed1],
+                                            })
+                                            }
+                                        
+                                            }
+                                        } else {
+                                            this.skuArr.push(sku)
+                                        }
+                                        
+                                    }
+                                   
+                                //    console.log(c[i].attribs.href)
                             }
-                            console.log(this.stockNumber, this.availability, this.productPrice, this.productName)
+                            }
+                            console.log(this.skuArr)
                         }))
                         // const $ = cheerio.load(check.body)
                         // let atcCheck = $('#product-details-info > div.container > div > div.product-page-description.col-flex-lg-5.col-flex-sm-12 > button')
@@ -199,48 +266,6 @@ class amdMonitor {
                         //     }))
                         // }
                      //   console.log(check.statusCode)
-
-
-                        if (!this.isStock && this.availability) {
-                            // Send in stock webhook
-                            this.isStock = true
-                            let embed1 = new Discord.MessageEmbed()
-                                .setColor('#07bf6e')
-                                .setTitle('AMD Monitor')
-                                .setThumbnail(`${this.itemPicUrl}`)
-                                .setURL(`https://www.amd.com/en/direct-buy/${this.sku}/us`)
-                                .addField('Product Name', `${this.productName}`)
-                                .addField('Product Availability', 'In Stock!', true)
-                                .addField('Stock Number', `${this.stockNumber}`, true)
-                                .addField('Product Price', `$${this.productPrice}`, true)
-                                .addField("Links", `[Product](https://www.amd.com/en/direct-buy/${this.sku}/us) | [Add To Cart](https://www.amd.com/en/direct-buy/add-to-cart/${this.sku}) | [Home](https://www.amd.com/en)`)
-                                // .addField('Original Price', originalPrice)
-                                // .addField('Current Price', currentPrice , true)
-                            //    .setImage(`${this.itemPicUrl}`)
-                                .setTimestamp()
-                                .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                            webhookClient1.send('Restock!', {
-                                username: 'AMD',
-                                avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
-                                embeds: [embed1],
-                            })
-                        } else if (!this.availability && this.isStock) {
-                            this.isStock = false
-                        } else if (!this.availability && !this.isStock){
-                            this.isStock = false
-                            this.availability = false
-                            // Not Important
-                          //  console.log('False false')
-                        } else if(this.availability && this.isStock){
-                            this.availability = true
-                            this.isStock = true
-                            // Not Important
-                            // console.log(true, true)
-                        } else {
-                            fs.appendFileSync('what.txt', this.availability + this.isStock + '\n', (err =>{
-                                console.log(err)
-                            }))
-                        }
 
                         console.log(`Task ${i} : ${this.availability}, ${this.productName}}`)
                         // console.log(originalPrice, currentPrice)
@@ -277,5 +302,5 @@ class amdMonitor {
 // }) ()
 
 module.exports = {
-    amdMonitor
+    amdSiteMonitor
 }
