@@ -23,18 +23,19 @@ const rp = require('request-promise').defaults({
     gzip: true,
 });
 // Production 
-//const webhookClient1 = new Discord.WebhookClient('821965782132457523', '7DC5Rm6HxYf1PfnrwGoa9-LGq2AK76p7pMktWVVmIMkwpCMdewugDp-T2lk9RrMOPnRH');
+const webhookClient1 = new Discord.WebhookClient('821965782132457523', '7DC5Rm6HxYf1PfnrwGoa9-LGq2AK76p7pMktWVVmIMkwpCMdewugDp-T2lk9RrMOPnRH');
 
 
 
 // Test 
-const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
+// const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
 const webhook = require("webhook-discord")
 
 class amdSiteMonitor {
     constructor(sku) {
         this.sku = sku;
-        this.delay = 1000;
+        this.delay = 250000;
+        this.startDelay = 1000
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -53,7 +54,7 @@ class amdSiteMonitor {
             setTimeout(() =>{
                 this.isAllowed = true
                 console.log(this.isAllowed)
-            }, 5000)
+            }, 350000)
             await this.monitor()
         } catch (error) {
             fs.appendFileSync('errors.txt', error.toString() + '\n', (err =>{
@@ -124,21 +125,20 @@ class amdSiteMonitor {
          //   console.log('HERE')
             for (let i = 0; i < this.proxyList.length; i++) {
                 let proxy = this.proxyList[i]
-           
+                var {
+                    skuBank
+                } = require('../dms')
+                let index = skuBank.findIndex(e => e.sku == this.sku)
+                if (skuBank[index].stop) {
+                    console.log('stoppped!!!!!')
+                    clearInterval(monitorInterval)
+                    resolve('Stopped')
+                    return;
+                }
             let monitorInterval = setInterval(async () => {
-                    var {
-                        skuBank
-                    } = require('../dms')
-                    let index = skuBank.findIndex(e => e.sku == this.sku)
-                    if (skuBank[index].stop) {
-                        console.log('stoppped!!!!!')
-                        clearInterval(monitorInterval)
-                        resolve('Stopped')
-                        return;
-                    }
+                   
 
                     try {
-                        console.log('ok')
                         // let check = await rp.get({
                         //     url : `https://www.amd.com/en/direct-buy/${this.sku}/us`,
                         //     headers : {
@@ -154,7 +154,7 @@ class amdSiteMonitor {
                         //     proxy: `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
                         // })
                         // console.log(check.statusCode)
-                        let test = await rp.get({
+                       await rp.get({
                             url : `https://www.amd.com/en/direct-buy/us`,
                             headers : {
                                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -250,6 +250,7 @@ class amdSiteMonitor {
                             }
                             }
                             console.log(this.skuArr)
+                            console.log(`Task ${i} : ${this.availability}, ${this.productName}}`)
                         }))
                         // const $ = cheerio.load(check.body)
                         // let atcCheck = $('#product-details-info > div.container > div > div.product-page-description.col-flex-lg-5.col-flex-sm-12 > button')
@@ -267,7 +268,7 @@ class amdSiteMonitor {
                         // }
                      //   console.log(check.statusCode)
 
-                        console.log(`Task ${i} : ${this.availability}, ${this.productName}}`)
+                       
                         // console.log(originalPrice, currentPrice)
                         // console.log(parsedBod)
 
@@ -285,7 +286,7 @@ class amdSiteMonitor {
                         }
                     }
                 }, this.delay)
-                await delay(100)
+                await delay(c)
             }
 
 

@@ -89,9 +89,9 @@ class newEggMonitor {
             for (let i = 0; i < this.proxyList.length; i++){
                 let proxy = this.proxyList[i]
                 console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                var { skuBank } = require('../dms')
+                let index = skuBank.findIndex(e => e.sku == this.trueSku)
                 let monitorInterval = setInterval(async () => {
-                    var { skuBank } = require('../dms')
-                    let index = skuBank.findIndex(e => e.sku == this.trueSku)
                     if(skuBank[index]?.stop){
                         console.log('stopped!')
                         clearInterval(monitorInterval)
