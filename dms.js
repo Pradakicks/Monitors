@@ -118,8 +118,8 @@ function deleteSku(clients, triggerText, replyText) {
 				// console.log(skuBank[index])
 				skuBank[index].stop = true;
 				// console.log(skuBank)
-				(async ()=>{
-					await delay(100000)
+				(async () => {
+					await delay(1000)
 					skuBank.splice(index, 1)
 				})()
 				// console.log(skuBank)
@@ -136,9 +136,80 @@ function checkBank (clients, triggerText, replyText){
 	try {
 		clients.on('message', async (message) => {
 			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
-				let string = JSON.stringify(skuBank)
+				let string = (skuBank)
 			//	message.channel.send(JSON.parse(string))
-				message.channel.send(string)
+			skuBank.forEach(e =>{
+				console.log(e)
+				message.channel.send(JSON.stringify(e));
+			})
+			//	message.channel.send(string)
+			}
+		});
+	} catch (error) {
+		console.log(error);
+	}
+}
+function massAdd (clients, triggerText, replyText){
+	try {
+		clients.on('message', async (message) => {
+			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				let string = message.content
+				const content = message.content;
+				const site = content.split(' ')[1].split('|')[0]
+				console.log(site.toUpperCase())
+			//	const SKU = content.split(' ')[2];
+			//	console.log(site)
+				let g  = string.split('\n')
+			//	console.log(g)
+			for(let i = 0; i < g.length; i++){
+				if(!g[i].includes('!massAdd')){
+					console.log(g[i])
+					console.log(site.toUpperCase())
+					if (site.toUpperCase() == 'TARGET') {
+						skuBank.push({
+							sku: g[i],
+							site: 'TARGET',
+							stop: false
+						})
+						let monitor = new targetMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'NEWEGG') {
+						skuBank.push({
+							sku: g[i],
+							site: 'NEWEGG',
+							stop: false
+						})
+						let monitor = new newEggMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'GAMESTOP') {
+						skuBank.push({
+							sku: g[i],
+							site: 'GAMESTOP',
+							stop: false
+						})
+						let monitor = new gameStopMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'AMD') {
+						skuBank.push({
+							sku: g[i],
+							site: 'AMD',
+							stop: false
+						})
+						let monitor = new amdMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'AMDSITE') {
+						skuBank.push({
+							sku: g[i],
+							site: 'AMDSITE',
+							stop: false
+						})
+						let monitor = new amdSiteMonitor(g[i].toString())
+						monitor.task()
+					}
+
+				}
+				await delay(25000)
+			}
 			}
 		});
 	} catch (error) {
@@ -152,5 +223,6 @@ module.exports = {
 	findCommand,
 	deleteSku,
 	checkBank,
-	skuBank
+	skuBank,
+	massAdd
 }

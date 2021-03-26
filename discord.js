@@ -6,7 +6,7 @@ const {
 	bot_age,
 	bot_info,
 } = require('./config.json');
-const {SKUADD , findCommand , deleteSku, checkBank} = require('./dms');
+const {SKUADD , findCommand , deleteSku, checkBank, massAdd} = require('./dms');
 
 
 client.once('ready', () => {
@@ -21,6 +21,7 @@ client.once('ready', () => {
 	SKUADD(client, '!SKUAdd', 'Testing');
 	deleteSku(client, '!deleteSku', 'Deleted')
 	checkBank(client, '!checkBank', 'Returned')
+	massAdd(client, '!massAdd', 'Returned')
 
 	client.users.fetch('202862796965150720').then((user) =>{
 		user.send('Hello World');
