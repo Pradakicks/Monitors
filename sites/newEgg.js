@@ -140,7 +140,7 @@ class newEggMonitor {
                                 .addField("Links", `[ATC](https://secure.newegg.com/shopping/addtocart.aspx?submit=add&itemList=${this.sku}) | [Cart](https://secure.newegg.com/shop/cart)`)
                                 // .addField('Original Price', originalPrice, true)
                                 // .addField('Current Price', currentPrice, true)
-                                .setThumbnail(`https://c1.neweggimages.com/ProductImageOriginal/${image}`)
+                                .setThumbnail(`http://c1.neweggimages.com/ProductImageOriginal/${image}`)
                                 .setTimestamp()
                                 .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                                 webhookClient1.send({

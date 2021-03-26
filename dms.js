@@ -144,7 +144,7 @@ function checkBank (clients, triggerText, replyText){
 				for (let i = 0; i < skuBank.length; i++){
 					console.log(skuBank[i])
 					message.channel.send(JSON.stringify(skuBank[i]))
-					await delay(500)
+					await delay(1000)
 				}
 			//	message.channel.send(string)
 			}
