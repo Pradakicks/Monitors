@@ -85,6 +85,7 @@ function SKUADD(clients, triggerText, replyText) {
 					}
 				}
 				console.log(skuBank)
+				message.channel.send(`${SKU} Added to ${site}`)
 			}
 		});
 	} catch (error) {
@@ -123,6 +124,8 @@ function deleteSku(clients, triggerText, replyText) {
 					skuBank.splice(index, 1)
 				})()
 				// console.log(skuBank)
+				message.channel.send(`${SKU} Delete From ${site}`)
+				return;
 				//    fetch('')
 
 			}
@@ -138,10 +141,11 @@ function checkBank (clients, triggerText, replyText){
 			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = (skuBank)
 			//	message.channel.send(JSON.parse(string))
-			skuBank.forEach(e =>{
-				console.log(e)
-				message.channel.send(JSON.stringify(e));
-			})
+				for (let i = 0; i < skuBank.length; i++){
+					console.log(skuBank[i])
+					message.channel.send(JSON.stringify(skuBank[i]))
+					await delay(500)
+				}
 			//	message.channel.send(string)
 			}
 		});
@@ -210,6 +214,7 @@ function massAdd (clients, triggerText, replyText){
 				}
 				await delay(30000)
 			}
+			message.channel.send("SKUS Added")
 			}
 		});
 	} catch (error) {
