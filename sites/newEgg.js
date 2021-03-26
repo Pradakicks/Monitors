@@ -109,7 +109,8 @@ class newEggMonitor {
                             let originalPrice; 
                             let currentPrice;
                            if(fetchSite?.body?.includes("We apologize for the confusion, but we can't quite tell if you're a person or?")){
-                               await delay(100000)
+                            //   await delay(100000)
+                            console.log('Captcha')
                            } else {
                             testing = fetchSite.body
                             let parsedBod = JSON.parse(fetchSite?.body)
@@ -175,7 +176,8 @@ class newEggMonitor {
                             // fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
                             //     console.log(err)
                             // }))
-                              if(error.message.includes('Unexpected token')){
+                            
+                              if(error.message.includes('Unexpected token') && !error.message.includes('<!DOCTYPE html><html')){
                                 console.log(testing)
                                 resolve('g')
                             } else if (error.message.includes('403')){
