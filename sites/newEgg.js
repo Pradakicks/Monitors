@@ -29,7 +29,7 @@ class newEggMonitor {
         this.sku = sku.split(':')[0];
         this.skuName = sku.split(':')[1]
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 100; //  this.startDelay = 6000;
+        this.startDelay = 3500; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
