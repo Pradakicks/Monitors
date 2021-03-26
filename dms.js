@@ -208,7 +208,7 @@ function massAdd (clients, triggerText, replyText){
 					}
 
 				}
-				await delay(25000)
+				await delay(30000)
 			}
 			}
 		});

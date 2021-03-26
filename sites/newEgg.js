@@ -180,6 +180,8 @@ class newEggMonitor {
                               if(error.message.includes('Unexpected token')){
                                   if(testing.includes('<!DOCTYPE html><html')){
                                     console.log("HTML")
+                                  } else if (testing.includes('Are you a human?')) {
+                                      console.log('Captcha')
                                   } else {
                                         console.log('No HTML')
                                         console.log(testing)
