@@ -109,7 +109,6 @@ class newEggMonitor {
                            if(fetchSite?.body?.includes("We apologize for the confusion, but we can't quite tell if you're a person or?")){
                                await delay(100000)
                            } else {
-                            console.log(`Task ${i} : ${fetchSite.statusCode}`)
                             testing = fetchSite.body
                             let parsedBod = JSON.parse(fetchSite?.body)
                             let image = parsedBod?.MainItem?.Image?.ItemCellImageName
@@ -119,7 +118,7 @@ class newEggMonitor {
                             let currentPrice = parsedBod?.MainItem?.FinalPrice
                             this.availability = parsedBod?.MainItem?.Instock
                             this.stockNumber = parsedBod?.MainItem?.Stock 
-                            console.log(this.availability, this.stockNumber, productName, this.isStock)
+                            console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.stockNumber, productName, this.isStock)
                            }
                             if(!this.isStock && this.availability) {
                                 // Send in stock webhook
@@ -171,15 +170,14 @@ class newEggMonitor {
             
                         } catch (error) {
                             console.log(error)
-                            fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
-                                console.log(err)
-                            }))
+                            // fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+                            //     console.log(err)
+                            // }))
                               if(error.message.includes('Unexpected token')){
                                 console.log(testing)
-                                clearInterval(monitorInterval)
                                 resolve('g')
                             } else if (error.message.includes('403')){
-                                await delay(400000)
+                                // await delay(400000)
                                 console.log('403 Access Denied')
                             }
                         }
