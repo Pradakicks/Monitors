@@ -10,6 +10,7 @@ const {
 
 const { amdMonitor } = require('./sites/amd')
 const { amdSiteMonitor } = require('./sites/amdSite')
+const { walmartMonitor } = require('./sites/walmart')
 const delay = require('delay');
 require('newrelic');
 var skuBank = []
@@ -72,6 +73,14 @@ function SKUADD(clients, triggerText, replyText) {
 							stop: false
 						})
 						let monitor = new amdSiteMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'WALMART') {
+						skuBank.push({
+							sku: SKU,
+							site: 'WALMART',
+							stop: false
+						})
+						let monitor = new walmartMonitor(SKU.toString())
 						monitor.task()
 					}
 				}

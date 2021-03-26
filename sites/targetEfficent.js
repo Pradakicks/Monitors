@@ -56,6 +56,7 @@ class targetMonitor {
             }))
         }
     }
+
     async getProxies() {
         try {
             // read contents of the file
@@ -85,6 +86,7 @@ class targetMonitor {
             }))
         }
     }
+    
     async monitor() {
         console.log('Starting Monitoring')
         var testing = ''

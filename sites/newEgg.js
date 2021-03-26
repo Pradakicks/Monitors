@@ -28,8 +28,8 @@ class newEggMonitor {
         this.trueSku = sku
         this.sku = sku.split(':')[0];
         this.skuName = sku.split(':')[1]
-        this.delay = 390000;
-        this.startDelay = 6000;
+        this.delay = 850000; // this.delay = 390000
+        this.startDelay = 100; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -55,8 +55,6 @@ class newEggMonitor {
     async getProxies() {
 		try {
 			// read contents of the file
-			const data = fs.readFileSync('proxies.txt', 'utf-8');
-			// split the contents by new line
 			const lines = data.split(/\r?\n/);
 
 			// print all lines
@@ -86,104 +84,111 @@ class newEggMonitor {
         console.log('Starting Monitoring')
         var testing = ''
         return new Promise( async ( resolve, reject) => {
-            for (let i = 0; i < this.proxyList.length; i++){
-                let proxy = this.proxyList[i]
-                console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+
+                let i = 0
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
-                let monitorInterval = setInterval(async () => {
-                    if(skuBank[index]?.stop){
-                        console.log('stopped!')
-                        clearInterval(monitorInterval)
-                        resolve('Stopped')
-                        return;
-                    }
-                    try {
-                        let fetchSite = await rp.get({
-                            url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`,
-                            proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
-                        })   
-                       // console.log(fetchSite.body)
-                        console.log(`Task ${i} : ${fetchSite.statusCode}`)
-                        testing = fetchSite.body
-                        let parsedBod = JSON.parse(fetchSite.body)
-                        let image = parsedBod?.MainItem?.Image?.ItemCellImageName
+                    while(!skuBank[index]?.stop){
+                        if(i+1 == this.proxyList.length){
+                            i = 0
+                        }
+                        let proxy = this.proxyList[i]
+                        i++
+                        console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                        try {
+                            let fetchSite = await rp.get({
+                                url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`,
+                                proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
+                            })   
+                           // console.log(fetchSite.body)
+                           let parsedBod; 
+                           let image;
+                            let productName; 
+                            let originalPrice; 
+                            let currentPrice;
+                           if(fetchSite?.body?.includes("We apologize for the confusion, but we can't quite tell if you're a person or?")){
+                               await delay(100000)
+                           } else {
+                            console.log(`Task ${i} : ${fetchSite.statusCode}`)
+                            testing = fetchSite.body
+                            let parsedBod = JSON.parse(fetchSite?.body)
+                            let image = parsedBod?.MainItem?.Image?.ItemCellImageName
+                            
+                            let productName = parsedBod?.MainItem?.Description?.Title
+                            let originalPrice = parsedBod?.MainItem?.OriginalUnitPrice
+                            let currentPrice = parsedBod?.MainItem?.FinalPrice
+                            this.availability = parsedBod?.MainItem?.Instock
+                            this.stockNumber = parsedBod?.MainItem?.Stock 
+                            console.log(this.availability, this.stockNumber, productName, this.isStock)
+                           }
+                            if(!this.isStock && this.availability) {
+                                // Send in stock webhook
+                                console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
+                                this.isStock = true
+                                let embed1 = new Discord.MessageEmbed()
+                                .setColor('#07bf6e')
+                                .setTitle('New Egg Monitor')
+                                .setURL(`https://www.newegg.com/Prada/p/${this.skuName}`)
+                                .addFields(
+                                    { name : 'Product Name', value : `${productName}`},
+                                    { name : 'Product Availability', value : `Product In Stock`, inline : true},
+                                    { name : 'Stock Number', value : `${this.stockNumber}`, inline : true}, 
+                                    { name : 'Current Price', value : currentPrice, inline : true} 
+                                    )
+                                .addField("Links", `[ATC](https://secure.newegg.com/shopping/addtocart.aspx?submit=add&itemList=${this.sku}) | [Cart](https://secure.newegg.com/shop/cart)`)
+                                // .addField('Original Price', originalPrice, true)
+                                // .addField('Current Price', currentPrice, true)
+                                .setThumbnail(`https://c1.neweggimages.com/ProductImageOriginal/${image}`)
+                                .setTimestamp()
+                                .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                                webhookClient1.send({
+                                    username: 'New Egg',
+                                    avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                    embeds: [embed1],
+                                })
+                            } else if (!this.availability && this.isStock) {
+                                this.isStock = false
+                            } else if (!this.availability && !this.isStock){
+                                this.isStock = false
+                                this.availability = false
+                                // Not Important
+                              //  console.log('False false')
+                            } else if(this.availability && this.isStock){
+                                this.availability = true
+                                this.isStock = true
+                                // Not Important
+                                // console.log(true, true)
+                            } else {
+                                fs.appendFileSync('what.txt', this.availability + this.isStock + '\n', (err =>{
+                                    console.log(err)
+                                }))
+                            }
+        
                         
-                        let productName = parsedBod?.MainItem?.Description?.Title
-                        let originalPrice = parsedBod?.MainItem?.OriginalUnitPrice
-                        let currentPrice = parsedBod?.MainItem?.FinalPrice
-                        this.availability = parsedBod?.MainItem?.Instock
-                        this.stockNumber = parsedBod?.MainItem?.Stock 
-                        console.log(this.availability, this.stockNumber, productName, this.isStock)
-
-
-                        if(!this.isStock && this.availability) {
-                            // Send in stock webhook
-                            console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
-                            this.isStock = true
-                            let embed1 = new Discord.MessageEmbed()
-                            .setColor('#07bf6e')
-                            .setTitle('New Egg Monitor')
-                            .setURL(`https://www.newegg.com/Prada/p/${this.skuName}`)
-                            .addFields(
-                                { name : 'Product Name', value : `${productName}`},
-                                { name : 'Product Availability', value : `Product In Stock`, inline : true},
-                                { name : 'Stock Number', value : `${this.stockNumber}`, inline : true}, 
-                                { name : 'Current Price', value : currentPrice, inline : true} 
-                                )
-                            .addField("Links", `[ATC](https://secure.newegg.com/shopping/addtocart.aspx?submit=add&itemList=${this.sku}) | [Cart](https://secure.newegg.com/shop/cart)`)
-                            // .addField('Original Price', originalPrice, true)
-                            // .addField('Current Price', currentPrice, true)
-                            .setThumbnail(`https://c1.neweggimages.com/ProductImageOriginal/${image}`)
-                            .setTimestamp()
-                            .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                            webhookClient1.send('Restock!', {
-                                username: 'New Egg',
-                                avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
-                                embeds: [embed1],
-                            })
-                        } else if (!this.availability && this.isStock) {
-                            this.isStock = false
-                        } else if (!this.availability && !this.isStock){
-                            this.isStock = false
-                            this.availability = false
-                            // Not Important
-                          //  console.log('False false')
-                        } else if(this.availability && this.isStock){
-                            this.availability = true
-                            this.isStock = true
-                            // Not Important
-                            // console.log(true, true)
-                        } else {
-                            fs.appendFileSync('what.txt', this.availability + this.isStock + '\n', (err =>{
+                            // console.log(originalPrice, currentPrice)
+                           // console.log(parsedBod)
+            
+            
+                        } catch (error) {
+                            console.log(error)
+                            fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
                                 console.log(err)
                             }))
+                              if(error.message.includes('Unexpected token')){
+                                console.log(testing)
+                                clearInterval(monitorInterval)
+                                resolve('g')
+                            } else if (error.message.includes('403')){
+                                await delay(400000)
+                                console.log('403 Access Denied')
+                            }
                         }
-    
-                    
-                        // console.log(originalPrice, currentPrice)
-                       // console.log(parsedBod)
-        
-        
-                    } catch (error) {
-                        console.log(error)
-                        fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
-                            console.log(err)
-                        }))
-                          if(error.message.includes('Unexpected token')){
-                            console.log(testing)
-                            clearInterval(monitorInterval)
-                            resolve('g')
-                        } else if (error.message.includes('403')){
-                            await delay(100000)
-                            console.log('403 Access Denied')
-                        }
+                        await delay(this.startDelay)
                     }
-                }, this.delay)
-                await delay(this.startDelay)
-            }
-          
-
+                    console.log('stopped!')
+                    resolve('Stopped')
+                    return
+              
         })
        } catch (error) {
         fs.appendFileSync('bigError.txt', error.toString() + '\n', (err =>{
