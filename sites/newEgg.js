@@ -177,9 +177,14 @@ class newEggMonitor {
                             //     console.log(err)
                             // }))
                             
-                              if(error.message.includes('Unexpected token') && !error.message.includes('<!DOCTYPE html><html')){
-                                console.log(testing)
-                                resolve('g')
+                              if(error.message.includes('Unexpected token')){
+                                  if(testing.includes('<!DOCTYPE html><html')){
+                                    console.log("HTML")
+                                  } else {
+                                        console.log('No HTML')
+                                        console.log(testing)
+                                  }
+                               
                             } else if (error.message.includes('403')){
                                 // await delay(400000)
                                 console.log('403 Access Denied')
