@@ -55,6 +55,8 @@ class newEggMonitor {
     async getProxies() {
 		try {
 			// read contents of the file
+			const data = fs.readFileSync('proxies.txt', 'utf-8');
+
 			const lines = data.split(/\r?\n/);
 
 			// print all lines
