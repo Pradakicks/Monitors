@@ -8,7 +8,7 @@ const {
 	gameStopMonitor
 } = require('./sites/gameStop');
 const { bestBuyMonitor } = require('./sites/bestBuy')
-
+const Discord = require('discord.js');
 const { amdMonitor } = require('./sites/amd')
 const { amdSiteMonitor } = require('./sites/amdSite')
 const { walmartMonitor } = require('./sites/walmart')
@@ -40,7 +40,7 @@ function SKUADD(clients, triggerText, replyText) {
 				console.log(SKU)
 				console.log(content)
 				console.log(pricerange)
-				
+
 				if (SKU.length > 1 && site.length > 1) {
 					if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
@@ -159,13 +159,22 @@ function checkBank (clients, triggerText, replyText){
 		clients.on('message', async (message) => {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = (skuBank)
-			//	message.channel.send(JSON.parse(string))
-				for (let i = 0; i < skuBank.length; i++){
-					console.log(skuBank[i])
-					message.channel.send(JSON.stringify(skuBank[i]))
-					await delay(1000)
+				let skuString = ''
+				for (let i = 0; i < skuBank.length; i++) {
+					let status = "Terminated"
+					if(!skuBank[i].stop){
+						status = "Running"
+					}
+					skuString+= `Site : ${skuBank[i].site} | ${skuBank[i].sku} | ${status} \n`
 				}
-			//	message.channel.send(string)
+
+				  let embed1 = new Discord.MessageEmbed()
+                    .setColor('#07bf6e')
+                    .setTitle('Monitor Bank')
+                    .addField('Products', `${skuString}`)
+                    .setTimestamp()
+                    .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+				message.channel.send(embed1)
 			}
 		});
 	} catch (error) {
