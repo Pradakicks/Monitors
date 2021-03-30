@@ -103,7 +103,10 @@ class targetMonitor {
                 this.itemPicUrl = itemPic
             }))
             } catch (error) {
-                console.log(error.message)
+                if(error.statusCode != 404){
+                    console.log(error.statusCode)
+                }
+                
                 this.itemPicUrl = 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'
             }
           
@@ -117,13 +120,25 @@ class targetMonitor {
                 }
                 let proxy = this.proxyList[i]
                 i++
-                (async ()=>{
+                (async () => {
                     try {
+                        console.log(``)
                         let fetchSite = await rp.get({
-                            url: `https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=${this.sku}&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test`,
-                            proxy: `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
+                            url: `https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=${this.sku}&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&zip=33473&state=FL&latitude=26.523098&longitude=-80.186779&scheduled_delivery_store_id=2067&pricing_store_id=2067`,
+                            proxy: `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`, 
+                            headers : {
+                                    "accept": "application/json",
+                                    "accept-language": "en-US,en;q=0.9",
+                                    "cache-control": "no-cache",
+                                    "pragma": "no-cache",
+                                    "sec-fetch-dest": "empty",
+                                    "sec-fetch-mode": "cors",
+                                    "sec-fetch-site": "same-site",
+                                    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
+                            }
                         })
                         console.log(fetchSite.statusCode)
+                        
                         testing = fetchSite.body
                         let parsedBod = JSON.parse(fetchSite.body)
                         let originalPrice = 'N/A'
@@ -137,8 +152,9 @@ class targetMonitor {
                         } else if (this.availability == "PRE_ORDER_UNSELLABLE" || this.availability == "UNAVAILABLE" || this.availability == undefined || this.availability == 'OUT_OF_STOCK') {
                             this.availability = false
                         } else {
+                            console.log('Something Else')
                             fs.appendFileSync('./errors.txt', this.availability + this.availability + '\n', (err =>{
-                                console.log(err)
+                              //  console.log(err)
                             }))
                         }
 
@@ -179,7 +195,7 @@ class targetMonitor {
                             }))
                         }
                     } catch (error) {
-                        console.log(error.message)
+                        console.log(error.statusCode)
                         fs.appendFileSync('errors.txt', error.toString() + '\n', (err =>{
                             console.log(err)
                         }))
