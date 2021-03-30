@@ -140,17 +140,17 @@ class walmartMonitor {
                          //   console.log()
                             testing = monitoring?.body
                             let parsed = JSON.parse(monitoring?.body)
-                            let offerList = parsed.payload.offers
+                            let offerList = parsed?.payload?.offers
                             let keys = Object.keys(offerList)
-                            let currentImages = Object.keys(parsed.payload.images)
+                            let currentImages = Object.keys(parsed?.payload?.images)
 
-                            this.imageUrl = (parsed.payload.images[currentImages[0]].assetSizeUrls.DEFAULT)
+                            this.imageUrl = (parsed?.payload?.images[currentImages[0]]?.assetSizeUrls?.DEFAULT)
                             this.availability = false
-                            this.productName = parsed.payload.products[Object.keys(parsed.payload.products)[0]].productAttributes.productName
+                            this.productName = parsed?.payload?.products[Object.keys(parsed?.payload?.products)[0]]?.productAttributes?.productName
                                 keys.map(e => {
                                  let d = offerList[e]
-                                 let status = d?.productAvailability.availabilityStatus
-                                 let price = d?.pricesInfo.priceMap.CURRENT.price
+                                 let status = d?.productAvailability?.availabilityStatus
+                                 let price = d?.pricesInfo?.priceMap?.CURRENT?.price
 
                                 if(status == "IN_STOCK" && this.minPrice < price && price < this.maxPrice){
                                     this.availability = true
@@ -208,13 +208,14 @@ class walmartMonitor {
                             }))
                               if(error.message.includes('Unexpected token')){
                                 console.log(testing)
-                                resolve('g')
+                              //  resolve('g')
                             } else if (error.message.includes('403')){
-                                await delay(400000)
+                                // await delay(400000)
                                 console.log('403 Access Denied')
-                            } else [
+                            } else {
                                 console.log(testing)
-                            ]
+                            }
+                            
                         }
 
                         await delay(this.startDelay)
