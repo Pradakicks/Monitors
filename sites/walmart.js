@@ -202,7 +202,7 @@ class walmartMonitor {
                                     }))
                                 }
                         } catch (error) {
-                            console.log(error)
+                            console.log(error.message)
                             fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
                                 console.log(err)
                             }))
