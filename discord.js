@@ -23,12 +23,16 @@ client.once('ready', () => {
 	checkBank(client, '!checkBank', 'Returned')
 	massAdd(client, '!massAdd', 'Returned')
 
-	client.users.fetch('202862796965150720').then((user) =>{
+	client.users.fetch('202862796965150720').then((user) => {
 		user.send('Hello World');
 	});
 });
-client.on('message', msg => {
+
+
+client.on('message', async  msg => {
+
 	console.log(msg.content);
+	
 });
 
 

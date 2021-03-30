@@ -25,7 +25,7 @@ const rp = require('request-promise').defaults({
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
-			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				// message.author.send(replyText);
 				let pricerange = ''
 				const content = message.content;
@@ -40,6 +40,7 @@ function SKUADD(clients, triggerText, replyText) {
 				console.log(SKU)
 				console.log(content)
 				console.log(pricerange)
+				
 				if (SKU.length > 1 && site.length > 1) {
 					if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
@@ -110,7 +111,7 @@ function SKUADD(clients, triggerText, replyText) {
 
 function findCommand(clients, triggerText, replyText) {
 	clients.on('message', message => {
-		if (message.channel.type === 'dm' && message.content.toLowerCase() === triggerText.toLowerCase()) {
+		if (message.content.toLowerCase() === triggerText.toLowerCase()) {
 			message.author.send(replyText);
 		}
 	});
@@ -120,7 +121,7 @@ function findCommand(clients, triggerText, replyText) {
 function deleteSku(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
-			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				// message.author.send(replyText);
 				const content = message.content;
 				const site = content.split(' ')[1];
@@ -156,7 +157,7 @@ function deleteSku(clients, triggerText, replyText) {
 function checkBank (clients, triggerText, replyText){
 	try {
 		clients.on('message', async (message) => {
-			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = (skuBank)
 			//	message.channel.send(JSON.parse(string))
 				for (let i = 0; i < skuBank.length; i++){
@@ -171,10 +172,11 @@ function checkBank (clients, triggerText, replyText){
 		console.log(error);
 	}
 }
+
 function massAdd (clients, triggerText, replyText){
 	try {
 		clients.on('message', async (message) => {
-			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = message.content
 				const content = message.content;
 				const site = content.split(' ')[1].split('|')[0]
