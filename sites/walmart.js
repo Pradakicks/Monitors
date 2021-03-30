@@ -98,11 +98,11 @@ class walmartMonitor {
                     var { skuBank } = require('../dms')
                        let index = skuBank.findIndex(e => e.sku == this.trueSku)
                         while(!skuBank[index]?.stop){
-                        if(i+1 == this.proxyList.length){
-                            i = 0
-                        }
-                        let proxy = this.proxyList[i]
-                        i++
+                            if(i+1 == this.proxyList.length){
+                                i = 0
+                            }
+                            let proxy = this.proxyList[i]
+                            i++
 
                         // console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
 

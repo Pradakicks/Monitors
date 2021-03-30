@@ -1,6 +1,6 @@
 const {
 	targetMonitor
-} = require('./sites/targetEfficent');
+} = require('./sites/target');
 const {
 	newEggMonitor
 } = require('./sites/newEgg')
@@ -173,7 +173,7 @@ function checkBank (clients, triggerText, replyText){
                     .setTitle('Monitor Bank')
                     .addField('Products', `${skuString}`)
                     .setTimestamp()
-                    .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
+                    .setFooter('Jigged Custom Monitors', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
 				message.channel.send(embed1)
 			}
 		});
