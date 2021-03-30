@@ -137,8 +137,6 @@ class targetMonitor {
                                     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
                             }
                         })
-                        console.log(fetchSite.statusCode)
-                        
                         testing = fetchSite.body
                         let parsedBod = JSON.parse(fetchSite.body)
                         let originalPrice = 'N/A'
@@ -146,7 +144,7 @@ class targetMonitor {
                         this.availability = parsedBod?.data?.product?.fulfillment?.shipping_options?.availability_status
                         this.stockNumber = parsedBod?.data?.product?.fulfillment?.shipping_options?.available_to_promise_quantity
                     //    let tcin = parsedBod?.data?.product?.tcin
-                        console.log(`Task ${i} : ${this.availability} | ${this.productName} | ${this.stockNumber}`)
+                        console.log(`Task ${i} : ${fetchSite.statusCode} | ${this.availability} | ${this.productName} | ${this.stockNumber}`)
                         if (this.availability == "PRE_ORDER_SELLABLE" || this.availability == "IN_STOCK" || this.availability == 'LIMITED_STOCK') {
                             this.availability = true
                         } else if (this.availability == "PRE_ORDER_UNSELLABLE" || this.availability == "UNAVAILABLE" || this.availability == undefined || this.availability == 'OUT_OF_STOCK') {
@@ -166,11 +164,11 @@ class targetMonitor {
                                 .setColor('#07bf6e')
                                 .setTitle('Target Monitor')
                                 .setThumbnail(`${this.itemPicUrl}`)
-                                .setURL(`https://www.target.com/prada/-/A-${this.sku}`)
+                                .setURL(`https://www.target.com/p/prada/-/A-${this.sku}`)
                                 .addField('Product Name', `${this.productName}`)
                                 .addField('Product Availability', 'In Stock!', true)
                                 .addField('Stock Number', `${this.stockNumber}`, true)
-                                .addField("Links", `[Product](https://www.target.com/prada/-/A-${this.sku}) | [Cart](https://www.target.com/co-cart)`)
+                                .addField("Links", `[Product](https://www.target.com/p/prada/-/A-${this.sku}}) | [Cart](https://www.target.com/co-cart)`)
                                 // .addField('Original Price', originalPrice)
                                 // .addField('Current Price', currentPrice , true)
                                 //  .setImage(`${this.itemPicUrl}`)

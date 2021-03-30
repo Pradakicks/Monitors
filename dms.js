@@ -200,7 +200,7 @@ function massAdd (clients, triggerText, replyText){
 			//	console.log(g)
 			for(let i = 0; i < g.length; i++){
 				
-				if(!g[i].includes('!massAdd')){
+				if(!g[i].toUpperCase().includes('!MASSADD')){
 					let SKU
 					let pricerange = ''
 					if(g[i].includes('[')){
