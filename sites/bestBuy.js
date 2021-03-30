@@ -89,8 +89,8 @@ class bestBuyMonitor {
                 let i = 0
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
-                    while(!skuBank[index]?.stop)
-                    skuBank[index].name = this.productName{
+                    while(!skuBank[index]?.stop){
+                    skuBank[index].name = this.productName
                         if(i+1 == this.proxyList.length){
                             i = 0
                         }
