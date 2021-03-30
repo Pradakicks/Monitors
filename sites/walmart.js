@@ -21,13 +21,13 @@ const rp = require('request-promise').defaults({
 	gzip : true,
     timeout: 50000
 });
-// https://discordapp.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t
- // const webhookClient1 = new Discord.WebhookClient('816740348222767155', '2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t');
+// https://discordapp.com/api/webhooks/826289643455643658/tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC 
+  const webhookClient1 = new Discord.WebhookClient('826289643455643658', 'tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC');
 
 
 
  //Test
- const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
+ // const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
 
 
 class walmartMonitor {
@@ -50,6 +50,12 @@ class walmartMonitor {
         try {
             console.log('Start')
             console.log(this.sku)
+            if(this.price.length > 2){
+            console.log('Price Range Detected')
+            } else {
+                this.maxPrice = 1000000000
+                this.minPrice = 1
+            }
             console.log(this.maxPrice, this.minPrice)
             await this.getProxies()
             await this.monitor()
