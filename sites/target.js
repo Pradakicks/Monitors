@@ -35,7 +35,7 @@ const rp = require('request-promise').defaults({
 class targetMonitor {
     constructor(sku) {
         this.sku = sku;
-        this.delay = 200;
+        this.delay = 500;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -179,7 +179,7 @@ class targetMonitor {
                             }))
                         }
                     } catch (error) {
-                        console.log(error)
+                        console.log(error.message)
                         fs.appendFileSync('errors.txt', error.toString() + '\n', (err =>{
                             console.log(err)
                         }))
