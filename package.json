@@ -24,6 +24,7 @@
     "node-fetch": "^2.6.1",
     "path": "^0.12.7",
     "playwright-chromium": "^1.9.1",
+    "puppeteer": "^8.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "tough-cookie": "^4.0.0",

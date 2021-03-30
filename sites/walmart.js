@@ -8,48 +8,53 @@ const { resolve } = require('path');
 const { json } = require('body-parser');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
-const { chromium } = require('playwright')
+//const { chromium } = require('playwright')
+const puppeteer = require('puppeteer')
+const request = require('request')
+var tough = require('tough-cookie');
+var Cookie = tough.Cookie
 // require ('newrelic');
+var cookieJar = request.jar()
 const rp = require('request-promise').defaults({
-	followAllRedirects: true,
+    followAllRedirects: true,
 	resolveWithFullResponse: true,
 	gzip : true,
+    timeout: 50000
 });
 // https://discordapp.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t
- const webhookClient1 = new Discord.WebhookClient('816740348222767155', '2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t');
-const webhookClient = new Discord.WebhookClient('797249480410923018', 'NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW');
-// const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
+ // const webhookClient1 = new Discord.WebhookClient('816740348222767155', '2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t');
 
-const webhook = require("webhook-discord")
- // https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
-const Hook = new webhook.Webhook("https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM")
+
+
+ //Test
+ const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
+
 
 class walmartMonitor {
-    constructor(sku) {
+    constructor(sku, price) {
         this.trueSku = sku
-        this.sku = sku.split(':')[0];
-        this.skuName = sku.split(':')[1]
+        this.price = price
+        this.sku = sku
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 100; //  this.startDelay = 6000;
+        this.startDelay = 3000; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
         this.isStock = false
         this.imageUrl = ''
-        this.maxPrice = ''
-        this.minPrice = ''
-
+        this.maxPrice = parseInt(price.split(' ')[1])
+        this.minPrice =  parseInt(price.split(' ')[0])
     }
 
     async task () {
         try {
             console.log('Start')
             console.log(this.sku)
-            console.log(this.skuName)
+            console.log(this.maxPrice, this.minPrice)
             await this.getProxies()
-         //   console.log(this.proxyList)
             await this.monitor()
         } catch (error) {
+            console.log(error)
             fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
                 console.log(err)
             }))
@@ -88,45 +93,68 @@ class walmartMonitor {
         console.log('Starting Monitoring')
         var testing = ''
         return new Promise( async ( resolve, reject) => {
-
                 let i = 0
-                var { skuBank } = require('../dms')
-                let index = skuBank.findIndex(e => e.sku == this.trueSku)
-                    while(!skuBank[index]?.stop){
+            
+                    var { skuBank } = require('../dms')
+                       let index = skuBank.findIndex(e => e.sku == this.trueSku)
+                        while(!skuBank[index]?.stop){
                         if(i+1 == this.proxyList.length){
                             i = 0
                         }
                         let proxy = this.proxyList[i]
                         i++
-                        console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+
+                        // console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+
                         try {
                             
                             let monitoring = await rp.get({
+                                headers : {
+                                                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                                                "accept-language": "en-US,en;q=0.9",
+                                                "cache-control": "max-age=0",
+                                                "sec-fetch-dest": "document",
+                                                "sec-fetch-mode": "navigate",
+                                                "sec-fetch-site": "none",
+                                                "sec-fetch-user": "?1",
+                                                "upgrade-insecure-requests": "1",
+                                                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36",
+                                   
+                                },
                                 url : `https://www.walmart.com/terra-firma/item/${this.sku}`,
                                 proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
                             })
-                            let availableOffer = {offer, price, availability}
+
+                            let availableOffer = 
+                            {
+                              offer : "",
+                              price: "",
+                              availability : ""
+                            }
                          //   console.log()
+                            testing = monitoring?.body
                             let parsed = JSON.parse(monitoring?.body)
                             let offerList = parsed.payload.offers
                             let keys = Object.keys(offerList)
                             let currentImages = Object.keys(parsed.payload.images)
-                            this.imageUrl = (parsed.payload.images[currentImages].assetSizeUrls.DEFAULT)
+
+                            this.imageUrl = (parsed.payload.images[currentImages[0]].assetSizeUrls.DEFAULT)
                             this.availability = false
                             this.productName = parsed.payload.products[Object.keys(parsed.payload.products)[0]].productAttributes.productName
-                            keys.map(e => {
+                                keys.map(e => {
                                  let d = offerList[e]
                                  let status = d?.productAvailability.availabilityStatus
                                  let price = d?.pricesInfo.priceMap.CURRENT.price
 
-                                 if(status == "IN_STOCK" && this.minPrice < price && price < this.maxPrice){
-                                    this.availability == true
-                                    console.log(this.availability)
+                                if(status == "IN_STOCK" && this.minPrice < price && price < this.maxPrice){
+                                    this.availability = true
+                                  //  console.log(this.availability)
                                     availableOffer.offer = e
                                     availableOffer.price = price
                                     availableOffer.availability = status
                                 }
                                 })
+                                console.log(`Task ${i} | ${this.sku} | ${monitoring?.statusCode}: ${JSON.stringify(availableOffer)} ${this.availability} & ${this.isStock}`)
                                 if (!this.isStock && this.availability) {
                                     // Send in stock webhook
                                     this.isStock = true
@@ -137,14 +165,15 @@ class walmartMonitor {
                                         .setURL(`https://www.walmart.com/ip/prada/${this.sku}`)
                                         .addField('Product Name', `${this.productName}`)
                                         .addField('Product Availability', 'In Stock!', true)
-                                //        .addField('Stock Number', `${this.stockNumber}`, true)
-                                        .addField("Links", `[Product](https://www.walmart.com/ip/prada/${this.sku}) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)`)
-                                        .addField('Price', availableOffer.price)
-                                         .addField('OfferId', availableOffer.offer , true)
+                                        .addField('Price', availableOffer.price, true)
+                                        .addField('Sku', this.sku, true)
+                                        .addField('OfferId', availableOffer.offer , true)
+                                //      .addField('Stock Number', `${this.stockNumber}`, true)
+                                        .addField("Links", `[Product](https://www.walmart.com/ip/prada/${this.sku}) | [ATC](https://affil.walmart.com/cart/buynow?items=${this.sku}) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)`)
                                         //  .setImage(`${this.itemPicUrl}`)
                                         .setTimestamp()
                                         .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-                                    webhookClient1.send('Restock!', {
+                                        webhookClient1.send({
                                         username: 'Walmart',
                                         avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
                                         embeds: [embed1],
@@ -177,13 +206,16 @@ class walmartMonitor {
                             } else if (error.message.includes('403')){
                                 await delay(400000)
                                 console.log('403 Access Denied')
-                            }
+                            } else [
+                                console.log(testing)
+                            ]
                         }
+
                         await delay(this.startDelay)
                     }
                     console.log('stopped!')
                     resolve('Stopped')
-                    return
+                    return;
               
         })
        } catch (error) {

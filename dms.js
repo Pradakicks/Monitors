@@ -7,6 +7,7 @@ const {
 const {
 	gameStopMonitor
 } = require('./sites/gameStop');
+const { bestBuyMonitor } = require('./sites/bestBuy')
 
 const { amdMonitor } = require('./sites/amd')
 const { amdSiteMonitor } = require('./sites/amdSite')
@@ -26,13 +27,19 @@ function SKUADD(clients, triggerText, replyText) {
 		clients.on('message', async (message) => {
 			if (message.channel.type === 'dm' && message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				// message.author.send(replyText);
+				let pricerange = ''
 				const content = message.content;
 				const site = content.split(' ')[1];
 				const SKU = content.split(' ')[2];
+				if(content.includes('[')){
+					pricerange = content.split('[')[1].split(']')[0]
+
+				}
 				//    fetch('')
 				console.log(site)
 				console.log(SKU)
 				console.log(content)
+				console.log(pricerange)
 				if (SKU.length > 1 && site.length > 1) {
 					if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
@@ -80,14 +87,21 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'WALMART',
 							stop: false
 						})
-						let monitor = new walmartMonitor(SKU.toString())
+						let monitor = new walmartMonitor(SKU.toString(), pricerange)
+						monitor.task()
+					} else if (site.toUpperCase() == 'BESTBUY') {
+						skuBank.push({
+							sku: SKU,
+							site: 'BESTBUY',
+							stop: false
+						})
+						let monitor = new bestBuyMonitor(SKU.toString())
 						monitor.task()
 					}
-				}
 				console.log(skuBank)
 				message.channel.send(`${SKU} Added to ${site}`)
 			}
-		});
+		}});
 	} catch (error) {
 		console.log(error);
 	}
@@ -120,11 +134,15 @@ function deleteSku(clients, triggerText, replyText) {
 				skuBank[index].stop = true;
 				// console.log(skuBank)
 				(async () => {
-					await delay(1000)
+					await delay(10000)
 					skuBank.splice(index, 1)
 				})()
+				
 				// console.log(skuBank)
-				message.channel.send(`${SKU} Delete From ${site}`)
+				function replaceWithTheCapitalLetter(values){
+				return values.charAt(0).toUpperCase() + values.slice(1);
+				}
+				message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
 				return;
 				//    fetch('')
 
@@ -175,7 +193,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'TARGET',
 							stop: false
 						})
-						let monitor = new targetMonitor(g[i].toString())
+						let monitor = new targetMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						skuBank.push({
@@ -183,7 +201,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'NEWEGG',
 							stop: false
 						})
-						let monitor = new newEggMonitor(g[i].toString())
+						let monitor = new newEggMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						skuBank.push({
@@ -191,7 +209,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'GAMESTOP',
 							stop: false
 						})
-						let monitor = new gameStopMonitor(g[i].toString())
+						let monitor = new gameStopMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
 						skuBank.push({
@@ -199,7 +217,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'AMD',
 							stop: false
 						})
-						let monitor = new amdMonitor(g[i].toString())
+						let monitor = new amdMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
 						skuBank.push({
@@ -207,8 +225,24 @@ function massAdd (clients, triggerText, replyText){
 							site: 'AMDSITE',
 							stop: false
 						})
-						let monitor = new amdSiteMonitor(g[i].toString())
+						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
+					} else if (site.toUpperCase() == 'WALMART') {
+						skuBank.push({
+							sku: g[i],
+							site: 'WALMART',
+							stop: false
+						})
+						let monitor = new walmartMonitor(SKU.toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'BESTBUY') {
+						skuBank.push({
+							sku: g[i],
+							site: 'BESTBUY',
+							stop: false
+						})
+						let monitor = new bestBuyMonitor(SKU.toString())
+						
 					}
 
 				}

@@ -31,14 +31,6 @@ client.on('message', msg => {
 	console.log(msg.content);
 });
 
-// client.on('message', msg => {
-// 	if (msg.content === `${prefix}ping`) {
-// 		msg.reply('Pong!');
-// 	}
-// });
-
-// const hook = new Discord.WebhookClient('webhook id', 'webhook token');
-// const targetMonitor = require('./targetMonitor')
 
 
 client.login(token);
