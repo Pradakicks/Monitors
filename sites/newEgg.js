@@ -35,6 +35,7 @@ class newEggMonitor {
         this.proxyList = [];
         this.isStock = false
         this.imageUrl = ''
+        this.productName = ''
 
     }
 
@@ -91,6 +92,7 @@ class newEggMonitor {
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
                     while(!skuBank[index]?.stop){
+                        skuBank[index].name = this.productName
                         if(i+1 == this.proxyList.length){
                             i = 0
                         }
@@ -116,7 +118,7 @@ class newEggMonitor {
                             let parsedBod = JSON.parse(fetchSite?.body)
                             let image = parsedBod?.MainItem?.Image?.ItemCellImageName
                             
-                            let productName = parsedBod?.MainItem?.Description?.Title
+                            this.productName = parsedBod?.MainItem?.Description?.Title
                             let originalPrice = parsedBod?.MainItem?.OriginalUnitPrice
                             let currentPrice = parsedBod?.MainItem?.FinalPrice
                             this.availability = parsedBod?.MainItem?.Instock

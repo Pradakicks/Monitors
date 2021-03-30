@@ -109,7 +109,7 @@ class walmartMonitor {
                             }
                             let proxy = this.proxyList[i]
                             i++
-
+                            skuBank[index].name = this.productName
                         // console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
 
                         try {

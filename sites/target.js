@@ -115,6 +115,7 @@ class targetMonitor {
             let index = skuBank.findIndex(e => e.sku == this.sku)
             let i = 0
             while(!skuBank[index]?.stop){
+                skuBank[index].name = this.productName
                 if(i+1 == this.proxyList.length){
                     i = 0
                 }

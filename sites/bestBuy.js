@@ -33,6 +33,7 @@ class bestBuyMonitor {
         this.proxyList = [];
         this.isStock = false
         this.imageUrl = ''
+        this.productName = ''
 
     }
 
@@ -88,7 +89,8 @@ class bestBuyMonitor {
                 let i = 0
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
-                    while(!skuBank[index]?.stop){
+                    while(!skuBank[index]?.stop)
+                    skuBank[index].name = this.productName{
                         if(i+1 == this.proxyList.length){
                             i = 0
                         }
@@ -116,7 +118,7 @@ class bestBuyMonitor {
                                     console.log(response?.statusCode)
                                 }))   
                                 let availability = fetchSite?.body?.split(',"availability":"')[1]?.split('.org/')[1]?.split('"')[0]
-                                let productName = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('"')[0]
+                                this.productName = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('"')[0]
                                 let price = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('price":"')[1]?.split('"')[0]
                                 let image = fetchSite?.body?.split('","image":"')[1]?.split('"')[0]
                                 if(availability == "SoldOut"){
@@ -137,7 +139,7 @@ class bestBuyMonitor {
                                     .setTitle('Best Buy Monitor')
                                     .setURL(`https://www.bestbuy.com/site/prada/${this.sku}.p?skuId=${this.sku}`)
                                     .addFields(
-                                        { name : 'Product Name', value : `${productName}`},
+                                        { name : 'Product Name', value : `${this.productName}`},
                                         { name : 'Product Availability', value : `Product In Stock`, inline : true},
                                     //    { name : 'Stock Number', value : `${this.stockNumber}`, inline : true}, 
                                         { name : 'Current Price', value : price, inline : true} 

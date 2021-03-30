@@ -40,13 +40,23 @@ function SKUADD(clients, triggerText, replyText) {
 				console.log(SKU)
 				console.log(content)
 				console.log(pricerange)
-
+				
 				if (SKU.length > 1 && site.length > 1) {
+					let isContinue = true
+					skuBank.map(e => {
+						if(e.sku == SKU){
+							console.log('Duplicate Found')
+							message.channel.send(`${SKU} is already present in monitor`)
+							isContinue = false
+						}
+					})
+					if(isContinue){
 					if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
 							sku: SKU,
 							site: 'TARGET',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new targetMonitor(SKU.toString())
 						monitor.task()
@@ -54,7 +64,8 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'NEWEGG',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new newEggMonitor(SKU.toString())
 						monitor.task()
@@ -62,7 +73,8 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'GAMESTOP',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new gameStopMonitor(SKU.toString())
 						monitor.task()
@@ -70,7 +82,8 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'AMD',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new amdMonitor(SKU.toString())
 						monitor.task()
@@ -78,7 +91,8 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'AMDSITE',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
@@ -86,7 +100,8 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'WALMART',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new walmartMonitor(SKU.toString(), pricerange)
 						monitor.task()
@@ -94,13 +109,16 @@ function SKUADD(clients, triggerText, replyText) {
 						skuBank.push({
 							sku: SKU,
 							site: 'BESTBUY',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new bestBuyMonitor(SKU.toString())
 						monitor.task()
 					}
 				console.log(skuBank)
 				message.channel.send(`${SKU} Added to ${site}`)
+					}
+				
 			}
 		}});
 	} catch (error) {
@@ -160,14 +178,13 @@ function checkBank (clients, triggerText, replyText){
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = (skuBank)
 				let skuString = ''
-				for (let i = 0; i < skuBank.length; i++) {
+				skuBank.map(e => {
 					let status = "Terminated"
-					if(!skuBank[i].stop){
+						if(!e.stop){
 						status = "Running"
 					}
-					skuString+= `Site : ${skuBank[i].site} | ${skuBank[i].sku} | ${status} \n`
-				}
-
+					skuString+= `Site : ${e.site} | ${e.sku} | ${status} | ${e.name} \n`
+				})
 				  let embed1 = new Discord.MessageEmbed()
                     .setColor('#07bf6e')
                     .setTitle('Monitor Bank')
@@ -198,9 +215,9 @@ function massAdd (clients, triggerText, replyText){
 			//	console.log(site)
 				let g  = string.split('\n')
 			//	console.log(g)
-			for(let i = 0; i < g.length; i++){
-				
+			for(let i = 0; i < g.length; i++){		
 				if(!g[i].toUpperCase().includes('!MASSADD')){
+					let isContinue = true
 					let SKU
 					let pricerange = ''
 					if(g[i].includes('[')){
@@ -210,11 +227,20 @@ function massAdd (clients, triggerText, replyText){
 					SKU = g[i]
 					console.log(g[i])
 					console.log(site.toUpperCase())
-					if (site.toUpperCase() == 'TARGET') {
+						skuBank.map(e => {
+						if(e.sku == SKU) {
+							console.log('Duplicate Found')
+							message.channel.send(`${SKU} is already present in monitor`)
+							isContinue = false
+						}
+					})
+					if(isContinue){
+							if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
 							sku: g[i],
 							site: 'TARGET',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new targetMonitor(g[i].toString())
 						monitor.task()
@@ -222,7 +248,8 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'NEWEGG',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new newEggMonitor(g[i].toString())
 						monitor.task()
@@ -230,7 +257,8 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'GAMESTOP',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new gameStopMonitor(g[i].toString())
 						monitor.task()
@@ -238,7 +266,8 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'AMD',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new amdMonitor(g[i].toString())
 						monitor.task()
@@ -246,7 +275,8 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'AMDSITE',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new amdSiteMonitor(g[i].toString())
 						monitor.task()
@@ -254,7 +284,8 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'WALMART',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new walmartMonitor(g[i].toString())
 						monitor.task()
@@ -262,11 +293,14 @@ function massAdd (clients, triggerText, replyText){
 						skuBank.push({
 							sku: g[i],
 							site: 'BESTBUY',
-							stop: false
+							stop: false,
+                          name: ""
 						})
 						let monitor = new bestBuyMonitor(g[i].toString())
 						
 					}
+					}
+				
 
 				}
 				await delay(30000)
