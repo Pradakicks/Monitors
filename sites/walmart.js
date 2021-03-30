@@ -42,8 +42,8 @@ class walmartMonitor {
         this.proxyList = [];
         this.isStock = false
         this.imageUrl = ''
-        this.maxPrice = parseInt(price.split(' ')[1])
-        this.minPrice =  parseInt(price.split(' ')[0])
+        this.maxPrice = parseInt(price?.split(' ')[1])
+        this.minPrice =  parseInt(price?.split(' ')[0])
     }
 
     async task () {

@@ -186,16 +186,28 @@ function massAdd (clients, triggerText, replyText){
 	try {
 		clients.on('message', async (message) => {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				
 				let string = message.content
 				const content = message.content;
 				const site = content.split(' ')[1].split('|')[0]
 				console.log(site.toUpperCase())
+				
+			
+
 			//	const SKU = content.split(' ')[2];
 			//	console.log(site)
 				let g  = string.split('\n')
 			//	console.log(g)
 			for(let i = 0; i < g.length; i++){
+				
 				if(!g[i].includes('!massAdd')){
+					let SKU
+					let pricerange = ''
+					if(g[i].includes('[')){
+					pricerange = g[i].split('[')[1].split(']')[0]
+					SKU = g[i].split(' ')[0]
+					}
+					SKU = g[i]
 					console.log(g[i])
 					console.log(site.toUpperCase())
 					if (site.toUpperCase() == 'TARGET') {
