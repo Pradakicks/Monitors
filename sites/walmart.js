@@ -50,7 +50,7 @@ class walmartMonitor {
         try {
             console.log('Start')
             console.log(this.sku)
-            if(this.price.length > 2){
+            if(this.price?.length > 2){
             console.log('Price Range Detected')
             } else {
                 this.maxPrice = 1000000000
