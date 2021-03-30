@@ -204,7 +204,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'TARGET',
 							stop: false
 						})
-						let monitor = new targetMonitor(SKU.toString())
+						let monitor = new targetMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						skuBank.push({
@@ -212,7 +212,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'NEWEGG',
 							stop: false
 						})
-						let monitor = new newEggMonitor(SKU.toString())
+						let monitor = new newEggMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						skuBank.push({
@@ -220,7 +220,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'GAMESTOP',
 							stop: false
 						})
-						let monitor = new gameStopMonitor(SKU.toString())
+						let monitor = new gameStopMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
 						skuBank.push({
@@ -228,7 +228,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'AMD',
 							stop: false
 						})
-						let monitor = new amdMonitor(SKU.toString())
+						let monitor = new amdMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
 						skuBank.push({
@@ -236,7 +236,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'AMDSITE',
 							stop: false
 						})
-						let monitor = new amdSiteMonitor(SKU.toString())
+						let monitor = new amdSiteMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
 						skuBank.push({
@@ -244,7 +244,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'WALMART',
 							stop: false
 						})
-						let monitor = new walmartMonitor(SKU.toString())
+						let monitor = new walmartMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						skuBank.push({
@@ -252,7 +252,7 @@ function massAdd (clients, triggerText, replyText){
 							site: 'BESTBUY',
 							stop: false
 						})
-						let monitor = new bestBuyMonitor(SKU.toString())
+						let monitor = new bestBuyMonitor(g[i].toString())
 						
 					}
 
