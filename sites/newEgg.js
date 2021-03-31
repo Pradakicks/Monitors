@@ -116,11 +116,11 @@ class newEggMonitor {
                            } else {
                             testing = fetchSite.body
                             let parsedBod = JSON.parse(fetchSite?.body)
-                            let image = parsedBod?.MainItem?.Image?.ItemCellImageName
+                            image = parsedBod?.MainItem?.Image?.ItemCellImageName
                             
                             this.productName = parsedBod?.MainItem?.Description?.Title
-                            let originalPrice = parsedBod?.MainItem?.OriginalUnitPrice
-                            let currentPrice = parsedBod?.MainItem?.FinalPrice
+                            originalPrice = parsedBod?.MainItem?.OriginalUnitPrice
+                            currentPrice = parsedBod?.MainItem?.FinalPrice
                             this.availability = parsedBod?.MainItem?.Instock
                             this.stockNumber = parsedBod?.MainItem?.Stock 
                             console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.stockNumber, productName, this.isStock)

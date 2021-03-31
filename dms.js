@@ -8,11 +8,12 @@ const {
 	gameStopMonitor
 } = require('./sites/gameStop');
 const { bestBuyMonitor } = require('./sites/bestBuy')
-const Discord = require('discord.js');
+const {MessageAttachment } = require('discord.js');
 const { amdMonitor } = require('./sites/amd')
 const { amdSiteMonitor } = require('./sites/amdSite')
 const { walmartMonitor } = require('./sites/walmart')
 const delay = require('delay');
+const fs = require('fs').promises
 require('newrelic');
 var skuBank = []
 
@@ -173,30 +174,42 @@ function deleteSku(clients, triggerText, replyText) {
 }
 
 function checkBank (clients, triggerText, replyText){
-	try {
+	
 		clients.on('message', async (message) => {
+			try {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let string = (skuBank)
 				let skuString = ''
-				skuBank.map(e => {
+				if(skuBank.length != 0){
+					for (let i = 0; i < skuBank.length; i++){
 					let status = "Terminated"
-						if(!e.stop){
+						if(!skuBank[i].stop){
 						status = "Running"
 					}
-					skuString+= `Site : ${e.site} | ${e.sku} | ${status} | ${e.name} \n`
+					await fs.appendFile(`monitorBank-${message.author.username}.txt`, `Site : ${skuBank[i].site} | ${skuBank[i].sku} | ${status} | ${skuBank[i].name} \n` , err => {
+						if(err) message.content.send('Error While Creating Text Document')
+								else console.log("File Sent")
 				})
-				  let embed1 = new Discord.MessageEmbed()
-                    .setColor('#07bf6e')
-                    .setTitle('Monitor Bank')
-                    .addField('Products', `${skuString}`)
-                    .setTimestamp()
-                    .setFooter('Jigged Custom Monitors', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
-				message.channel.send(embed1)
+				}
+				let attachment = new MessageAttachment(`monitorBank-${message.author.username}.txt`);
+				message.channel.send(attachment)
+				message.author.send('Attachment Successfully Fetched and Sent')
+				await delay(2500)
+				await fs.unlink(`monitorBank-${message.author.username}.txt`, err =>{
+					if(err) console.log('Error doing the unthinkable')
+				})
+				} else {
+					message.channel.send('Monitor Bank is empty')
+				}
+		
+				
 			}
-		});
-	} catch (error) {
+			} catch (error) {
 		console.log(error);
+		message.channel.send('Error checking Bank')
 	}
+		});
+	
 }
 
 function massAdd (clients, triggerText, replyText){

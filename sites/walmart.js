@@ -202,12 +202,12 @@ class walmartMonitor {
                                     }))
                                 }
                         } catch (error) {
-                            console.log(error.message)
+                            console.log(error)
                             fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
                                 console.log(err)
                             }))
                               if(error.message.includes('Unexpected token')){
-                                console.log(testing)
+                               // console.log(testing)
                               //  resolve('g')
                             } else if (error.message.includes('403')){
                                 // await delay(400000)
