@@ -107,7 +107,6 @@ class newEggMonitor {
                            // console.log(fetchSite.body)
                            let parsedBod; 
                            let image;
-                            let productName; 
                             let originalPrice; 
                             let currentPrice;
                            if(fetchSite?.body?.includes("We apologize for the confusion, but we can't quite tell if you're a person or?")){

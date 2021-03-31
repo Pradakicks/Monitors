@@ -212,6 +212,8 @@ class walmartMonitor {
                             } else if (error.message.includes('403')){
                                 // await delay(400000)
                                 console.log('403 Access Denied')
+                            } else if(error?.message?.includes('Cannot convert undefined or null to object')){
+                                console.log('Walmart Undefined')
                             } else {
                                 console.log(testing)
                             }
