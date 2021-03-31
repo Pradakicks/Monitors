@@ -123,7 +123,7 @@ class newEggMonitor {
                             currentPrice = parsedBod?.MainItem?.FinalPrice
                             this.availability = parsedBod?.MainItem?.Instock
                             this.stockNumber = parsedBod?.MainItem?.Stock 
-                            console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.stockNumber, productName, this.isStock)
+                            console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.stockNumber, this.productName, this.isStock)
                            }
                             if(!this.isStock && this.availability) {
                                 // Send in stock webhook
@@ -134,7 +134,7 @@ class newEggMonitor {
                                 .setTitle('New Egg Monitor')
                                 .setURL(`https://www.newegg.com/Prada/p/${this.skuName}`)
                                 .addFields(
-                                    { name : 'Product Name', value : `${productName}`},
+                                    { name : 'Product Name', value : `${this.productName}`},
                                     { name : 'Product Availability', value : `Product In Stock`, inline : true},
                                     { name : 'Stock Number', value : `${this.stockNumber}`, inline : true}, 
                                     { name : 'Current Price', value : currentPrice, inline : true} 
