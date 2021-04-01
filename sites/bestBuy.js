@@ -17,7 +17,7 @@ const rp = require('request-promise').defaults({
 });
 // Production https://discordapp.com/api/webhooks/827263591114997790/chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY
  const webhookClient1 = new Discord.WebhookClient('827263591114997790', 'chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY');
- 
+
 // Test https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
 
 class bestBuyMonitor {
@@ -128,7 +128,7 @@ class bestBuyMonitor {
                                     console.log(availability)
                                 }
                                 
-                                console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, productName, price , this.isStock)
+                                console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.productName, price , this.isStock)
                                 if(!this.isStock && this.availability) {
                                     // Send in stock webhook
                                     console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
