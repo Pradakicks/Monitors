@@ -302,6 +302,7 @@ function massAdd (clients, triggerText, replyText){
 						})
 						let monitor = new walmartMonitor(g[i].toString())
 						monitor.task()
+						await delay(30000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						skuBank.push({
 							sku: g[i],
