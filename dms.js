@@ -311,6 +311,7 @@ function massAdd (clients, triggerText, replyText){
                           name: ""
 						})
 						let monitor = new bestBuyMonitor(g[i].toString())
+						monitor.task()
 						
 					}
 					}

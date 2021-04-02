@@ -8,13 +8,16 @@ const { resolve } = require('path');
 const { json } = require('body-parser');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
+const got = require('got').default
+const HttpsProxyAgent = require('https-proxy-agent')
+
 // require ('newrelic');
-const rp = require('request-promise').defaults({
-	followAllRedirects: true,
-	resolveWithFullResponse: true,
-	gzip : true,
-    timeout: 50000
-});
+// const rp = require('request-promise').defaults({
+// 	// followAllRedirects: true,
+// 	resolveWithFullResponse: true,
+// 	gzip : true,
+//     timeout: 5000
+// });
 // Production https://discordapp.com/api/webhooks/827263591114997790/chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY
  const webhookClient1 = new Discord.WebhookClient('827263591114997790', 'chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY');
 
@@ -26,7 +29,7 @@ class bestBuyMonitor {
         this.sku = sku.split(':')[0];
         this.skuName = sku.split(':')[1]
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 1000; //  this.startDelay = 6000;
+        this.startDelay = 800; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -53,7 +56,7 @@ class bestBuyMonitor {
     async getProxies() {
 		try {
 			// read contents of the file
-			const data = fs.readFileSync('proxies.txt', 'utf-8');
+                const data = fs.readFileSync('bestBuyProxies.txt', 'utf-8');
 
 			const lines = data.split(/\r?\n/);
 
@@ -79,6 +82,31 @@ class bestBuyMonitor {
             }))
         }
     }
+    async getPic(){
+                try {
+                   var axios = require("axios").default;
+
+                var options = {
+                method: 'GET',
+                url: `https://www.bestbuy.com/site/prada/${this.sku}.p`,
+                params: {skuId: `${this.sku}`},
+                };
+
+                let fetchSite = await axios.request(options).then(response => {
+                   return response?.data?.split('","image":"')[1]?.split('"')[0]
+                }).catch(err => {
+                    console.log(err)
+                })
+                console.log(fetchSite)
+                this.image = fetchSite
+                
+                
+                console.log(this.image)
+                } catch (error) {
+                    console.log(`Error on getting pic ${error.message}`)
+                    this.getPic
+                }
+    }
     async monitor () {
        try {
         console.log('Starting Monitoring')
@@ -88,7 +116,11 @@ class bestBuyMonitor {
                 let i = 0
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
+                    this.getPic()
+             
                     while(!skuBank[index]?.stop){
+                            let timeStart = Date.now();
+                            let timeStartSec = (timeStart / 1000);
                     skuBank[index].name = this.productName
                         if(i+1 == this.proxyList.length){
                             i = 0
@@ -96,39 +128,53 @@ class bestBuyMonitor {
                         let proxy = this.proxyList[i]
                         i++
                       //  console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`);
+                        (async () =>{
+                              try {
+                               var options = {
+                                            method: 'GET',
+                                            url: 'https://www.bestbuy.com/api/3.0/priceBlocks',
+                                            params: {skus: `${this.sku}`},
+                                                       headers: {
+                                                                "accept": "*/*",
+                                                                        "accept-language": "en-US,en;q=0.9",
+                                                                        "cache-control": "no-cache",
+                                                                        "pragma": "no-cache",
+                                                                        "sec-fetch-dest": "empty",
+                                                                        "sec-fetch-mode": "cors",
+                                                                        "sec-fetch-site": "same-origin",
+                                                                        "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
+                                                                },
+                                             proxy: {
+                                                        host: proxy.ip,
+                                                        port: proxy.port,
+                                                        auth: {
+                                                        username: proxy.userAuth,
+                                                        password: proxy.userPass
+                                                        }
+                                                    },
+                                            timeout : 1000
+                                            };
+                                            
 
-                        (async () => {
-                            try {
-                                let fetchSite = await rp.get({
-                                    headers : {
-                                                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-                                                "accept-language": "en-US,en;q=0.9",
-                                                "cache-control": "max-age=0",
-                                                "sec-fetch-dest": "document",
-                                                "sec-fetch-mode": "navigate",
-                                                "sec-fetch-site": "none",
-                                                "sec-fetch-user": "?1",
-                                                "upgrade-insecure-requests": "1",
-                                                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML%2C like Gecko) Mobile/15E148",
-                                    },
-                                    url : `https://www.bestbuy.com/site/prada/${this.sku}.p?skuId=${this.sku}`,
-                                    proxy : `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
-                                }, ((error, response, body) => {
-                                    console.log(response?.statusCode)
-                                }))   
-                                let availability = fetchSite?.body?.split(',"availability":"')[1]?.split('.org/')[1]?.split('"')[0]
-                                this.productName = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('"')[0]
-                                let price = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('price":"')[1]?.split('"')[0]
-                                let image = fetchSite?.body?.split('","image":"')[1]?.split('"')[0]
-                                if(availability == "SoldOut"){
+                                let fetchSite = await axios.request(options)
+                                // console.log(fetchSite?.data)
+                                let parsed = fetchSite?.data
+                                let availability = parsed[0]?.sku?.buttonState?.buttonState
+                                this.productName = parsed[0]?.sku?.names?.short
+                                let price = parsed[0]?.sku?.price?.currentPrice
+                                // let availability = fetchSite?.body?.split(',"availability":"')[1]?.split('.org/')[1]?.split('"')[0]
+                                // this.productName = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('"')[0]
+                                // let price = fetchSite?.body?.split('"@context":"http://schema.org/","@type":"Product","name":"')[1]?.split('price":"')[1]?.split('"')[0]
+                                // 
+                                if(availability == "SOLD_OUT"){
                                     this.availability = false
-                                } else if (availability == "InStock"){
+                                } else if (availability == "ADD_TO_CART"){
                                     this.availability = true
                                 } else {
                                     console.log(availability)
                                 }
                                 
-                                console.log(`Task ${i} : ${fetchSite.statusCode}`, this.availability, this.productName, price , this.isStock)
+                                console.log(`Task ${i} : ${fetchSite.status}`, this.availability, this.productName, price , this.isStock)
                                 if(!this.isStock && this.availability) {
                                     // Send in stock webhook
                                     console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
@@ -146,7 +192,7 @@ class bestBuyMonitor {
                                     .addField("Links", `[ATC](https://api.bestbuy.com/click/tempo/${this.sku}/cart) | [Cart](https://www.bestbuy.com/cart)`)
                                     // .addField('Original Price', originalPrice, true)
                                     // .addField('Current Price', currentPrice, true)
-                                    .setThumbnail(image)
+                                    .setThumbnail(this.image)
                                     .setTimestamp()
                                     .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                                     webhookClient1.send({
@@ -199,7 +245,13 @@ class bestBuyMonitor {
                                 }
                             }
                         })()
-                       
+                        
+
+                          
+                     
+                        // let timeEnd = Date.now();
+                        // let timeEndSec = timeEnd / 1000
+                        // console.log(timeEndSec - timeStartSec)
                         await delay(this.startDelay)
                     }
                     console.log('stopped!')
