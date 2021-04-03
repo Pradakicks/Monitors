@@ -13,6 +13,8 @@ const rp = require('request-promise').defaults({
 	followAllRedirects: true,
 	resolveWithFullResponse: true,
 	gzip : true,
+    timeout: 5000
+
 });
 // https://discordapp.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t
  const webhookClient1 = new Discord.WebhookClient('816740348222767155', '2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t');
@@ -29,7 +31,7 @@ class newEggMonitor {
         this.sku = ''
         this.skuName = sku
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 3500; //  this.startDelay = 6000;
+        this.startDelay = 3000; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -237,11 +239,6 @@ class newEggMonitor {
 
 }
 
-// const monitoring = new newEggMonitor(`19-113-569`);
-
-// (async ()=>{
-//     await monitoring.task()
-// })()
 
 module.exports = {
     newEggMonitor

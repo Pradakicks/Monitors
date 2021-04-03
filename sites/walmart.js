@@ -19,7 +19,7 @@ const rp = require('request-promise').defaults({
     followAllRedirects: true,
 	resolveWithFullResponse: true,
 	gzip : true,
-    timeout: 50000
+    timeout: 5000 
 });
 // https://discordapp.com/api/webhooks/826289643455643658/tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC 
   const webhookClient1 = new Discord.WebhookClient('826289643455643658', 'tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC');

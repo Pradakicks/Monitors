@@ -10,7 +10,7 @@ const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const got = require('got').default
 const HttpsProxyAgent = require('https-proxy-agent')
-
+const HTMLParser = require('node-html-parser');
 // require ('newrelic');
 // const rp = require('request-promise').defaults({
 // 	// followAllRedirects: true,
@@ -29,7 +29,7 @@ class bestBuyMonitor {
         this.sku = sku.split(':')[0];
         this.skuName = sku.split(':')[1]
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 800; //  this.startDelay = 6000;
+        this.startDelay = 1000; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -93,14 +93,12 @@ class bestBuyMonitor {
                 };
 
                 let fetchSite = await axios.request(options).then(response => {
-                   return response?.data?.split('","image":"')[1]?.split('"')[0]
+                   return response?.data
                 }).catch(err => {
                     console.log(err)
                 })
-                console.log(fetchSite)
-                this.image = fetchSite
-                
-                
+                let document = HTMLParser.parse(fetchSite);
+                this.image = document.querySelector("div.primary-media-wrapper.lv.base-page-image > div > button > img").outerHTML.split('src="')[1].split('"')[0]
                 console.log(this.image)
                 } catch (error) {
                     console.log(`Error on getting pic ${error.message}`)
@@ -128,7 +126,7 @@ class bestBuyMonitor {
                         let proxy = this.proxyList[i]
                         i++
                       //  console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`);
-                        (async () =>{
+
                               try {
                                var options = {
                                             method: 'GET',
@@ -244,7 +242,6 @@ class bestBuyMonitor {
                                     console.log('403 Access Denied')
                                 }
                             }
-                        })()
                         
 
                           
