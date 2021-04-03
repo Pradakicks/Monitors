@@ -26,8 +26,8 @@ const Hook = new webhook.Webhook("https://discordapp.com/api/webhooks/7452790812
 class newEggMonitor {
     constructor(sku) {
         this.trueSku = sku
-        this.sku = sku.split(':')[0];
-        this.skuName = sku.split(':')[1]
+        this.sku = ''
+        this.skuName = sku
         this.delay = 850000; // this.delay = 390000
         this.startDelay = 3500; //  this.startDelay = 6000;
         this.availability = '';
@@ -91,6 +91,33 @@ class newEggMonitor {
                 let i = 0
                 var { skuBank } = require('../dms')
                 let index = skuBank.findIndex(e => e.sku == this.trueSku)
+
+               try {
+                   console.log(this.skuName)
+                    let fetchProductPage = await rp.get({
+                    url : `https://www.newegg.com/prada/p/${this.skuName}`,
+                    headers : {
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                    "accept-language": "en-US,en;q=0.9",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1"
+                    }
+                })
+                this.sku = fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[0] + '-'
+                this.sku = this.sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[1] + '-'
+                this.sku = this.sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[2] 
+                console.log(this.sku)
+                } catch (error) {
+                    console.log(error.message)
+                    skuBank[index].name = 'Restart'
+                    skuBank[index]["error"] = error.message
+                }
+
                     while(!skuBank[index]?.stop){
                         skuBank[index].name = this.productName
                         if(i+1 == this.proxyList.length){
