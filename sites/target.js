@@ -21,11 +21,15 @@ const rp = require('request-promise').defaults({
     followAllRedirects: true,
     resolveWithFullResponse: true,
     gzip: true,
-    timeout: 3000
+    timeout: 1000
 });
-
+const { targetWebhook , companyImage, companyColor} = require('../config.json')
+let Tokens = targetWebhook.split('https://discordapp.com/api/webhooks/')[1]
+let channelId = Tokens.split('/')[0]
+let discordToken = Tokens.split('/')[1]
+const webhookClient1 = new Discord.WebhookClient(channelId, discordToken);
 // https://discordapp.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd
- const webhookClient1 = new Discord.WebhookClient('826281048480153641', 'rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd');
+//  const webhookClient1 = new Discord.WebhookClient('826281048480153641', 'rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd');
 
 
 
@@ -162,7 +166,7 @@ class targetMonitor {
                             // Send in stock webhook
                             this.isStock = true
                             let embed1 = new Discord.MessageEmbed()
-                                .setColor('#07bf6e')
+                                .setColor(companyColor)
                                 .setTitle('Target Monitor')
                                 .setThumbnail(`${this.itemPicUrl}`)
                                 .setURL(`https://www.target.com/p/prada/-/A-${this.sku}`)
@@ -177,7 +181,7 @@ class targetMonitor {
                                 .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                             webhookClient1.send({
                                 username: 'Target',
-                                avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                avatarURL: companyImage,
                                 embeds: [embed1],
                             })
                         } else if (!this.availability && this.isStock) {
