@@ -19,8 +19,12 @@ const HTMLParser = require('node-html-parser');
 //     timeout: 5000
 // });
 // Production https://discordapp.com/api/webhooks/827263591114997790/chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY
- const webhookClient1 = new Discord.WebhookClient('827263591114997790', 'chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY');
-
+//const webhookClient1 = new Discord.WebhookClient('827263591114997790', 'chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY');
+const { bestBuyWebhook, companyImage, companyColor } = require('../config.json')
+let Tokens = bestBuyWebhook.split('https://discordapp.com/api/webhooks/')[1]
+let channelId = Tokens.split('/')[0]
+let discordToken = Tokens.split('/')[1]
+const webhookClient1 = new Discord.WebhookClient(channelId, discordToken);
 // Test https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
 
 class bestBuyMonitor {
@@ -178,7 +182,7 @@ class bestBuyMonitor {
                                     console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
                                     this.isStock = true
                                     let embed1 = new Discord.MessageEmbed()
-                                    .setColor('#07bf6e')
+                                    .setColor(companyColor)
                                     .setTitle('Best Buy Monitor')
                                     .setURL(`https://www.bestbuy.com/site/prada/${this.sku}.p?skuId=${this.sku}`)
                                     .addFields(
@@ -195,7 +199,7 @@ class bestBuyMonitor {
                                     .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                                     webhookClient1.send({
                                         username: 'Best Buy',
-                                        avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                        avatarURL: companyImage,
                                         embeds: [embed1],
                                     })
                                 } else if (!this.availability && this.isStock) {

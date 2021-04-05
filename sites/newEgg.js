@@ -16,14 +16,12 @@ const rp = require('request-promise').defaults({
     timeout: 5000
 
 });
+const { newEggWebhook, companyImage , companyColor} = require('../config.json')
+let Tokens = newEggWebhook.split('https://discordapp.com/api/webhooks/')[1]
+let channelId = Tokens.split('/')[0]
+let discordToken = Tokens.split('/')[1]
 // https://discordapp.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t
- const webhookClient1 = new Discord.WebhookClient('816740348222767155', '2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t');
-const webhookClient = new Discord.WebhookClient('797249480410923018', 'NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW');
-// const webhookClient1 = new Discord.WebhookClient('745279081247014942', '3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM');
-
-const webhook = require("webhook-discord")
- // https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
-const Hook = new webhook.Webhook("https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM")
+const webhookClient1 = new Discord.WebhookClient(channelId, discordToken);
 
 class newEggMonitor {
     constructor(sku) {
@@ -158,7 +156,7 @@ class newEggMonitor {
                                 console.log(`Task ${i} : ${this.isStock} and ${this.availability}`)
                                 this.isStock = true
                                 let embed1 = new Discord.MessageEmbed()
-                                .setColor('#07bf6e')
+                                .setColor(companyColor)
                                 .setTitle('New Egg Monitor')
                                 .setURL(`https://www.newegg.com/Prada/p/${this.skuName}`)
                                 .addFields(
@@ -175,7 +173,7 @@ class newEggMonitor {
                                 .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                                 webhookClient1.send({
                                     username: 'New Egg',
-                                    avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                    avatarURL: companyImage,
                                     embeds: [embed1],
                                 })
                             } else if (!this.availability && this.isStock) {

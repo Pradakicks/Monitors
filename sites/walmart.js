@@ -21,9 +21,13 @@ const rp = require('request-promise').defaults({
 	gzip : true,
     timeout: 5000 
 });
-// https://discordapp.com/api/webhooks/826289643455643658/tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC 
-  const webhookClient1 = new Discord.WebhookClient('826289643455643658', 'tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC');
 
+const { walmartWebhook, companyImage , companyColor} = require('../config.json')
+let Tokens = walmartWebhook.split('https://discordapp.com/api/webhooks/')[1]
+let channelId = Tokens.split('/')[0]
+let discordToken = Tokens.split('/')[1]
+const webhookClient1 = new Discord.WebhookClient(channelId, discordToken);
+// Test https://discordapp.com/api/webhooks/745279081247014942/3TuT8vs6BUXr9HAK1uRKaB4t3Ap0LnoLfPJTgT1uhNzQvqR1GsUXW-d4_dxCrgOCdkBM
 
 
  //Test
@@ -165,7 +169,7 @@ class walmartMonitor {
                                     // Send in stock webhook
                                     this.isStock = true
                                     let embed1 = new Discord.MessageEmbed()
-                                        .setColor('#07bf6e')
+                                        .setColor(companyColor)
                                         .setTitle('Walmart Monitor')
                                         .setThumbnail(`${this.imageUrl}`)
                                         .setURL(`https://www.walmart.com/ip/prada/${this.sku}`)
@@ -181,7 +185,7 @@ class walmartMonitor {
                                         .setFooter('Prada#4873', 'https://cdn.discordapp.com/attachments/772173046235529256/795132477659152444/pradakicks.jpg');
                                         webhookClient1.send({
                                         username: 'Walmart',
-                                        avatarURL: 'https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png',
+                                        avatarURL: companyImage,
                                         embeds: [embed1],
                                     })
                                 } else if (!this.availability && this.isStock) {
