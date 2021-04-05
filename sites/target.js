@@ -21,6 +21,7 @@ const rp = require('request-promise').defaults({
     followAllRedirects: true,
     resolveWithFullResponse: true,
     gzip: true,
+    timeout: 3000
 });
 
 // https://discordapp.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd
@@ -35,7 +36,7 @@ const rp = require('request-promise').defaults({
 class targetMonitor {
     constructor(sku) {
         this.sku = sku;
-        this.delay = 500;
+        this.delay = 0;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -121,7 +122,6 @@ class targetMonitor {
                 }
                 let proxy = this.proxyList[i]
                 i++
-                (async () => {
                     try {
                         console.log(``)
                         let fetchSite = await rp.get({
@@ -203,9 +203,7 @@ class targetMonitor {
                          //   console.log(testing)
                          console.log('Unexpected JSON')
                         }
-                    }
-                })()
-                   
+                    }      
                 await delay(this.delay)
             }
                 console.log('Stopped!')
