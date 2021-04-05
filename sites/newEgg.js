@@ -116,6 +116,8 @@ class newEggMonitor {
                     console.log(error.message)
                     skuBank[index].name = 'Restart'
                     skuBank[index]["error"] = error.message
+                    skuBank[index]?.stop = true
+                    console.log(skuBank[index])
                 }
 
                     while(!skuBank[index]?.stop){
