@@ -21,6 +21,7 @@ const rp = require('request-promise').defaults({
     followAllRedirects: true,
     resolveWithFullResponse: true,
     gzip: true,
+    timeout : 3000
 });
 
 const { targetWebhook , companyImage, companyColor} = require('../config.json')

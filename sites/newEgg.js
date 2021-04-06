@@ -82,18 +82,13 @@ class newEggMonitor {
             }))
         }
     }
-    async monitor () {
-       try {
-        console.log('Starting Monitoring')
-        var testing = ''
-        return new Promise( async ( resolve, reject) => {
-
-                let i = 0
-                var { skuBank } = require('../dms')
-                let index = skuBank.findIndex(e => e.sku == this.trueSku)
-
-               try {
+    async getSku () {
+        try {
+                     var { skuBank } = require('../dms')
+                    this.index = skuBank.findIndex(e => e.sku == this.trueSku)
                    console.log(this.skuName)
+                    let proxy1 = this.proxyList[Math.floor(Math.random() * this.proxyList.length)]
+                    console.log(proxy1)
                     let fetchProductPage = await rp.get({
                     url : `https://www.newegg.com/prada/p/${this.skuName}`,
                     headers : {
@@ -106,19 +101,37 @@ class newEggMonitor {
                     "sec-fetch-site": "none",
                     "sec-fetch-user": "?1",
                     "upgrade-insecure-requests": "1"
-                    }
+                    },
+                    proxy : `http://${proxy1.userAuth}:${proxy1.userPass}@${proxy1.ip}:${proxy1.port}`
                 })
+                console.log(fetchProductPage?.statusCode)
                 this.sku = fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[0] + '-'
+                console.log(this.sku)
                 this.sku = this.sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[1] + '-'
+                console.log(this.sku)
                 this.sku = this.sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[2] 
                 console.log(this.sku)
+                
                 } catch (error) {
-                    console.log(error.message)
-                    skuBank[index].name = 'Restart'
-                    skuBank[index]["error"] = error.message
-                    skuBank[index]?.stop = true
-                    console.log(skuBank[index])
+                    console.log(error)
+                    // skuBank[this.index].name = 'Restart'
+                    // skuBank[this.index]["error"] = error.message
+                    // skuBank[this.index].stop = true
+                  //  console.log(skuBank[this.index])
+                    await this.getSku()
                 }
+    }
+    async monitor () {
+       try {
+        console.log('Starting Monitoring')
+        var testing = ''
+        return new Promise( async ( resolve, reject) => {
+
+                let i = 0
+                var { skuBank } = require('../dms')
+                let index = skuBank.findIndex(e => e.sku == this.trueSku)
+
+                    await this.getSku()
 
                     while(!skuBank[index]?.stop){
                         skuBank[index].name = this.productName
