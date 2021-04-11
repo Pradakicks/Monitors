@@ -6,8 +6,8 @@ const {
 	bot_age,
 	bot_info,
 } = require('./config.json');
-const {SKUADD , findCommand , deleteSku, checkBank, massAdd} = require('./dms');
-
+const {SKUADD , findCommand , deleteSku, checkBank, massAdd, skuBank} = require('./dms');
+const fs = require('fs')
 
 client.once('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
@@ -26,6 +26,9 @@ client.once('ready', () => {
 	client.users.fetch('202862796965150720').then((user) => {
 		user.send('Hello World');
 	});
+		fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
 });
 
 

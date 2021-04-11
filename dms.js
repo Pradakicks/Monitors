@@ -144,6 +144,9 @@ function SKUADD(clients, triggerText, replyText) {
 						monitor.task()
 					}
 				console.log(skuBank)
+				fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
 				message.channel.send(`${SKU} Added to ${site}`)
 					}
 				
@@ -179,10 +182,18 @@ function deleteSku(clients, triggerText, replyText) {
 				// console.log(index)
 				// console.log(skuBank[index])
 				skuBank[index].stop = true;
+					fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				});
 				// console.log(skuBank)
 				(async () => {
+					const fs = require('fs')
 					await delay(10000)
 					skuBank.splice(index, 1)
+					await delay(2000)
+					await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
 				})()
 				
 				// console.log(skuBank)
@@ -199,7 +210,6 @@ function deleteSku(clients, triggerText, replyText) {
 		console.log(error);
 	}
 }
-
 function checkBank (clients, triggerText, replyText){
 	
 		clients.on('message', async (message) => {
@@ -368,7 +378,9 @@ function massAdd (clients, triggerText, replyText){
 						
 					}
 					}
-				
+					fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
 
 				}
 				await delay(30000)

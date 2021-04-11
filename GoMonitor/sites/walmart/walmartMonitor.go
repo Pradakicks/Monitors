@@ -22,6 +22,7 @@ type Config struct {
 	priceRangeMin int
 	image         string
 	proxyCount    int
+	indexMonitorJson int
 }
 type Monitor struct {
 	Config              Config
@@ -44,14 +45,22 @@ type Proxy struct {
 	userPass string
 }
 
-var file os.File
-
-func walmartMonitor(sku string) {
-	go NewMonitor(sku, 1, 1000)
-	fmt.Scanln()
+type ItemInMonitorJson struct {
+	Sku  string `json:"sku"`
+	Site string `json:"site"`
+	Stop bool `json:"stop"`
+	Name string `json:"name"`
 }
 
+var file os.File
+
+// func walmartMonitor(sku string) {
+// 	go NewMonitor(sku, 1, 1000)
+// 	fmt.Scanln()
+// }
+
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
+
 	m := Monitor{}
 	m.Availability = false
 	var err error
@@ -73,11 +82,46 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		return nil
 	}
 	defer file.Close()
+
+	data, err := ioutil.ReadFile("GoMonitors.json")
+	if err != nil {
+		fmt.Print(err)
+	}
+		// fmt.Println(string(data))
+	var monitorCheckJson []interface{}
+	err = json.Unmarshal(data, &monitorCheckJson)
+	fmt.Println(monitorCheckJson)
+	for key, value := range monitorCheckJson {
+		var currentObject ItemInMonitorJson
+		currentObject.Site = value.(map[string]interface{})["site"].(string)
+		currentObject.Stop = value.(map[string]interface{})["stop"].(bool)
+		currentObject.Name = value.(map[string]interface{})["name"].(string)
+		currentObject.Sku = value.(map[string]interface{})["sku"].(string)
+		if currentObject.Sku == m.Config.sku {
+			m.Config.indexMonitorJson = key
+			fmt.Println(currentObject, key)
+		}
+	}
+
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
 	i := true
 	for i == true {
+		data, err := ioutil.ReadFile("GoMonitors.json")
+		if err != nil {
+			fmt.Print(err)
+		}
+		// fmt.Println(string(data))
+		var monitorCheckJson []interface{}
+		err = json.Unmarshal(data, &monitorCheckJson)
+		fmt.Println(monitorCheckJson[m.Config.indexMonitorJson])
+		var currentObject ItemInMonitorJson
+		currentObject.Site = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["site"].(string)
+		currentObject.Stop = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["stop"].(bool)
+		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
+		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
+		if !currentObject.Stop {
 		currentProxy := m.getProxy()
 		splittedProxy := strings.Split(currentProxy, ":")
 		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
@@ -96,6 +140,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		go m.monitor()
 		time.Sleep(500 * (time.Millisecond))
 		fmt.Println(m.Availability)
+		} else {
+			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
+			i = false
+		}
+	
 	}
 	return &m
 }
@@ -263,7 +312,7 @@ func (m *Monitor) getProxy() string {
 		m.Config.proxyCount = 0
 	}
 	m.Config.proxyCount++
-	fmt.Println(proxyList[m.Config.proxyCount])
+	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
 
