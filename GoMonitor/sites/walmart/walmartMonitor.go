@@ -172,19 +172,34 @@ func (m *Monitor) monitor() error {
 
 	image := realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})
 	for _, value := range image {
-		m.Config.image = value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
+		if value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"] != nil {
+			m.Config.image = value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
+		}
+		
 	}
+
 	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
 	for key, value := range offers {
-		currentOffer := value.(map[string]interface{})
-		currentAvailability := currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
-		currentPrice := currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
-		currentPrice1 := int(currentPrice)
+		var currentAvailability interface{}
+		var currentPrice float64
+		var currentPrice1 int
+		if value.(map[string]interface{}) != nil {
+			currentOffer := value.(map[string]interface{})
+			if currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"] != nil {
+				currentAvailability = currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
+				if currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"] != nil {
+				currentPrice = currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
+				currentPrice1 = int(currentPrice)
+				}
+				
 		if err != nil {
 			fmt.Println(err)
 			m.file.WriteString(err.Error() + "\n")
 			return nil
 		}
+			}
+		}
+		
 		if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
 			monitorAvailability = true
 			m.monitorProduct.offerId = key
