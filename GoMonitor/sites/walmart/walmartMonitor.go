@@ -102,11 +102,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-	defer func() {
-     if r := recover(); r != nil {
-        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-    }
-  }()
+// 	defer func() {
+//      if r := recover(); r != nil {
+//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+//     }
+//   }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -163,33 +163,27 @@ func (m *Monitor) monitor() error {
 		m.file.WriteString(err.Error() + "\n")
 		return nil
 	}
+	
 	var monitorAvailability bool
 	monitorAvailability = false
-	nameTheory := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})
-
-	for _, value := range nameTheory {
-		if value.(map[string]interface{})["productAttributes"] != nil {
-			m.monitorProduct.name = value.(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
-			//	fmt.Println(m.monitorProduct.name, key)
-		}
-
-	}	
-	var i int = 0
-	if realBody["payload"].(map[string]interface{}) != nil  && realBody["payload"].(map[string]interface{})["images"].(map[string]interface{}) != nil && i == 0{
-		i++
-		image := realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})
-		for _, value := range image {
-		if value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{}) != nil && value.(map[string]interface{}) != nil && value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"] != nil{
-			m.Config.image = value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
-		}
-		
+	selectedProduct := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["product"].(string)
+	m.monitorProduct.name = realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
+	// fmt.Println(selectedProduct, m.monitorProduct.name)
+	productImageName := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["defaultImage"].(string)
+	m.Config.image = realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})[productImageName].(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
+	var offerList []string
+	offerArray := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["offers"].([]interface{})
+	for _, value := range offerArray{
+		 offerList = append(offerList, value.(string))
 	}
-	}
-	
-	
+
 
 	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
 	for key, value := range offers {
+		for _, v := range offerList {
+			
+		if key == v {
+		// fmt.Printf("%s === %s\n", key, v)
 		var currentAvailability interface{}
 		var currentPrice float64
 		var currentPrice1 int
@@ -215,8 +209,8 @@ func (m *Monitor) monitor() error {
 			m.monitorProduct.offerId = key
 			m.monitorProduct.price = currentPrice1
 		}
-		//	fmt.Println(key, currentAvailability, currentPrice)
-
+			}
+		}
 	}
 	fmt.Println(monitorAvailability)
 	// // log.Printf("%+v", m.Availability)
