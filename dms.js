@@ -116,7 +116,7 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMax = 100000
 							currentBody.priceRangeMin = 1
 
-						}}
+						}
 							console.log(currentBody)
 							try {
 							rp.post({
