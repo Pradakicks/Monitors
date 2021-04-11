@@ -168,7 +168,6 @@ func (m *Monitor) monitor() error {
 	nameTheory := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})
 
 	for _, value := range nameTheory {
-		i++
 		if value.(map[string]interface{})["productAttributes"] != nil {
 			m.monitorProduct.name = value.(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
 			//	fmt.Println(m.monitorProduct.name, key)
