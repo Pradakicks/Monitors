@@ -111,7 +111,7 @@ function SKUADD(clients, triggerText, replyText) {
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
-						if(currentBody.priceRangeMax == NaN){
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMin){
 							console.log("No Price Range Detected")
 							currentBody.priceRangeMax = 100000
 							currentBody.priceRangeMin = 1
@@ -334,12 +334,12 @@ function massAdd (clients, triggerText, replyText){
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
-						if(currentBody.priceRangeMax == NaN){
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMin){
 							console.log("No Price Range Detected")
 							currentBody.priceRangeMax = 100000
 							currentBody.priceRangeMin = 1
 
-						}
+						}}
 						
 							console.log(currentBody)
 							try {
