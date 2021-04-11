@@ -105,13 +105,18 @@ function SKUADD(clients, triggerText, replyText) {
                           name: ""
 						})
 						console.log(pricerange)
-
-						let currentBody = {
+							let currentBody = {
 								  	site: "Walmart",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
+						if(currentBody.priceRangeMax == NaN){
+							console.log("No Price Range Detected")
+							currentBody.priceRangeMax = 100000
+							currentBody.priceRangeMin = 1
+
+						}}
 							console.log(currentBody)
 							try {
 							rp.post({
@@ -323,13 +328,19 @@ function massAdd (clients, triggerText, replyText){
                           name: ""
 						})
 						console.log(pricerange)
-
-						let currentBody = {
+							let currentBody = {
 								  	site: "Walmart",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
+						if(currentBody.priceRangeMax == NaN){
+							console.log("No Price Range Detected")
+							currentBody.priceRangeMax = 100000
+							currentBody.priceRangeMin = 1
+
+						}
+						
 							console.log(currentBody)
 							try {
 							rp.post({
