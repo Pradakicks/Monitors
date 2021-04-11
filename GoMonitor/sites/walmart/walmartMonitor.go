@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,6 +21,7 @@ type Config struct {
 	priceRangeMax int
 	priceRangeMin int
 	image         string
+	proxyCount    int
 }
 type Monitor struct {
 	Config              Config
@@ -78,7 +78,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-		currentProxy := getProxy()
+		currentProxy := m.getProxy()
 		splittedProxy := strings.Split(currentProxy, ":")
 		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
 		//	fmt.Println(proxy, proxy.ip)
@@ -102,11 +102,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-// 	defer func() {
-//      if r := recover(); r != nil {
-//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-//     }
-//   }()
+	// 	defer func() {
+	//      if r := recover(); r != nil {
+	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	//     }
+	//   }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -163,7 +163,7 @@ func (m *Monitor) monitor() error {
 		m.file.WriteString(err.Error() + "\n")
 		return nil
 	}
-	
+
 	var monitorAvailability bool
 	monitorAvailability = false
 	selectedProduct := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["product"].(string)
@@ -173,42 +173,41 @@ func (m *Monitor) monitor() error {
 	m.Config.image = realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})[productImageName].(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
 	var offerList []string
 	offerArray := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["offers"].([]interface{})
-	for _, value := range offerArray{
-		 offerList = append(offerList, value.(string))
+	for _, value := range offerArray {
+		offerList = append(offerList, value.(string))
 	}
-
 
 	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
 	for key, value := range offers {
 		for _, v := range offerList {
-			
-		if key == v {
-		// fmt.Printf("%s === %s\n", key, v)
-		var currentAvailability interface{}
-		var currentPrice float64
-		var currentPrice1 int
-		if value.(map[string]interface{}) != nil {
-			currentOffer := value.(map[string]interface{})
-			if currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"] != nil {
-				currentAvailability = currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
-				if currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"] != nil {
-				currentPrice = currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
-				currentPrice1 = int(currentPrice)
+
+			if key == v {
+				// fmt.Printf("%s === %s\n", key, v)
+				var currentAvailability interface{}
+				var currentPrice float64
+				var currentPrice1 int
+				if value.(map[string]interface{}) != nil {
+					currentOffer := value.(map[string]interface{})
+					if currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"] != nil {
+						currentAvailability = currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
+						if currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"] != nil {
+							currentPrice = currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
+							currentPrice1 = int(currentPrice)
+						}
+
+						if err != nil {
+							fmt.Println(err)
+							m.file.WriteString(err.Error() + "\n")
+							return nil
+						}
+					}
 				}
-				
-		if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return nil
-		}
-			}
-		}
-		
-		if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
-			monitorAvailability = true
-			m.monitorProduct.offerId = key
-			m.monitorProduct.price = currentPrice1
-		}
+
+				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
+					monitorAvailability = true
+					m.monitorProduct.offerId = key
+					m.monitorProduct.price = currentPrice1
+				}
 			}
 		}
 	}
@@ -226,7 +225,7 @@ func (m *Monitor) monitor() error {
 	return nil
 }
 
-func getProxy() string {
+func (m *Monitor) getProxy() string {
 	path := "test.txt"
 	var proxyList = make([]string, 0)
 	buf, err := os.Open(path)
@@ -258,9 +257,14 @@ func getProxy() string {
 		fmt.Println(err)
 	}
 	//fmt.Scanln()
-	rand.Seed(time.Now().UnixNano())
-	randomPosition := rand.Intn(len(proxyList)-0) + 0
-	return proxyList[randomPosition]
+	// rand.Seed(time.Now().UnixNano())
+	// randomPosition := rand.Intn(len(proxyList)-0) + 0
+	if m.Config.proxyCount+1 == len(proxyList) {
+		m.Config.proxyCount = 0
+	}
+	m.Config.proxyCount++
+	fmt.Println(proxyList[m.Config.proxyCount])
+	return proxyList[m.Config.proxyCount]
 }
 
 func (m *Monitor) sendWebhook() error {
