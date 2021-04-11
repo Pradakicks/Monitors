@@ -169,14 +169,17 @@ func (m *Monitor) monitor() error {
 		}
 
 	}
-
-	image := realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})
-	for _, value := range image {
+	if realBody["payload"].(map[string]interface{})["images"].(map[string]interface{}) != nil {
+		image := realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})
+		for _, value := range image {
 		if value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"] != nil {
 			m.Config.image = value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
 		}
 		
 	}
+	}
+	
+	
 
 	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
 	for key, value := range offers {
