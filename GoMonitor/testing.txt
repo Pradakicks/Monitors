@@ -1,0 +1,1 @@
+Get "https://www.walmart.com/terra-firma/item/884804415": proxyconnect tcp: dial tcp 38.80.30.6:60000: connectex: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.

@@ -40,7 +40,7 @@ class walmartMonitor {
         this.price = price
         this.sku = sku
         this.delay = 850000; // this.delay = 390000
-        this.startDelay = 3000; //  this.startDelay = 6000;
+        this.startDelay =  0; //  this.startDelay = 6000;
         this.availability = '';
         this.stockNumber = '';
         this.proxyList = [];
@@ -48,6 +48,7 @@ class walmartMonitor {
         this.imageUrl = ''
         this.maxPrice = parseInt(price?.split(' ')[1])
         this.minPrice =  parseInt(price?.split(' ')[0])
+        this.currentProxylist = []
     }
 
     async task () {
@@ -108,12 +109,21 @@ class walmartMonitor {
                     var { skuBank } = require('../dms')
                        let index = skuBank.findIndex(e => e.sku == this.trueSku)
                         while(!skuBank[index]?.stop){
-                            if(i+1 == this.proxyList.length){
-                                i = 0
+                           console.log(this.currentProxylist.length)
+                            if(this.currentProxylist.length === 0){
+                                console.log('Zero')
+                                this.proxyList.map(e => {
+                                    this.currentProxylist.push(e)
+                                })
                             }
-                            let proxy = this.proxyList[i]
+                            let proxyIndex = Math.floor(Math.random() * this.currentProxylist.length)
+                            console.log(proxyIndex)
+                            let proxy = this.currentProxylist[proxyIndex]
                             i++
-                            skuBank[index].name = this.productName
+                            console.log(proxy)
+                            console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                            this.currentProxylist.splice(proxyIndex, 1)
+                                skuBank[index].name = this.productName
                         // console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
 
                         try {

@@ -104,8 +104,30 @@ function SKUADD(clients, triggerText, replyText) {
 							stop: false,
                           name: ""
 						})
-						let monitor = new walmartMonitor(SKU.toString(), pricerange)
-						monitor.task()
+						console.log(pricerange)
+
+						let currentBody = {
+								  	site: "Walmart",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+							console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/walmart`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						
+
+						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
+						// monitor.task()
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						skuBank.push({
 							sku: SKU,

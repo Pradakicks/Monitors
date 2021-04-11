@@ -36,7 +36,7 @@ class newEggMonitor {
         this.isStock = false
         this.imageUrl = ''
         this.productName = ''
-
+        this.currentProxylist = []
     }
 
     async task () {
@@ -133,14 +133,22 @@ class newEggMonitor {
 
                     await this.getSku()
 
-                    while(!skuBank[index]?.stop){
+                    while(!skuBank[index]?.stop) {
                         skuBank[index].name = this.productName
-                        if(i+1 == this.proxyList.length){
-                            i = 0
+                        console.log(this.currentProxylist.length)
+                        if(this.currentProxylist.length === 0){
+                            console.log('Zero')
+                            this.proxyList.map(e => {
+                                this.currentProxylist.push(e)
+                            })
                         }
-                        let proxy = this.proxyList[i]
+                        let proxyIndex = Math.floor(Math.random() * this.currentProxylist.length)
+                        console.log(proxyIndex)
+                        let proxy = this.currentProxylist[proxyIndex]
                         i++
+                        console.log(proxy)
                         console.log(`${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`)
+                        this.currentProxylist.splice(proxyIndex, 1)
                         try {
                             let fetchSite = await rp.get({
                                 url : `https://www.newegg.com/product/api/ProductRealtime?ItemNumber=${this.sku}`,
