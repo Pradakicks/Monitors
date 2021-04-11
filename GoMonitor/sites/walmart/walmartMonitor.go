@@ -166,14 +166,18 @@ func (m *Monitor) monitor() error {
 	var monitorAvailability bool
 	monitorAvailability = false
 	nameTheory := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})
+
 	for _, value := range nameTheory {
+		i++
 		if value.(map[string]interface{})["productAttributes"] != nil {
 			m.monitorProduct.name = value.(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
 			//	fmt.Println(m.monitorProduct.name, key)
 		}
 
-	}
-	if realBody["payload"].(map[string]interface{}) != nil  && realBody["payload"].(map[string]interface{})["images"].(map[string]interface{}) != nil{
+	}	
+	var i int = 0
+	if realBody["payload"].(map[string]interface{}) != nil  && realBody["payload"].(map[string]interface{})["images"].(map[string]interface{}) != nil && i == 0{
+		i++
 		image := realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})
 		for _, value := range image {
 		if value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{}) != nil && value.(map[string]interface{}) != nil && value.(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"] != nil{
