@@ -322,8 +322,28 @@ function massAdd (clients, triggerText, replyText){
 							stop: false,
                           name: ""
 						})
-						let monitor = new walmartMonitor(g[i].toString())
-						monitor.task()
+						console.log(pricerange)
+
+						let currentBody = {
+								  	site: "Walmart",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+							console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/walmart`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new walmartMonitor(g[i].toString())
+						// monitor.task()
 						await delay(30000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						skuBank.push({
