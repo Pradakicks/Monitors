@@ -34,6 +34,7 @@ function SKUADD(clients, triggerText, replyText) {
 				const SKU = content.split(' ')[2];
 				if(content.includes('[')){
 					pricerange = content.split('[')[1].split(']')[0]
+				//	SKU = content.split('')
 
 				}
 				//    fetch('')
@@ -111,9 +112,12 @@ function SKUADD(clients, triggerText, replyText) {
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
-						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMin){
-							console.log("No Price Range Detected")
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
 
 						}
@@ -270,12 +274,13 @@ function massAdd (clients, triggerText, replyText){
 				if(!g[i].toUpperCase().includes('!MASSADD')){
 					let isContinue = true
 					let SKU
-					let pricerange = ''
+					let pricerange = ''	
+					SKU = g[i]
 					if(g[i].includes('[')){
 					pricerange = g[i].split('[')[1].split(']')[0]
 					SKU = g[i].split(' ')[0]
 					}
-					SKU = g[i]
+				
 					console.log(g[i])
 					console.log(site.toUpperCase())
 						skuBank.map(e => {
@@ -345,9 +350,12 @@ function massAdd (clients, triggerText, replyText){
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
 							}
-						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMin){
-							console.log("No Price Range Detected")
+					if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
 
 						}

@@ -155,11 +155,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-		defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+	// 	defer func() {
+	//      if r := recover(); r != nil {
+	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	//     }
+	//   }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -173,6 +173,7 @@ func (m *Monitor) monitor() error {
 	// fmt.Println(string(body))
 
 	url := fmt.Sprintf("https://www.walmart.com/terra-firma/item/%s", m.Config.sku)
+	fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -219,6 +220,8 @@ func (m *Monitor) monitor() error {
 
 	var monitorAvailability bool
 	monitorAvailability = false
+	// fmt.Println(m)
+	// fmt.Println(realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{}))
 	selectedProduct := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["product"].(string)
 	m.monitorProduct.name = realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
 	// fmt.Println(selectedProduct, m.monitorProduct.name)
@@ -265,12 +268,11 @@ func (m *Monitor) monitor() error {
 	}
 
 	// To Do - Rewrite for loop so it only loops through specific offerIds
-	fmt.Println(monitorAvailability)
+	fmt.Println(monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price)
 	// // log.Printf("%+v", m.Availability)
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-
 	}
 	if m.Availability == true && monitorAvailability == false {
 		fmt.Println("Item Out Of Stock")

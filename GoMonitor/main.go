@@ -31,7 +31,6 @@ func target(w http.ResponseWriter, r *http.Request) {
 }
 
 func walmart(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Walmart Monitor")
 	var currentMonitor Monitor
