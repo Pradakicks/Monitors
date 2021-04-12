@@ -258,6 +258,7 @@ func (m *Monitor) monitor() error {
 				}
 
 				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
+					fmt.Println(currentAvailability, m.Config.priceRangeMin, currentPrice1, m.Config.priceRangeMax)
 					monitorAvailability = true
 					m.monitorProduct.offerId = key
 					m.monitorProduct.price = currentPrice1
