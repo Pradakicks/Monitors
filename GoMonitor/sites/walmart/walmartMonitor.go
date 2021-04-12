@@ -155,11 +155,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	//     }
-	//   }()
+		defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -173,7 +173,6 @@ func (m *Monitor) monitor() error {
 	// fmt.Println(string(body))
 
 	url := fmt.Sprintf("https://www.walmart.com/terra-firma/item/%s", m.Config.sku)
-	fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
