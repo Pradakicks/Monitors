@@ -151,11 +151,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	//     }
-	//   }()
+		defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -229,7 +229,6 @@ func (m *Monitor) monitor() error {
 	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
 	for key, value := range offers {
 		for _, v := range offerList {
-
 			if key == v {
 				// fmt.Printf("%s === %s\n", key, v)
 				var currentAvailability interface{}
@@ -260,6 +259,8 @@ func (m *Monitor) monitor() error {
 			}
 		}
 	}
+
+	// To Do - Rewrite for loop so it only loops through specific offerIds
 	fmt.Println(monitorAvailability)
 	// // log.Printf("%+v", m.Availability)
 	if m.Availability == false && monitorAvailability == true {

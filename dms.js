@@ -210,6 +210,7 @@ function deleteSku(clients, triggerText, replyText) {
 		console.log(error);
 	}
 }
+
 function checkBank (clients, triggerText, replyText){
 	
 		clients.on('message', async (message) => {
