@@ -108,6 +108,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
+			defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -115,7 +120,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		// fmt.Println(string(data))
 		var monitorCheckJson []interface{}
 		err = json.Unmarshal(data, &monitorCheckJson)
-		fmt.Println(monitorCheckJson[m.Config.indexMonitorJson])
 		var currentObject ItemInMonitorJson
 		currentObject.Site = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["site"].(string)
 		currentObject.Stop = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["stop"].(bool)
