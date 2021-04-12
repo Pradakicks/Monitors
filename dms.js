@@ -351,7 +351,9 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-						
+							fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
 							console.log(currentBody)
 							try {
 							rp.post({
@@ -379,9 +381,7 @@ function massAdd (clients, triggerText, replyText){
 						
 					}
 					}
-					fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
+				
 
 				}
 				await delay(30000)
