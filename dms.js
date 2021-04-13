@@ -424,7 +424,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							await delayfs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
 					console.log(err)
 				})
 							console.log(currentBody)
