@@ -101,7 +101,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.skuName = sku
 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
-	m.Config.discord = "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_tY"
+	m.Config.discord = "https://discord.com/api/v8/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_tY"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
@@ -350,7 +350,7 @@ func (m *Monitor) sendWebhook() error {
         },
         {
           "name": "Links",
-          "value": "[ATC](https://secure.newegg.com/shopping/addtocart.aspx?submit=add&itemList=%s) | [Cart](https://secure.newegg.com/shop/cart)"
+          "value": "[ATC](https://secure.newegg.com/shopping/addtocart.aspx?submit=add&itemList=%s | [Cart](https://secure.newegg.com/shop/cart)"
         }
       ],
       "footer": {
