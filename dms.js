@@ -67,10 +67,42 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'NEWEGG',
 							stop: false,
-                          name: ""
+                          	name: ""
 						})
-						let monitor = new newEggMonitor(SKU.toString())
-						monitor.task()
+
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "New Egg",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+									skuName: await getSku(SKU, await getProxies())
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/newEgg`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						skuBank.push({
 							sku: SKU,
@@ -307,8 +339,41 @@ function massAdd (clients, triggerText, replyText){
 							stop: false,
                           name: ""
 						})
-						let monitor = new newEggMonitor(g[i].toString())
-						monitor.task()
+
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "NewEgg",
+									sku: g[i],
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+									skuName: await getSku(g[i], await getProxies())
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+						await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
+							try {
+							rp.post({
+							url : `http://localhost:7243/newEgg`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new newEggMonitor(g[i].toString())
+						// monitor.task()
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						skuBank.push({
 							sku: g[i],
@@ -359,7 +424,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+							await delayfs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
 					console.log(err)
 				})
 							console.log(currentBody)
@@ -401,7 +466,74 @@ function massAdd (clients, triggerText, replyText){
 		console.log(error);
 	}
 }
+async function getProxies () {
+								try {
+						// read contents of the file
+						let proxyList = []
+						const data = await fs.readFile('proxies.txt', 'utf-8');
 
+						const lines = data.split(/\r?\n/);
+
+						// print all lines
+						lines.forEach((line) => {
+							const lineSplit = line.split(':');
+							const item1 = {
+								ip : lineSplit[0],
+								port: lineSplit[1],
+								userAuth: lineSplit[2],
+								userPass: lineSplit[3],
+							};
+							proxyList.push(item1);
+
+							// console.log(line);
+							// console.log(item1);
+							// console.log('\n\n\n\n\n');
+						});
+						return proxyList;
+					} catch (err) {
+						console.error(err);
+						fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+							console.log(err)
+						}))
+					}
+}
+async function getSku (skuName, proxyList) {
+        try {
+                   console.log(skuName)
+                    let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
+                    console.log(proxy1)
+                    let fetchProductPage = await rp.get({
+                    url : `https://www.newegg.com/prada/p/${skuName}`,
+                    headers : {
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                    "accept-language": "en-US,en;q=0.9",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1"
+                    },
+                    proxy : `http://${proxy1.userAuth}:${proxy1.userPass}@${proxy1.ip}:${proxy1.port}`
+                })
+                console.log(fetchProductPage?.statusCode)
+                sku = fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[0] + '-'
+                console.log(sku)
+                sku = sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[1] + '-'
+                console.log(sku)
+                sku = sku + fetchProductPage?.body?.split('/ProductImage/')[1].split('-')[2] 
+                console.log(sku)
+                return sku
+                } catch (error) {
+                    console.log(error)
+                    // skuBank[this.index].name = 'Restart'
+                    // skuBank[this.index]["error"] = error.message
+                    // skuBank[this.index].stop = true
+                  //  console.log(skuBank[this.index])
+                    await getSku()
+                }
+}
 
 module.exports = {
 	SKUADD,
