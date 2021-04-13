@@ -101,7 +101,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.skuName = sku
 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
-	m.Config.discord = "https://discord.com/api/webhooks/801223334703661068/TuQyXOOa0McqUFH2FohthDH7nSKfol_lQtt460DNXh5qqfwrkGYEM7N2aexGWN9NDtEY"
+	m.Config.discord = "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_tY"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
