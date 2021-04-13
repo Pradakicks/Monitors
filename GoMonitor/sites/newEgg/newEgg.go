@@ -99,7 +99,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.startDelay = 3000
 	m.Config.sku = skuName
 	m.Config.skuName = sku
-	m.file, err = os.Create("./testing.txt")
+	m.file, err = os.Create("./newEggProxy.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/801223334703661068/TuQyXOOa0McqUFH2FohthDH7nSKfol_lQtt460DNXh5qqfwrkGYEM7N2aexGWN9NDtEY"
 	m.monitorProduct.name = "Testing Product"
