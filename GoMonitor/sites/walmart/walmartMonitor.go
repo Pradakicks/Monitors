@@ -103,6 +103,36 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		}
 	}
 
+	path := "test.txt"
+	var proxyList = make([]string, 0)
+	buf, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err = buf.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	snl := bufio.NewScanner(buf)
+	for snl.Scan() {
+		proxy := snl.Text()
+		proxyList = append(proxyList, proxy)
+		splitProxy := strings.Split(string(proxy), ":")
+		newProxy := Proxy{}
+		newProxy.userAuth = splitProxy[2]
+		newProxy.userPass = splitProxy[3]
+		newProxy.ip = splitProxy[0]
+		newProxy.port = splitProxy[1]
+		//	go NewMonitor(newProxy)
+		//	time.Sleep(5 * time.Second)
+	}
+	err = snl.Err()
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
@@ -126,7 +156,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
 		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
 		if !currentObject.Stop {
-		currentProxy := m.getProxy()
+		currentProxy := m.getProxy(proxyList)
 		splittedProxy := strings.Split(currentProxy, ":")
 		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
 		//	fmt.Println(proxy, proxy.ip)
@@ -281,37 +311,8 @@ func (m *Monitor) monitor() error {
 	return nil
 }
 
-func (m *Monitor) getProxy() string {
-	path := "test.txt"
-	var proxyList = make([]string, 0)
-	buf, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer func() {
-		if err = buf.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	snl := bufio.NewScanner(buf)
-	for snl.Scan() {
-		proxy := snl.Text()
-		proxyList = append(proxyList, proxy)
-		splitProxy := strings.Split(string(proxy), ":")
-		newProxy := Proxy{}
-		newProxy.userAuth = splitProxy[2]
-		newProxy.userPass = splitProxy[3]
-		newProxy.ip = splitProxy[0]
-		newProxy.port = splitProxy[1]
-		//	go NewMonitor(newProxy)
-		//	time.Sleep(5 * time.Second)
-	}
-	err = snl.Err()
-	if err != nil {
-		fmt.Println(err)
-	}
+func (m *Monitor) getProxy(proxyList []string) string {
+	
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
