@@ -298,7 +298,7 @@ func (m *Monitor) monitor() error {
 	}
 
 	// To Do - Rewrite for loop so it only loops through specific offerIds
-	fmt.Println(monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price)
+	fmt.Println(monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku)
 	// // log.Printf("%+v", m.Availability)
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
