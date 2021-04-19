@@ -178,6 +178,45 @@ function SKUADD(clients, triggerText, replyText) {
 						})
 						let monitor = new bestBuyMonitor(SKU.toString())
 						monitor.task()
+					} else if (site.toUpperCase() == 'BIGLOTS') {
+						skuBank.push({
+							sku: SKU,
+							site: 'BIGLOTS',
+							stop: false,
+                          name: ""
+						})
+						console.log(pricerange)
+							let currentBody = {
+								  	site: "Big Lots",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/bigLots`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						
+
+						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
+						// monitor.task()
 					}
 				console.log(skuBank)
 				fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {

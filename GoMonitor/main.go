@@ -10,6 +10,7 @@ import (
 	TargetMonitor "github.con/prada-monitors-go/sites"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
+	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
 )
 
 type Monitor struct {
@@ -51,12 +52,23 @@ func newegg(w http.ResponseWriter, r *http.Request) {
 	go NewEggMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func bigLots(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Big Lots Monitor")
+	fmt.Println("Big Lots")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go BigLotsMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/target", target).Methods("GET")
 	router.HandleFunc("/walmart", walmart).Methods("POST")
 	router.HandleFunc("/newEgg", newegg).Methods("POST")
+	router.HandleFunc("/bigLots", bigLots).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 
 }
