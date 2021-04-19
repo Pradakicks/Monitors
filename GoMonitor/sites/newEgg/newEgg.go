@@ -169,11 +169,11 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	//fmt.Println(m)
 	i := true
 	for i == true {
-	// 		defer func() {
-	//      if r := recover(); r != nil {
-	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	//     }
-	//   }()
+			defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)

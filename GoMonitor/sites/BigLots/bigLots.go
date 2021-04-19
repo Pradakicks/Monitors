@@ -138,11 +138,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-		// 		defer func() {
-		//      if r := recover(); r != nil {
-		//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		//     }
-		//   }()
+				defer func() {
+		     if r := recover(); r != nil {
+		        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		    }
+		  }()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -185,11 +185,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	//     }
-	//   }()
+		defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -261,7 +261,19 @@ func (m *Monitor) monitor() error {
 	if itemOutOfStockCheck == true && inStockOnlineCheck == false {
 		monitorAvailability = false
 	} else if itemOutOfStockCheck == false && inStockOnlineCheck == true {
-		monitorAvailability = true
+
+		isItReallyInStock := strings.Split(string(body), "isInStock :	")[1]
+		isItReallyInStock = isItReallyInStock[0:3]
+		
+		if isItReallyInStock == "true" {
+			monitorAvailability = true
+		} else if isItReallyInStock == "fals" {
+			fmt.Println("Out of Stock Online")
+			monitorAvailability = true
+		}
+		
+		fmt.Println("Big Lots", isItReallyInStock)
+		
 		m.monitorProduct.image = strings.Split((strings.Split(string(body), `data-resolvechain="set=`)[1]), `"`)[0]
 		m.monitorProduct.name = strings.Split(strings.Split(string(body), `<div class="product-name">
 					<h1>`)[1], "</h1>")[0]
@@ -269,7 +281,7 @@ func (m *Monitor) monitor() error {
 
 	}
 
-	fmt.Println("Check Here", itemOutOfStockCheck, inStockOnlineCheck, monitorAvailability, m.monitorProduct.name, m.monitorProduct.image)
+	fmt.Println("Check Here", res.StatusCode, itemOutOfStockCheck, inStockOnlineCheck, monitorAvailability, m.monitorProduct.name, m.monitorProduct.image)
 	//	l, err := g.WriteString(string(body))
 	// htmlSplit := (strings.Split(string(body), "inStockOnline : ")[1])
 	// finalSplit := (strings.Split(htmlSplit, "<br")[0])
