@@ -11,6 +11,7 @@ import (
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
+	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 )
 
 type Monitor struct {
@@ -19,6 +20,11 @@ type Monitor struct {
 	PriceRangeMin int    `json:"priceRangeMin"`
 	PriceRangeMax int    `json:"priceRangeMax"`
 	SkuName       string `json:"skuName"`
+}
+
+type KeyWordMonitor struct {
+	Endpoint string `json:"endpoint"`
+	Keywords []string `json:"keywords"`
 }
 
 func target(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +68,16 @@ func bigLots(w http.ResponseWriter, r *http.Request) {
 	go BigLotsMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func targetNew(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Target New Products")
+	fmt.Println("Big Lots")
+	var currentMonitor KeyWordMonitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go TargetNewTradingCards.NewMonitor(currentMonitor.Endpoint, currentMonitor.Keywords)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -69,6 +85,7 @@ func handleRequests() {
 	router.HandleFunc("/walmart", walmart).Methods("POST")
 	router.HandleFunc("/newEgg", newegg).Methods("POST")
 	router.HandleFunc("/bigLots", bigLots).Methods("POST")
+	router.HandleFunc("/targetNew", targetNew).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 
 }

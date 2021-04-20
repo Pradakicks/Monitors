@@ -29,13 +29,22 @@ function SKUADD(clients, triggerText, replyText) {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				// message.author.send(replyText);
 				let pricerange = ''
+				let kw = []
 				const content = message.content;
 				const site = content.split(' ')[1];
 				const SKU = content.split(' ')[2];
-				if(content.includes('[')){
+				if(content.includes('[') && site.toUpperCase() !== "TARGETNEW"){
 					pricerange = content.split('[')[1].split(']')[0]
 				//	SKU = content.split('')
 
+				}
+				if(site.toUpperCase() == "TARGETNEW"){
+					let kwArray = content.split('[')[1].split(']')[0]
+					console.log(kwArray)
+					let eachItem = kwArray.split(',')
+					eachItem.map(e =>{
+						kw.push(e)
+					})
 				}
 				//    fetch('')
 				console.log(site)
@@ -205,6 +214,34 @@ function SKUADD(clients, triggerText, replyText) {
 							try {
 							rp.post({
 							url : `http://localhost:7243/bigLots`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						
+
+						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
+						// monitor.task()
+					}  else if (site.toUpperCase() == 'TARGETNEW') {
+						skuBank.push({
+							sku: SKU,
+							site: 'TARGETNEW',
+							stop: false,
+                          name: ""
+						})
+						console.log(kw)
+							let currentBody = {
+									  endpoint : SKU,
+									  keywords : kw
+							}
+							console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/targetNew`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
