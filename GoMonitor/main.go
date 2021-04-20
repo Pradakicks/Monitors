@@ -34,7 +34,7 @@ func target(w http.ResponseWriter, r *http.Request) {
 	var currentMonitor Monitor
 	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
 	fmt.Println(currentMonitor)
-	go TargetMonitor.TargetMonitor(currentMonitor.Sku)
+	go TargetMonitor.NewMonitor(currentMonitor.Sku, 1, 100000)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
 
@@ -81,7 +81,7 @@ func targetNew(w http.ResponseWriter, r *http.Request) {
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/target", target).Methods("GET")
+	router.HandleFunc("/target", target).Methods("POST")
 	router.HandleFunc("/walmart", walmart).Methods("POST")
 	router.HandleFunc("/newEgg", newegg).Methods("POST")
 	router.HandleFunc("/bigLots", bigLots).Methods("POST")

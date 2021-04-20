@@ -20,6 +20,9 @@ client.once('ready', () => {
 	findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
 	SKUADD(client, '!SKUAdd', 'Testing');
 	deleteSku(client, '!deleteSku', 'Deleted')
+	deleteSku(client, '!skudelete', 'Deleted')
+	deleteSku(client, '!skuremove', 'Deleted')
+	deleteSku(client, '!removesku', 'Deleted')
 	checkBank(client, '!checkBank', 'Returned')
 	massAdd(client, '!massAdd', 'Returned')
 
