@@ -60,6 +60,11 @@ var file os.File
 // }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
@@ -323,7 +328,11 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-
+defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -336,6 +345,11 @@ func (m *Monitor) getProxy(proxyList []string) string {
 }
 
 func (m *Monitor) sendWebhook() error {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)

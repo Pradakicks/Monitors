@@ -159,12 +159,17 @@ var file os.File
 // }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
 	var err error
 	m.Client = http.Client{Timeout: 5 * time.Second}
-	m.Config.site = "New Egg"
+	m.Config.site = "Target"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.file, err = os.Create("./testing.txt")
@@ -359,7 +364,11 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-
+defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -372,6 +381,11 @@ func (m *Monitor) getProxy(proxyList []string) string {
 }
 
 func (m *Monitor) sendWebhook() error {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -464,6 +478,11 @@ func (m *Monitor) sendWebhook() error {
 }
 
 func (m *Monitor) getProductImage (tcin string) {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	fmt.Println("Getting Product Image")
 	url := fmt.Sprintf("https://redsky.target.com/redsky_aggregations/v1/web/pdp_client_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=%s&member_id=20032056835&store_id=2067&has_store_id=true&pricing_store_id=2067&has_pricing_store_id=true&scheduled_delivery_store_id=2067&has_scheduled_delivery_store_id=true&has_financing_options=false&visitor_id=0178E7894D540201A352D90ED642CB06&has_size_context=true", tcin)
 	req, err := http.NewRequest("GET", url, nil)

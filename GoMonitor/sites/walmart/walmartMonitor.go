@@ -59,7 +59,11 @@ var file os.File
 // }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
-
+defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()	
 	m := Monitor{}
 	m.Availability = false
 	var err error
@@ -208,7 +212,7 @@ func (m *Monitor) monitor() error {
 		m.file.WriteString(err.Error() + "\n")
 		return nil
 	}
-	req.Header.Add("authority", "discord.com")
+//	req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -324,6 +328,11 @@ func (m *Monitor) getProxy(proxyList []string) string {
 }
 
 func (m *Monitor) sendWebhook() error {
+	defer func() {
+	     if r := recover(); r != nil {
+	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	    }
+	  }()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
