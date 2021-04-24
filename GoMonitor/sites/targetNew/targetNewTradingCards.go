@@ -168,7 +168,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 		}
 	}
 
-	path := "newEggProxy.txt"
+	path := "cloud.txt"
 	var proxyList = make([]string, 0)
 	buf, err := os.Open(path)
 	if err != nil {

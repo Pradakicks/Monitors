@@ -189,7 +189,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
-	fmt.Println("Monitoring")
+//	fmt.Println("Monitoring")
 		defer func() {
 	     if r := recover(); r != nil {
 	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
