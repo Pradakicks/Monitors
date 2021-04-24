@@ -339,7 +339,7 @@ func (m *Monitor) monitor() error {
 				}
 			
 		}
-		fmt.Println(m.products)
+		// fmt.Println(m.products)
 	}
 	return nil
 }
