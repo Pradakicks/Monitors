@@ -187,7 +187,7 @@ defer func() {
 }
 
 func (m *Monitor) monitor() error {
-	fmt.Println("Monitoring")
+//a	fmt.Println("Monitoring")
 		defer func() {
 	     if r := recover(); r != nil {
 	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -240,6 +240,9 @@ func (m *Monitor) monitor() error {
 	//	fmt.Println(res)
 	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
+		if res.StatusCode == 412 {
+			fmt.Println("Blocked by PX")
+		}
 		return nil
 	}
 	var realBody map[string]interface{}
