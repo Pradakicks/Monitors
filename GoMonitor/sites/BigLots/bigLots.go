@@ -262,7 +262,7 @@ func (m *Monitor) monitor() error {
 	// 	fmt.Println(l)
 	itemOutOfStockCheck := strings.Contains(string(body), "This item is currently out of stock")
 	inStockOnlineCheck := strings.Contains(string(body), "inStockOnline")
-
+	fmt.Println(itemOutOfStockCheck, inStockOnlineCheck)
 	if itemOutOfStockCheck == true && inStockOnlineCheck == false {
 		monitorAvailability = false
 	} else if itemOutOfStockCheck == false && inStockOnlineCheck == true {
@@ -272,7 +272,7 @@ func (m *Monitor) monitor() error {
 		
 		if isItReallyInStock == "true" {
 			monitorAvailability = true
-		} else if isItReallyInStock == "fals" {
+		} else if isItReallyInStock == "fals" || isItReallyInStock == "fal"{
 			fmt.Println("Out of Stock Online")
 			monitorAvailability = true
 		}

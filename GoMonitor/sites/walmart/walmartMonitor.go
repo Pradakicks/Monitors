@@ -190,7 +190,7 @@ func (m *Monitor) monitor() error {
 //a	fmt.Println("Monitoring")
 		defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	        fmt.Printf(" Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, r)
 	    }
 	  }()
 	// url := "https://httpbin.org/ip"
