@@ -286,6 +286,47 @@ function SKUADD(clients, triggerText, replyText) {
 
 						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
 						// monitor.task()
+					} else if (site.toUpperCase() == 'ACADEMY') {
+						skuBank.push({
+							sku: SKU,
+							site: 'ACADEMY',
+							stop: false,
+                          name: ""
+						})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Academy",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+								console.log(err)
+							})
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/academy`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
 					}
 				console.log(skuBank)
 				fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
@@ -431,15 +472,47 @@ function massAdd (clients, triggerText, replyText){
 						}
 					})
 					if(isContinue){
-							if (site.toUpperCase() == 'TARGET') {
+						if (site.toUpperCase() == 'TARGET') {
 						skuBank.push({
 							sku: g[i],
 							site: 'TARGET',
 							stop: false,
                           name: ""
 						})
-						let monitor = new targetMonitor(g[i].toString())
-						monitor.task()
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Target",
+									sku: g[i],
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+					console.log(err)
+				})
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/target`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						skuBank.push({
 							sku: g[i],
@@ -560,6 +633,47 @@ function massAdd (clients, triggerText, replyText){
 						let monitor = new bestBuyMonitor(g[i].toString())
 						monitor.task()
 						
+					} else if (site.toUpperCase() == 'ACADEMY') {
+						skuBank.push({
+							sku: g[i],
+							site: 'ACADEMY',
+							stop: false,
+                          name: ""
+						})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Academy",
+									sku: g[i],
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+								console.log(err)
+							})
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/academy`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
 					}
 					}
 				
