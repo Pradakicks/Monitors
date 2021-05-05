@@ -160,7 +160,7 @@ class amdMonitor {
                             proxy: `http://${proxy.userAuth}:${proxy.userPass}@${proxy.ip}:${proxy.port}`
                         }, ((error, response, body) => {
                           //  console.log(body)
-                        
+                            console.log(body)
                             let parsed = JSON.parse(body.split('<textarea>')[1].split('</textarea>')[0])
                          //   console.log(parsed.length)
                             

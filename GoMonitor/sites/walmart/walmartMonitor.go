@@ -176,7 +176,7 @@ defer func() {
 		m.Client.Transport = defaultTransport
 		go m.monitor()
 		time.Sleep(500 * (time.Millisecond))
-		fmt.Println(m.Availability)
+		// fmt.Println(m.Availability)
 		} else {
 			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
 			i = false
@@ -304,7 +304,7 @@ func (m *Monitor) monitor() error {
 	}
 
 	// To Do - Rewrite for loop so it only loops through specific offerIds
-	fmt.Println(monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku)
+	fmt.Println("Walmart : ", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku)
 	// // log.Printf("%+v", m.Availability)
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")

@@ -74,7 +74,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.file, err = os.Create("./testing.txt")
-	m.Client = http.Client{Timeout: 60 * time.Second}
+	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/833531825951080478/DZcTzNJbZmfcq8KpRJFNJVunFnQj48QdGg6EIecHvmUkucldj-0q6UZdhZv7H75OWdqj"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
@@ -176,9 +176,9 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				Proxy: http.ProxyURL(proxyUrl),
 			}
 			m.Client.Transport = defaultTransport
-			go m.monitor()
-			time.Sleep(500 * (time.Millisecond))
-			fmt.Println(m.Availability)
+			m.monitor()
+			// time.Sleep(500 * (time.Millisecond))
+			//fmt.Println(m.Availability)
 		} else {
 			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -286,7 +286,7 @@ func (m *Monitor) monitor() error {
 
 	}
 
-	fmt.Println("Check Here", res.StatusCode, itemOutOfStockCheck, inStockOnlineCheck, monitorAvailability, m.monitorProduct.name, m.monitorProduct.image)
+	fmt.Println("Big Lots : ", res.StatusCode, itemOutOfStockCheck, inStockOnlineCheck, monitorAvailability, m.monitorProduct.name, m.monitorProduct.image)
 	//	l, err := g.WriteString(string(body))
 	// htmlSplit := (strings.Split(string(body), "inStockOnline : ")[1])
 	// finalSplit := (strings.Split(htmlSplit, "<br")[0])

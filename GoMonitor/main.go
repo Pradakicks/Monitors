@@ -13,6 +13,8 @@ import (
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	AcademyMonitor"github.con/prada-monitors-go/sites/academy"
+	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
+	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 )
 
 type Monitor struct {
@@ -38,7 +40,6 @@ func target(w http.ResponseWriter, r *http.Request) {
 	go TargetMonitor.NewMonitor(currentMonitor.Sku, 1, 100000)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
-
 func walmart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Walmart Monitor")
@@ -89,6 +90,26 @@ func academy(w http.ResponseWriter, r *http.Request) {
 	go AcademyMonitor.NewMonitor(currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func bestBuy(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Best Buy Monitor")
+	fmt.Println("Best Buy")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go BestBuyMonitor.NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
+func amd(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Amd Monitor")
+	fmt.Println("Amd")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go AmdMonitor.NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -98,6 +119,8 @@ func handleRequests() {
 	router.HandleFunc("/bigLots", bigLots).Methods("POST")
 	router.HandleFunc("/targetNew", targetNew).Methods("POST")
 	router.HandleFunc("/academy", academy).Methods("POST")
+	router.HandleFunc("/bestBuy", bestBuy).Methods("POST")
+	router.HandleFunc("/amd", amd).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 
 }

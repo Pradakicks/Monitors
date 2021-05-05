@@ -209,7 +209,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 		m.Client.Transport = defaultTransport
 		go m.monitor()
 		time.Sleep(500 * (time.Millisecond))
-		fmt.Println(m.Availability)
+		// fmt.Println(m.Availability)
 		} else {
 			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
 			i = false
@@ -295,7 +295,7 @@ func (m *Monitor) monitor() error {
 	m.monitorProduct.stockNumber = int(realBody.MainItem.Stock)
 	m.monitorProduct.image = realBody.MainItem.Image.ItemCellImageName
 	// // log.Printf("%+v", m.Availability)
-	fmt.Println(m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber)
+	fmt.Println("New Egg Monitor : ", m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber)
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()

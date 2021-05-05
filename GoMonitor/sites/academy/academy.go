@@ -117,12 +117,12 @@ func NewMonitor(sku string) *Monitor {
 	m := Monitor{}
 	m.Availability = "OUT_OF_STOCK_ONLINE"
 	var err error
-	m.Client = http.Client{Timeout: 5 * time.Second}
+//	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Academy"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.file, err = os.Create("./testing.txt")
-	m.Client = http.Client{Timeout: 60 * time.Second}
+	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/838637042119213067/V7WQ7z-9u32rNh5SO4YyxS5kibcHadXW4FxjVJTosO5cSGRoSqv4CY5g3GrAcIcwZhkF"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
@@ -222,9 +222,9 @@ func NewMonitor(sku string) *Monitor {
 			Proxy: http.ProxyURL(proxyUrl),
 		}
 		m.Client.Transport = defaultTransport
-		go m.monitor()
-		time.Sleep(500 * (time.Millisecond))
-		fmt.Println(m.Availability)
+		m.monitor()
+	//	time.Sleep(500 * (time.Millisecond))
+		fmt.Println("Academy : ", m.Availability, m.Config.sku)
 		} else {
 			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
 			i = false
