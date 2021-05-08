@@ -173,7 +173,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.file, err = os.Create("./testing.txt")
-	m.Client = http.Client{Timeout: 5 * time.Second}
+	m.Client = http.Client{Timeout: 2 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
@@ -276,8 +276,8 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			// time.Sleep(250 * (time.Millisecond))
-			 fmt.Println("Target : " , m.Availability, m.Config.sku)
+			time.Sleep(100 * (time.Millisecond))
+			
 		} else {
 			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -289,6 +289,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 
 func (m *Monitor) monitor() error {
 //	fmt.Println("Monitoring")
+
 		defer func() {
 	     if r := recover(); r != nil {
 	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -327,6 +328,12 @@ func (m *Monitor) monitor() error {
 		m.file.WriteString(err.Error() + "\n")
 		return nil
 	}
+	if res.StatusCode == 404 || res.StatusCode == 429 {
+		fmt.Println("Product Not Loaded on Target : ", m.Config.sku)
+	} else {
+		fmt.Println("Target : " , m.Availability, m.Config.sku, res.StatusCode)
+	}
+	
 	//	fmt.Println(res)
 	//	fmt.Println(string(body))
 //	fmt.Println("Target Monitor : ", res.StatusCode)
