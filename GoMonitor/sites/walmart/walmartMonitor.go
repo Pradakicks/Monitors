@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/elgs/gojq"
 )
 
 type Config struct {
@@ -190,7 +191,7 @@ func (m *Monitor) monitor() error {
 //a	fmt.Println("Monitoring")
 		defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf(" Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	        fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 	    }
 	  }()
 	// url := "https://httpbin.org/ip"
@@ -223,7 +224,6 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
@@ -255,44 +255,51 @@ func (m *Monitor) monitor() error {
 
 	var monitorAvailability bool
 	monitorAvailability = false
-	// fmt.Println(m)
-	// fmt.Println(realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{}))
-	selectedProduct := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["product"].(string)
-	m.monitorProduct.name = realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
-	// fmt.Println(selectedProduct, m.monitorProduct.name)
-	productImageName := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["defaultImage"].(string)
-	m.Config.image = realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})[productImageName].(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
+	parser, err := gojq.NewStringQuery(string(body))
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	selectedProduct, err := parser.Query("payload.selected.product")
+	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
+	name, err := parser.Query(par)
+	m.monitorProduct.name = name.(string)
+	im , err := parser.Query("payload.selected.defaultImage")
+	productImageName := im.(string)
+	ima, err := parser.Query(fmt.Sprintf("payload.images.%s.assetSizeUrls.DEFAULT", productImageName))
+	m.Config.image = ima.(string)
+	arr, err := parser.Query(fmt.Sprintf("payload.products.%s.offers", selectedProduct))
 	var offerList []string
-	offerArray := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["offers"].([]interface{})
-	for _, value := range offerArray {
+	for _, value := range arr.([]interface{}) {
 		offerList = append(offerList, value.(string))
 	}
-
-	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
-	for key, value := range offers {
+	off, err := parser.Query("payload.offers")
+	for key, _ := range off.(map[string]interface{}) {	
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}	
 		for _, v := range offerList {
 			if key == v {
-				// fmt.Printf("%s === %s\n", key, v)
 				var currentAvailability interface{}
-				var currentPrice float64
 				var currentPrice1 int
-				if value.(map[string]interface{}) != nil {
-					currentOffer := value.(map[string]interface{})
-					if currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"] != nil {
-						currentAvailability = currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
-						if currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"] != nil {
-							currentPrice = currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
-							currentPrice1 = int(currentPrice)
-						}
-
+						ca, err := parser.Query((fmt.Sprintf("payload.offers.%s.productAvailability.availabilityStatus", key)))
+						if err != nil {
+							fmt.Println(err)
+							break
+						}	
+						currentAvailability = ca.(string)
+							CP, err := parser.Query(fmt.Sprintf("payload.offers.%s.pricesInfo.priceMap.CURRENT.price", key))
+							if err != nil {
+								fmt.Println(err)
+								break
+							}	
+							currentPrice1 = int(CP.(float64))
 						if err != nil {
 							fmt.Println(err)
 							m.file.WriteString(err.Error() + "\n")
-							return nil
+							break
 						}
-					}
-				}
-
 				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
 					fmt.Println(currentAvailability, m.Config.priceRangeMin, currentPrice1, m.Config.priceRangeMax)
 					monitorAvailability = true
@@ -303,9 +310,7 @@ func (m *Monitor) monitor() error {
 		}
 	}
 
-	// To Do - Rewrite for loop so it only loops through specific offerIds
 	fmt.Println("Walmart : ", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku)
-	// // log.Printf("%+v", m.Availability)
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
