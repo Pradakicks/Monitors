@@ -62,7 +62,7 @@ var file os.File
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
 	    }
 	  }()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
@@ -145,7 +145,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	for i == true {
 				defer func() {
 		     if r := recover(); r != nil {
-		        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		    }
 		  }()
 		data, err := ioutil.ReadFile("GoMonitors.json")
@@ -192,7 +192,7 @@ func (m *Monitor) monitor() error {
 //	fmt.Println("Monitoring")
 		defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 	    }
 	  }()
 	// url := "https://httpbin.org/ip"
@@ -330,7 +330,7 @@ func (m *Monitor) monitor() error {
 func (m *Monitor) getProxy(proxyList []string) string {
 defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 	    }
 	  }()
 	//fmt.Scanln()
@@ -347,7 +347,7 @@ defer func() {
 func (m *Monitor) sendWebhook() error {
 	defer func() {
 	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 	    }
 	  }()
 	for _, letter := range m.monitorProduct.name {
