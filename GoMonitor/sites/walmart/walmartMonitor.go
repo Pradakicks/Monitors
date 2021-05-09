@@ -245,30 +245,41 @@ func (m *Monitor) monitor() error {
 		}
 		return nil
 	}
-	var realBody map[string]interface{}
-	err = json.Unmarshal([]byte(body), &realBody)
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
+	// var realBody map[string]interface{}
+	// err = json.Unmarshal([]byte(body), &realBody)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	m.file.WriteString(err.Error() + "\n")
+	// 	return nil
+	// }
 
 	var monitorAvailability bool
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		// return nil
 	}
 	selectedProduct, err := parser.Query("payload.selected.product")
 	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
 	name, err := parser.Query(par)
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.name = name.(string)
 	im , err := parser.Query("payload.selected.defaultImage")
 	productImageName := im.(string)
 	ima, err := parser.Query(fmt.Sprintf("payload.images.%s.assetSizeUrls.DEFAULT", productImageName))
-	m.Config.image = ima.(string)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		m.Config.image = ima.(string)
+	
+	}
 	arr, err := parser.Query(fmt.Sprintf("payload.products.%s.offers", selectedProduct))
+	if err != nil {
+		fmt.Println(err)
+	}
 	var offerList []string
 	for _, value := range arr.([]interface{}) {
 		offerList = append(offerList, value.(string))
@@ -281,14 +292,14 @@ func (m *Monitor) monitor() error {
 	}	
 		for _, v := range offerList {
 			if key == v {
-				var currentAvailability interface{}
+			//	var currentAvailability interface{}
 				var currentPrice1 int
 						ca, err := parser.Query((fmt.Sprintf("payload.offers.%s.productAvailability.availabilityStatus", key)))
 						if err != nil {
 							fmt.Println(err)
 							break
 						}	
-						currentAvailability = ca.(string)
+						currentAvailability := ca.(string)
 							CP, err := parser.Query(fmt.Sprintf("payload.offers.%s.pricesInfo.priceMap.CURRENT.price", key))
 							if err != nil {
 								fmt.Println(err)
