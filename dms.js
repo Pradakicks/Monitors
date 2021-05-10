@@ -1156,6 +1156,7 @@ async function checkPresentSkus(){
 	let deleteDB = await rp.delete({
 			url : `${pushEndpoint}/.json`
 		})
+	await delay(3000)
 		let initDB = await rp.post({
 			url : `${pushEndpoint}.json`,
 			body : JSON.stringify({init : "initialized"}),
@@ -1182,7 +1183,7 @@ async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
 	})
-	console.log(JSON.parse(getbank?.body))
+//	console.log(JSON.parse(getbank?.body))
 	return JSON.parse(getbank?.body)
 }
 async function pushSku(body){
