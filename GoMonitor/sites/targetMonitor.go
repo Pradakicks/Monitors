@@ -290,7 +290,7 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	defer res.Body.Close()
+	res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)

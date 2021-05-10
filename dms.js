@@ -816,6 +816,7 @@ async function getProxies () {
 						}))
 					}
 }
+
 async function getSku (skuName, proxyList) {
         try {
                    console.log(skuName)
@@ -1178,7 +1179,7 @@ async function checkPresentSkus(){
 	})
 	//skuBank
 }
-checkPresentSkus()
+// checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
