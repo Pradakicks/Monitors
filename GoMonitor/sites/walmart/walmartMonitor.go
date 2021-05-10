@@ -199,7 +199,7 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	res.Body.Close()
+	
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -229,6 +229,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		// return nil
 	}
+	res.Body.Close()
 	selectedProduct, err := parser.Query("payload.selected.product")
 	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
 	name, err := parser.Query(par)

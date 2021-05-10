@@ -290,7 +290,7 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	res.Body.Close()
+	
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -314,7 +314,7 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-
+	res.Body.Close()
 	currentAvailability := realBody.Data.Product.Fulfillment.ShippingOptions.AvailabilityStatus
 	if currentAvailability == "PRE_ORDER_UNSELLABLE" || currentAvailability == "UNAVAILABLE" || currentAvailability == "OUT_OF_STOCK" {
 		m.currentAvailability = false
