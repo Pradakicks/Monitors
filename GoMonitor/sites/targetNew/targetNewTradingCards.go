@@ -428,6 +428,11 @@ func GetBytes(key interface{}) ([]byte, error) {
 
 func (m *Monitor) checkStop() error {
 	for !m.stop {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			}
+		}()
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
 		req, _ := http.NewRequest("GET", url, nil)
 		res, _ := http.DefaultClient.Do(req)
@@ -441,7 +446,7 @@ func (m *Monitor) checkStop() error {
 		}
 		m.stop = m.stop
 		fmt.Println(currentObject)
-		time.Sleep(1000 * (time.Millisecond))
+		time.Sleep(3500 * (time.Millisecond))
 	}
 	return nil
 }

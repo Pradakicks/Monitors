@@ -32,7 +32,9 @@ function SKUADD(clients, triggerText, replyText) {
 				let pricerange = ''
 				let kw = []
 				const content = message.content;
+				
 				const site = content.split(' ')[1];
+				let original = content.split(`${site} `)[1]
 				const SKU = content.split(' ')[2];
 				if(content.includes('[') && site.toUpperCase() !== "TARGETNEW"){
 					pricerange = content.split('[')[1].split(']')[0]
@@ -50,6 +52,7 @@ function SKUADD(clients, triggerText, replyText) {
 				console.log(site)
 				console.log(SKU)
 				console.log(content)
+				console.log(original)
 				console.log(pricerange)
 				
 				if (SKU.length > 1 && site.length > 1) {
@@ -70,8 +73,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'TARGET',
 							stop: false,
-                          	name: ""
-						})
+							name: "",
+							original : original})
 							let currentBody = {
 								  	site: "Target",
 									sku: SKU,
@@ -106,8 +109,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'NEWEGG',
 							stop: false,
-                          	name: ""
-						})
+							name: "",
+							original : original})
 
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
@@ -145,8 +148,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'GAMESTOP',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						let monitor = new gameStopMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
@@ -154,17 +157,11 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'AMDSITE',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
-						await pushSku({
-							sku: SKU,
-							site: 'WALMART',
-							stop: false,
-                          	name: ""
-						})
 						console.log(pricerange)
 							let currentBody = {
 								  	site: "Walmart",
@@ -181,6 +178,13 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
+							await pushSku({
+							sku: SKU,
+							site: 'WALMART',
+							stop: false,
+							name: "",
+							original : original
+							})
 							console.log(currentBody)
 							try {
 							rp.post({
@@ -202,8 +206,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'BESTBUY',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -242,8 +246,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'BIGLOTS',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						console.log(pricerange)
 							let currentBody = {
 								  	site: "Big Lots",
@@ -281,8 +285,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'TARGETNEW',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						console.log(kw)
 							let currentBody = {
 									  endpoint : SKU,
@@ -309,8 +313,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'ACADEMY',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -350,8 +354,8 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'AMD',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -498,6 +502,7 @@ function massAdd (clients, triggerText, replyText){
 					let SKU
 					let pricerange = ''	
 					SKU = g[i]
+					let original = g[i]
 					if(g[i].includes('[')){
 					pricerange = g[i].split('[')[1].split(']')[0]
 					SKU = g[i].split(' ')[0]
@@ -520,8 +525,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'TARGET',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -559,8 +564,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'NEWEGG',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
@@ -599,8 +604,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'GAMESTOP',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						let monitor = new gameStopMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
@@ -608,8 +613,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'AMD',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -649,8 +654,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'AMDSITE',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						let monitor = new amdSiteMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
@@ -658,8 +663,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'WALMART',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						console.log(pricerange)
 							let currentBody = {
 								  	site: "Walmart",
@@ -697,8 +702,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'BESTBUY',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -737,8 +742,8 @@ function massAdd (clients, triggerText, replyText){
 							sku: SKU,
 							site: 'ACADEMY',
 							stop: false,
-                          name: ""
-						})
+							name: "",
+							original : original})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
