@@ -452,6 +452,7 @@ function checkBank (clients, triggerText, replyText){
 	
 		clients.on('message', async (message) => {
 			try {
+				
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
 				let skuBank = await getSkuBank()
 				let string = (skuBank)
@@ -868,9 +869,20 @@ async function checkPresentSkus(){
 		url : `${pushEndpoint}.json`
 	})
 	skuBank = JSON.parse(skuBank?.body)
-	console.log(skuBank)
+	//console.log(skuBank)
 	let sites = Object.keys(skuBank)
-	skuBank
+	console.log(sites)
+	sites.map(e => {
+		let string = `!massAdd ${e}|\n`
+		let skus = Object.keys(skuBank[e])
+		console.log(skus)
+		skus.forEach(d => {
+			string = string + `${skuBank[e][d].original}\n`
+		})
+		console.log(string)
+		// skuBank[e]
+	})
+	//skuBank
 }
 checkPresentSkus()
 async function getSkuBank(){

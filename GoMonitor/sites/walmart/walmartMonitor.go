@@ -108,6 +108,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		//	go NewMonitor(newProxy)
 		//	time.Sleep(5 * time.Second)
 	}
+	buf.Close()
 	err = snl.Err()
 	if err != nil {
 		fmt.Println(err)

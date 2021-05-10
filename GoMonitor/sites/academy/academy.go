@@ -153,6 +153,7 @@ func NewMonitor(sku string) *Monitor {
 		//	go NewMonitor(newProxy)
 		//	time.Sleep(5 * time.Second)
 	}
+	buf.Close()
 	err = snl.Err()
 	if err != nil {
 		fmt.Println(err)
