@@ -864,10 +864,15 @@ async function getSku (skuName, proxyList) {
 
 // Fire Base Sku Bank ----------------------------------------------
 async function checkPresentSkus(){
-	let skuBank = await getSkuBank()
-	skuBank.map()
+	let skuBank = await rp.get({
+		url : `${pushEndpoint}.json`
+	})
+	skuBank = JSON.parse(skuBank?.body)
+	console.log(skuBank)
+	let sites = Object.keys(skuBank)
+	skuBank
 }
-
+checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`

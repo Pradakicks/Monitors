@@ -75,20 +75,13 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.site = "Walmart"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
-	m.file, err = os.Create("./testing.txt")
+	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/v8/webhooks/826289643455643658/tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
-
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
-	defer file.Close()
 
 	path := "test.txt"
 	var proxyList = make([]string, 0)
@@ -142,7 +135,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-				m.file.WriteString(err.Error() + "\n")
+
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -185,7 +178,7 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	//	req.Header.Add("authority", "discord.com")
@@ -202,14 +195,14 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	//	fmt.Println(res)
@@ -224,7 +217,7 @@ func (m *Monitor) monitor() error {
 	// err = json.Unmarshal([]byte(body), &realBody)
 	// if err != nil {
 	// 	fmt.Println(err)
-	// 	m.file.WriteString(err.Error() + "\n")
+	//
 	// 	return nil
 	// }
 
@@ -283,7 +276,7 @@ func (m *Monitor) monitor() error {
 				currentPrice1 = int(CP.(float64))
 				if err != nil {
 					fmt.Println(err)
-					m.file.WriteString(err.Error() + "\n")
+
 					break
 				}
 				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
@@ -385,7 +378,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -402,7 +395,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
@@ -410,7 +403,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	fmt.Println(res)
@@ -435,7 +428,7 @@ func (m *Monitor) checkStop() error {
 		err := json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
+
 		}
 		m.stop = m.stop
 		fmt.Println(currentObject)

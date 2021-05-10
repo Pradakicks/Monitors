@@ -174,7 +174,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.site = "Target"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
-	m.file, err = os.Create("./testing.txt")
+	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 2 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd"
 	m.monitorProduct.name = "Testing Product"
@@ -182,12 +182,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
 	m.getProductImage(sku)
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
-	defer file.Close()
 
 	path := "cloud.txt"
 	var proxyList = make([]string, 0)
@@ -240,7 +234,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-				m.file.WriteString(err.Error() + "\n")
+
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -251,7 +245,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			m.monitor()
 			watch.Stop()
 			fmt.Printf("Target : %t : %s : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, watch.Milliseconds())
-			time.Sleep(100 * (time.Millisecond))
+			time.Sleep(250 * (time.Millisecond))
 
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
@@ -285,21 +279,21 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	if res.StatusCode == 404 || res.StatusCode == 429 {
@@ -316,7 +310,7 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 
@@ -425,7 +419,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -442,7 +436,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
@@ -450,7 +444,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	fmt.Println(res)
@@ -470,20 +464,20 @@ func (m *Monitor) getProductImage(tcin string) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return
 	}
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return
 	}
 	fmt.Println(res.StatusCode)
@@ -491,7 +485,7 @@ func (m *Monitor) getProductImage(tcin string) {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return
 	}
 	m.monitorProduct.name = realBody.Data.Product.Item.ProductDescription.Title
@@ -503,7 +497,7 @@ func (m *Monitor) getProductImage(tcin string) {
 
 func (m *Monitor) checkStop() error {
 	for !m.stop {
-			defer func() {
+		defer func() {
 			if r := recover(); r != nil {
 				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 			}
@@ -517,7 +511,7 @@ func (m *Monitor) checkStop() error {
 		err := json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
+
 		}
 		m.stop = m.stop
 		fmt.Println(currentObject)

@@ -135,19 +135,14 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.Config.skuName = sku
-	m.file, err = os.Create("./testing.txt")
+	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/833902775196450818/wCEYgKpT7eJaOtNERfwe5AlietWcFomGp10zTP3JyDEc8Kk3f2ujqY-BpdXPmpQYANiT"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
 	m.keywords = keywords
 	fmt.Println(keywords)
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
-	defer file.Close()
+
 	path := "cloud.txt"
 	var proxyList = make([]string, 0)
 	buf, err := os.Open(path)
@@ -199,7 +194,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-				m.file.WriteString(err.Error() + "\n")
+
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -240,7 +235,7 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", m.Config.sku, nil)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	// req.Header.Add("authority", "discord.com")
@@ -258,14 +253,14 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 
@@ -279,7 +274,7 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal([]byte(body), &realBody)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	products := realBody["data"].(map[string]interface{})["search"].(map[string]interface{})["products"].([]interface{})
@@ -382,7 +377,7 @@ func (m *Monitor) sendWebhook(tcin string, link string, price int, productName s
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -399,7 +394,7 @@ func (m *Monitor) sendWebhook(tcin string, link string, price int, productName s
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
@@ -407,7 +402,7 @@ func (m *Monitor) sendWebhook(tcin string, link string, price int, productName s
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	fmt.Println(res)
@@ -442,7 +437,7 @@ func (m *Monitor) checkStop() error {
 		err := json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
+
 		}
 		m.stop = m.stop
 		fmt.Println(currentObject)

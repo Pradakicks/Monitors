@@ -76,20 +76,13 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.Config.site = "Big Lots"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
-	m.file, err = os.Create("./testing.txt")
+	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/833531825951080478/DZcTzNJbZmfcq8KpRJFNJVunFnQj48QdGg6EIecHvmUkucldj-0q6UZdhZv7H75OWdqj"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
-
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
-	defer file.Close()
 
 	path := "cloud.txt"
 	var proxyList = make([]string, 0)
@@ -142,7 +135,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-				m.file.WriteString(err.Error() + "\n")
+
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -187,7 +180,7 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", m.Config.sku, nil)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	// req.Header.Add("authority", "discord.com")
@@ -205,14 +198,14 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 
@@ -226,13 +219,13 @@ func (m *Monitor) monitor() error {
 	// g, err := os.Create("testing.html")
 	// 	if err != nil {
 	// 		fmt.Println(err)
-	// 		m.file.WriteString(err.Error() + "\n")
+	//
 	// 		return nil
 	// 	}
 	// 	l, err := g.WriteString(string(body))
 	// 	if err != nil {
 	// 		fmt.Println(err)
-	// 		m.file.WriteString(err.Error() + "\n")
+	//
 	// 		return nil
 	// 	}
 	// 	fmt.Println(l)
@@ -280,13 +273,13 @@ func (m *Monitor) monitor() error {
 	// 	g, err := os.Create("testing.html")
 	// 	if err != nil {
 	// 		fmt.Println(err)
-	// 		m.file.WriteString(err.Error() + "\n")
+	//
 	// 		return nil
 	// 	}
 	// 	l, err := g.WriteString(string(body))
 	// 	if err != nil {
 	// 		fmt.Println(err)
-	// 		m.file.WriteString(err.Error() + "\n")
+	//
 	// 		return nil
 	// 	}
 	// 	fmt.Println(l)
@@ -374,7 +367,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -391,7 +384,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	defer res.Body.Close()
@@ -399,7 +392,7 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-		m.file.WriteString(err.Error() + "\n")
+
 		return nil
 	}
 	fmt.Println(res)
@@ -424,7 +417,7 @@ func (m *Monitor) checkStop() error {
 		err := json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
+
 		}
 		m.stop = m.stop
 		fmt.Println(currentObject)
