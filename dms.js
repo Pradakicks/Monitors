@@ -15,7 +15,8 @@ const { walmartMonitor } = require('./sites/walmart')
 const delay = require('delay');
 const fs = require('fs').promises
 require('newrelic');
-var skuBank = []
+//  var skuBank = []
+let pushEndpoint = "https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor"
 
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
@@ -46,7 +47,6 @@ function SKUADD(clients, triggerText, replyText) {
 						kw.push(e)
 					})
 				}
-				//    fetch('')
 				console.log(site)
 				console.log(SKU)
 				console.log(content)
@@ -54,23 +54,24 @@ function SKUADD(clients, triggerText, replyText) {
 				
 				if (SKU.length > 1 && site.length > 1) {
 					let isContinue = true
-					skuBank.map(e => {
-						if(e.sku == SKU){
+					let skuBank = await getSkuBank()
+					let caseSite = site.toUpperCase()
+					if(skuBank[caseSite]){
+						if(skuBank[caseSite][SKU]){
 							console.log('Duplicate Found')
 							message.channel.send(`${SKU} is already present in monitor`)
 							isContinue = false
-						}
-					})
+					}
+					}
+					
 					if(isContinue){
 					if (site.toUpperCase() == 'TARGET') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'TARGET',
 							stop: false,
-                          name: ""
+                          	name: ""
 						})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
 							let currentBody = {
 								  	site: "Target",
 									sku: SKU,
@@ -86,9 +87,6 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -104,7 +102,7 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'NEWEGG',
 							stop: false,
@@ -129,9 +127,7 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -145,7 +141,7 @@ function SKUADD(clients, triggerText, replyText) {
 								console.log(error)
 							}
 					} else if (site.toUpperCase() == 'GAMESTOP') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'GAMESTOP',
 							stop: false,
@@ -154,7 +150,7 @@ function SKUADD(clients, triggerText, replyText) {
 						let monitor = new gameStopMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'AMDSITE',
 							stop: false,
@@ -163,7 +159,7 @@ function SKUADD(clients, triggerText, replyText) {
 						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'WALMART',
 							stop: false,
@@ -202,7 +198,7 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
 						// monitor.task()
 					} else if (site.toUpperCase() == 'BESTBUY') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'BESTBUY',
 							stop: false,
@@ -242,7 +238,7 @@ function SKUADD(clients, triggerText, replyText) {
 							}
 	
 					} else if (site.toUpperCase() == 'BIGLOTS') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'BIGLOTS',
 							stop: false,
@@ -281,7 +277,7 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
 						// monitor.task()
 					} else if (site.toUpperCase() == 'TARGETNEW') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'TARGETNEW',
 							stop: false,
@@ -309,7 +305,7 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
 						// monitor.task()
 					} else if (site.toUpperCase() == 'ACADEMY') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'ACADEMY',
 							stop: false,
@@ -350,7 +346,7 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
-						skuBank.push({
+						await pushSku({
 							sku: SKU,
 							site: 'AMD',
 							stop: false,
@@ -391,14 +387,10 @@ function SKUADD(clients, triggerText, replyText) {
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
 					}
-				console.log(skuBank)
-				fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
 				message.channel.send(`${SKU} Added to ${site}`)
 					}
 				
-			}
+				}
 		}});
 	} catch (error) {
 		console.log(error);
@@ -426,31 +418,24 @@ function deleteSku(clients, triggerText, replyText) {
 				console.log(site)
 				console.log(`SKU - ${SKU}`)
 				console.log(content)
-				let index = skuBank.findIndex(e => e.sku == SKU)
-				// console.log(index)
-				// console.log(skuBank[index])
-				skuBank[index].stop = true;
-					fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				});
+				let skuBank = await getSkuBank()
+				let caseSite = site.toUpperCase()
+				let currentBody = skuBank[caseSite][SKU]
+				if(currentBody === undefined){
+					message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
+				} else {
+					message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
+				console.log(currentBody)
+				currentBody.stop = true
+				console.log(currentBody)
+				await updateSku(caseSite, SKU, currentBody)
+				await delay(10000)
+				await deleteSkuEnd(site, SKU)
 				// console.log(skuBank)
-				(async () => {
-					const fs = require('fs')
-					await delay(10000)
-					skuBank.splice(index, 1)
-					await delay(2000)
-					await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
-				})()
-				
-				// console.log(skuBank)
-				function replaceWithTheCapitalLetter(values){
-				return values.charAt(0).toUpperCase() + values.slice(1);
-				}
 				message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+				
+				}
 				return;
-				//    fetch('')
 
 			}
 		});
@@ -464,19 +449,14 @@ function checkBank (clients, triggerText, replyText){
 		clients.on('message', async (message) => {
 			try {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				let skuBank = await getSkuBank()
 				let string = (skuBank)
 				let skuString = ''
 				if(skuBank.length != 0){
-					for (let i = 0; i < skuBank.length; i++){
-					let status = "Terminated"
-						if(!skuBank[i].stop){
-						status = "Running"
-					}
-					await fs.appendFile(`monitorBank-${message.author.username}.txt`, `Site : ${skuBank[i].site} | ${skuBank[i].sku} | ${status} | ${skuBank[i].name} \n` , err => {
+				await fs.appendFile(`monitorBank-${message.author.username}.txt`, JSON.stringify(skuBank, null, 2) , err => {
 						if(err) message.content.send('Error While Creating Text Document')
 								else console.log("File Sent")
 				})
-				}
 				let attachment = new MessageAttachment(`monitorBank-${message.author.username}.txt`);
 				message.channel.send(attachment)
 				message.author.send('Attachment Successfully Fetched and Sent')
@@ -487,8 +467,6 @@ function checkBank (clients, triggerText, replyText){
 				} else {
 					message.channel.send('Monitor Bank is empty')
 				}
-		
-				
 			}
 			} catch (error) {
 		console.log(error);
@@ -527,16 +505,18 @@ function massAdd (clients, triggerText, replyText){
 				
 					console.log(g[i])
 					console.log(site.toUpperCase())
-						skuBank.map(e => {
-						if(e.sku == SKU) {
+					let skuBank = await getSkuBank()
+					let caseSite = site.toUpperCase()
+					if(skuBank[caseSite]){
+						if(skuBank[caseSite][SKU]){
 							console.log('Duplicate Found')
 							message.channel.send(`${SKU} is already present in monitor`)
 							isContinue = false
 						}
-					})
+					}
 					if(isContinue){
 						if (site.toUpperCase() == 'TARGET') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'TARGET',
 							stop: false,
@@ -559,9 +539,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -577,7 +555,7 @@ function massAdd (clients, triggerText, replyText){
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'NEWEGG',
 							stop: false,
@@ -602,9 +580,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-						await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
+						
 							try {
 							rp.post({
 							url : `http://localhost:7243/newEgg`,
@@ -619,7 +595,7 @@ function massAdd (clients, triggerText, replyText){
 						// let monitor = new newEggMonitor(g[i].toString())
 						// monitor.task()
 					} else if (site.toUpperCase() == 'GAMESTOP') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'GAMESTOP',
 							stop: false,
@@ -628,7 +604,7 @@ function massAdd (clients, triggerText, replyText){
 						let monitor = new gameStopMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
-							skuBank.push({
+							await pushSku({
 							sku: g[i],
 							site: 'AMD',
 							stop: false,
@@ -669,7 +645,7 @@ function massAdd (clients, triggerText, replyText){
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'AMDSITE',
 							stop: false,
@@ -678,7 +654,7 @@ function massAdd (clients, triggerText, replyText){
 						let monitor = new amdSiteMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'WALMART',
 							stop: false,
@@ -700,9 +676,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
+							
 							console.log(currentBody)
 							try {
 							rp.post({
@@ -719,7 +693,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 						await delay(30000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'BESTBUY',
 							stop: false,
@@ -759,7 +733,7 @@ function massAdd (clients, triggerText, replyText){
 							}
 	
 					} else if (site.toUpperCase() == 'ACADEMY') {
-						skuBank.push({
+						await pushSku({
 							sku: g[i],
 							site: 'ACADEMY',
 							stop: false,
@@ -801,10 +775,9 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 					}
 					}
-				
-
-				}
 				await delay(30000)
+				}
+				
 			}
 			message.channel.send("SKUS Added")
 			}
@@ -813,6 +786,7 @@ function massAdd (clients, triggerText, replyText){
 		console.log(error);
 	}
 }
+
 async function getProxies () {
 								try {
 						// read contents of the file
@@ -882,11 +856,62 @@ async function getSku (skuName, proxyList) {
                 }
 }
 
+
+// Fire Base Sku Bank ----------------------------------------------
+
+
+async function getSkuBank(){
+	let getbank = await rp.get({
+		url : `${pushEndpoint}.json`
+	})
+	console.log(JSON.parse(getbank?.body))
+	return JSON.parse(getbank?.body)
+}
+async function pushSku(body){
+	try {
+		console.log("PUSHING ", body)
+		let pushSku = await rp.patch({
+		url : `${pushEndpoint}/${body.site}/${body.sku}.json`,
+		body : JSON.stringify(body)
+		})
+		console.log(pushSku?.statusCode)
+	} catch (error) {
+		console.log(error.message)
+	}
+	
+}
+async function deleteSkuEnd(site, sku){
+	try {
+		console.log(`Deleting ${sku}/${site}`)
+		let deleteSku = await rp.delete({
+			url : `${pushEndpoint}/${site.toUpperCase()}/${sku}.json`
+		})
+		console.log(deleteSku?.statusCode)
+	} catch (error) {
+		console.log(error)
+	}
+}
+async function updateSku(site, sku, newBody){
+	try {
+		console.log(`Updating Sku ${sku}/${site}`)
+		let updateSku = await rp.patch({
+			url : `${pushEndpoint}/${site.toUpperCase()}/${sku}.json`,
+			body: JSON.stringify(newBody)
+		})
+		console.log(updateSku.statusCode)
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+//-----------------------------------------------------------------
+function replaceWithTheCapitalLetter(values){
+				return values.charAt(0).toUpperCase() + values.slice(1);
+				}
 module.exports = {
 	SKUADD,
 	findCommand,
 	deleteSku,
 	checkBank,
-	skuBank,
 	massAdd
-}
+} 

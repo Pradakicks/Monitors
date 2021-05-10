@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/bradhe/stopwatch"
-	"github.com/elgs/gojq"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +11,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/bradhe/stopwatch"
+	"github.com/elgs/gojq"
 )
 
 type Config struct {
@@ -33,6 +34,7 @@ type Monitor struct {
 	currentAvailability string
 	Client              http.Client
 	file                *os.File
+	stop                bool
 }
 type Product struct {
 	name        string
@@ -88,26 +90,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	}
 	defer file.Close()
 
-	data, err := ioutil.ReadFile("GoMonitors.json")
-	if err != nil {
-		fmt.Print(err)
-	}
-	// fmt.Println(string(data))
-	var monitorCheckJson []interface{}
-	err = json.Unmarshal(data, &monitorCheckJson)
-	fmt.Println(monitorCheckJson)
-	for key, value := range monitorCheckJson {
-		var currentObject ItemInMonitorJson
-		currentObject.Site = value.(map[string]interface{})["site"].(string)
-		currentObject.Stop = value.(map[string]interface{})["stop"].(bool)
-		currentObject.Name = value.(map[string]interface{})["name"].(string)
-		currentObject.Sku = value.(map[string]interface{})["sku"].(string)
-		if currentObject.Sku == m.Config.sku {
-			m.Config.indexMonitorJson = key
-			fmt.Println(currentObject, key)
-		}
-	}
-
 	path := "test.txt"
 	var proxyList = make([]string, 0)
 	buf, err := os.Open(path)
@@ -141,6 +123,8 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
+	go m.checkStop()
+
 	i := true
 	for i == true {
 		defer func() {
@@ -148,19 +132,8 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 			}
 		}()
-		data, err := ioutil.ReadFile("GoMonitors.json")
-		if err != nil {
-			fmt.Print(err)
-		}
-		// fmt.Println(string(data))
-		var monitorCheckJson []interface{}
-		err = json.Unmarshal(data, &monitorCheckJson)
-		var currentObject ItemInMonitorJson
-		currentObject.Site = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["site"].(string)
-		currentObject.Stop = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["stop"].(bool)
-		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
-		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
-		if !currentObject.Stop {
+
+		if !m.stop {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
 			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
@@ -180,7 +153,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			// time.Sleep(500 * (time.Millisecond))
 			// fmt.Println(m.Availability)
 		} else {
-			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
+			fmt.Println(m.stop, "STOPPED STOPPED STOPPED")
 			i = false
 		}
 
@@ -322,9 +295,9 @@ func (m *Monitor) monitor() error {
 			}
 		}
 	}
-
-	fmt.Printf("Walmart : %s %s %s %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
 	watch.Stop()
+	fmt.Printf("Walmart : %t %s %d %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
+
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
@@ -443,5 +416,25 @@ func (m *Monitor) sendWebhook() error {
 	fmt.Println(res)
 	fmt.Println(string(body))
 	fmt.Println(payload)
+	return nil
+}
+
+func (m *Monitor) checkStop() error {
+	for !m.stop {
+		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
+		req, _ := http.NewRequest("GET", url, nil)
+		res, _ := http.DefaultClient.Do(req)
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+		var currentObject ItemInMonitorJson
+		err := json.Unmarshal(body, &currentObject)
+		if err != nil {
+			fmt.Println(err)
+			m.file.WriteString(err.Error() + "\n")
+		}
+		m.stop = m.stop
+		fmt.Println(currentObject)
+		time.Sleep(1000 * (time.Millisecond))
+	}
 	return nil
 }

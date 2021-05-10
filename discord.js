@@ -29,9 +29,6 @@ client.once('ready', () => {
 	client.users.fetch('202862796965150720').then((user) => {
 		user.send('Hello World');
 	});
-		fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-					console.log(err)
-				})
 });
 
 
