@@ -2,6 +2,8 @@ github.com/PuerkitoBio/goquery v1.6.1 h1:FgjbQZKl5HTmcn4sKBgvx8vv63nhyhIpv7lJpFG
 github.com/PuerkitoBio/goquery v1.6.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/andybalholm/cascadia v1.1.0 h1:BuuO6sSfQNFRu1LppgbD25Hr2vLYW25JvxHs5zzsLTo=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
+github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea h1:+GIgqdjrcKMHK1JqC1Bb9arFtNOGX/SWCkueobreyQU=
+github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea/go.mod h1:P/j2DSP/kCOakHBACzMqmOdrTEieqdSiB3U9fqk7qgc=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/refraction-networking/utls v0.0.0-20200806014556-219d12d0a4a1/go.mod h1:tz9gX959MEFfFN5whTIocCLUG57WiILqtdVxI8c6Wj0=

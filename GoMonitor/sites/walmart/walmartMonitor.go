@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/bradhe/stopwatch"
 )
 
 type Config struct {
@@ -174,8 +175,11 @@ defer func() {
 			Proxy: http.ProxyURL(proxyUrl),
 		}
 		m.Client.Transport = defaultTransport
-		go m.monitor()
-		time.Sleep(500 * (time.Millisecond))
+		watch := stopwatch.Start()
+		m.monitor()
+		watch.Stop()
+  		fmt.Printf("Milliseconds elapsed: %v\n", watch.Milliseconds())
+		// time.Sleep(500 * (time.Millisecond))
 		// fmt.Println(m.Availability)
 		} else {
 			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")

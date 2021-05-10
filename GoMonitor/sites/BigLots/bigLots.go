@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/bradhe/stopwatch"
 )
 
 type Config struct {
@@ -61,10 +62,10 @@ var file os.File
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
@@ -143,11 +144,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-				defer func() {
-		     if r := recover(); r != nil {
-		        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		    }
-		  }()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+			}
+		}()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -176,7 +177,10 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				Proxy: http.ProxyURL(proxyUrl),
 			}
 			m.Client.Transport = defaultTransport
+			watch := stopwatch.Start()
 			m.monitor()
+			watch.Stop()
+			fmt.Printf("Milliseconds elapsed: %v\n", watch.Milliseconds())
 			// time.Sleep(500 * (time.Millisecond))
 			//fmt.Println(m.Availability)
 		} else {
@@ -189,12 +193,12 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
-//	fmt.Println("Monitoring")
-		defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+	//	fmt.Println("Monitoring")
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -269,16 +273,16 @@ func (m *Monitor) monitor() error {
 
 		isItReallyInStock := strings.Split(string(body), "isInStock :	")[1]
 		isItReallyInStock = isItReallyInStock[0:3]
-		
+
 		if isItReallyInStock == "true" {
 			monitorAvailability = true
-		} else if isItReallyInStock == "fals" || isItReallyInStock == "fal"{
+		} else if isItReallyInStock == "fals" || isItReallyInStock == "fal" {
 			fmt.Println("Out of Stock Online")
 			monitorAvailability = true
 		}
-		
+
 		fmt.Println("Big Lots", isItReallyInStock)
-		
+
 		m.monitorProduct.image = strings.Split((strings.Split(string(body), `data-resolvechain="set=`)[1]), `"`)[0]
 		m.monitorProduct.name = strings.Split(strings.Split(string(body), `<div class="product-name">
 					<h1>`)[1], "</h1>")[0]
@@ -328,11 +332,11 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -346,10 +350,10 @@ defer func() {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)

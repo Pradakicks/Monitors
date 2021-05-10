@@ -1,4 +1,4 @@
-package AcademyMonitor 
+package AcademyMonitor
 
 import (
 	"bufio"
@@ -14,14 +14,14 @@ import (
 )
 
 type Config struct {
-	sku           string
-	skuName string // Only for new Egg
-	startDelay    int
-	discord       string
-	site          string
-	priceRangeMax int
-	priceRangeMin int
-	proxyCount    int
+	sku              string
+	skuName          string // Only for new Egg
+	startDelay       int
+	discord          string
+	site             string
+	priceRangeMax    int
+	priceRangeMin    int
+	proxyCount       int
 	indexMonitorJson int
 }
 type Monitor struct {
@@ -34,11 +34,11 @@ type Monitor struct {
 }
 type Product struct {
 	name        string
-	stockNumber 	string
-	productId     string
-	price       	int
-	image         string
-	link string
+	stockNumber string
+	productId   string
+	price       int
+	image       string
+	link        string
 }
 type Proxy struct {
 	ip       string
@@ -49,7 +49,7 @@ type Proxy struct {
 type ItemInMonitorJson struct {
 	Sku  string `json:"sku"`
 	Site string `json:"site"`
-	Stop bool `json:"stop"`
+	Stop bool   `json:"stop"`
 	Name string `json:"name"`
 }
 type AcademyResponse struct {
@@ -72,8 +72,8 @@ type AcademyResponse struct {
 				Value        string `json:"value"`
 			} `json:"storeDeliveryMessage"`
 		} `json:"deliveryMessage"`
-		InventoryStatus             string `json:"inventoryStatus"`
-		SkuID                       string `json:"skuId"`
+		InventoryStatus string `json:"inventoryStatus"`
+		SkuID           string `json:"skuId"`
 	} `json:"online"`
 	ProductID string `json:"productId"`
 }
@@ -86,19 +86,18 @@ type ProductDetails struct {
 			Usage    string `json:"usage"`
 			Values   string `json:"values"`
 		} `json:"attributes"`
-		DefaultSkuID    string   `json:"defaultSkuId"`
-		FullImage              string        `json:"fullImage"`
-		ID                     string        `json:"id"`
-		ImageURL               string        `json:"imageURL"`
-		Name                   string        `json:"name"`
-		PriceUSD               float64       `json:"priceUSD"`
+		DefaultSkuID string  `json:"defaultSkuId"`
+		FullImage    string  `json:"fullImage"`
+		ID           string  `json:"id"`
+		ImageURL     string  `json:"imageURL"`
+		Name         string  `json:"name"`
+		PriceUSD     float64 `json:"priceUSD"`
 		ProductPrice struct {
 			ListPrice string `json:"listPrice"`
 		} `json:"productPrice"`
-		UpdatedSeoURL     string   `json:"updatedSeoURL"`
+		UpdatedSeoURL string `json:"updatedSeoURL"`
 	} `json:"productinfo"`
 }
-
 
 var file os.File
 
@@ -109,15 +108,15 @@ var file os.File
 
 func NewMonitor(sku string) *Monitor {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	fmt.Println("TESTING")
 	m := Monitor{}
 	m.Availability = "OUT_OF_STOCK_ONLINE"
 	var err error
-//	m.Client = http.Client{Timeout: 5 * time.Second}
+	//	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Academy"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
@@ -138,7 +137,7 @@ func NewMonitor(sku string) *Monitor {
 	if err != nil {
 		fmt.Print(err)
 	}
-		// fmt.Println(string(data))
+	// fmt.Println(string(data))
 	var monitorCheckJson []interface{}
 	err = json.Unmarshal(data, &monitorCheckJson)
 	fmt.Println(monitorCheckJson)
@@ -189,11 +188,11 @@ func NewMonitor(sku string) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-			defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+			}
+		}()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -207,40 +206,40 @@ func NewMonitor(sku string) *Monitor {
 		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
 		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
 		if !currentObject.Stop {
-		currentProxy := m.getProxy(proxyList)
-		splittedProxy := strings.Split(currentProxy, ":")
-		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-		//	fmt.Println(proxy, proxy.ip)
-		prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-		proxyUrl, err := url.Parse(prox1y)
-		if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return nil
-		}
-		defaultTransport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		m.Client.Transport = defaultTransport
-		m.monitor()
-	//	time.Sleep(500 * (time.Millisecond))
-		fmt.Println("Academy : ", m.Availability, m.Config.sku)
+			currentProxy := m.getProxy(proxyList)
+			splittedProxy := strings.Split(currentProxy, ":")
+			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
+			//	fmt.Println(proxy, proxy.ip)
+			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+			proxyUrl, err := url.Parse(prox1y)
+			if err != nil {
+				fmt.Println(err)
+				m.file.WriteString(err.Error() + "\n")
+				return nil
+			}
+			defaultTransport := &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			}
+			m.Client.Transport = defaultTransport
+			m.monitor()
+			//	time.Sleep(500 * (time.Millisecond))
+			fmt.Println("Academy : ", m.Availability, m.Config.sku)
 		} else {
-			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
+			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-	
+
 	}
 	return &m
 }
 
 func (m *Monitor) monitor() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
-//	fmt.Println("Monitoring")
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
+	//	fmt.Println("Monitoring")
 	// 	defer func() {
 	//      if r := recover(); r != nil {
 	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -320,10 +319,10 @@ func (m *Monitor) monitor() error {
 
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -337,10 +336,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -439,10 +438,10 @@ func (m *Monitor) sendWebhook() error {
 
 func (m *Monitor) getProductDetails() {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 
 	url := fmt.Sprintf("https://www.academy.com/api/productinfo/v2?productIds=%s&summary=true&dbFallback=true", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
@@ -464,24 +463,24 @@ func (m *Monitor) getProductDetails() {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return 
-		}
+		fmt.Println(err)
+		m.file.WriteString(err.Error() + "\n")
+		return
+	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return
-		}
-		var productBody ProductDetails
-			err = json.Unmarshal([]byte(body), &productBody)
-			if err != nil {
-				fmt.Println(err)
-				m.file.WriteString(err.Error() + "\n")
-				return
-			}
+		fmt.Println(err)
+		m.file.WriteString(err.Error() + "\n")
+		return
+	}
+	var productBody ProductDetails
+	err = json.Unmarshal([]byte(body), &productBody)
+	if err != nil {
+		fmt.Println(err)
+		m.file.WriteString(err.Error() + "\n")
+		return
+	}
 	m.monitorProduct.price = int(productBody.Productinfo[0].PriceUSD)
 	m.monitorProduct.link = productBody.Productinfo[0].UpdatedSeoURL
 	m.monitorProduct.name = productBody.Productinfo[0].Name

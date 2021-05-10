@@ -1,4 +1,4 @@
-package BestBuyMonitor 
+package BestBuyMonitor
 
 import (
 	"bufio"
@@ -11,18 +11,19 @@ import (
 	"os"
 	"strings"
 	"time"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
 type Config struct {
-	sku           string
-	skuName string // Only for new Egg
-	startDelay    int
-	discord       string
-	site          string
-	priceRangeMax int
-	priceRangeMin int
-	proxyCount    int
+	sku              string
+	skuName          string // Only for new Egg
+	startDelay       int
+	discord          string
+	site             string
+	priceRangeMax    int
+	priceRangeMin    int
+	proxyCount       int
 	indexMonitorJson int
 }
 type Monitor struct {
@@ -35,11 +36,11 @@ type Monitor struct {
 }
 type Product struct {
 	name        string
-	stockNumber 	string
-	productId     string
-	price       	int
-	image         string
-	link string
+	stockNumber string
+	productId   string
+	price       int
+	image       string
+	link        string
 }
 type Proxy struct {
 	ip       string
@@ -50,7 +51,7 @@ type Proxy struct {
 type ItemInMonitorJson struct {
 	Sku  string `json:"sku"`
 	Site string `json:"site"`
-	Stop bool `json:"stop"`
+	Stop bool   `json:"stop"`
 	Name string `json:"name"`
 }
 type bestBuyResponse []struct {
@@ -60,7 +61,7 @@ type bestBuyResponse []struct {
 			DisplayText string `json:"displayText"`
 			SkuID       string `json:"skuId"`
 		} `json:"buttonState"`
-		Condition  string `json:"condition"`
+		Condition        string        `json:"condition"`
 		InkSubscriptions []interface{} `json:"inkSubscriptions"`
 		Names            struct {
 			Short string `json:"short"`
@@ -68,12 +69,12 @@ type bestBuyResponse []struct {
 		Price struct {
 			CurrentPrice float64 `json:"currentPrice"`
 			PriceDomain  struct {
-				CurrentAsOfDate     string  `json:"currentAsOfDate"`
-				CurrentPrice        float64 `json:"currentPrice"`
-				IsMAP               bool    `json:"isMAP"`
-				PriceEventType      string  `json:"priceEventType"`
-				RegularPrice        float64 `json:"regularPrice"`
-				SkuID               string  `json:"skuId"`
+				CurrentAsOfDate string  `json:"currentAsOfDate"`
+				CurrentPrice    float64 `json:"currentPrice"`
+				IsMAP           bool    `json:"isMAP"`
+				PriceEventType  string  `json:"priceEventType"`
+				RegularPrice    float64 `json:"regularPrice"`
+				SkuID           string  `json:"skuId"`
 			} `json:"priceDomain"`
 			PricingType        string `json:"pricingType"`
 			SmartPricerEnabled bool   `json:"smartPricerEnabled"`
@@ -88,7 +89,6 @@ type bestBuyResponse []struct {
 	} `json:"sku"`
 }
 
-
 var file os.File
 
 // func walmartMonitor(sku string) {
@@ -98,15 +98,15 @@ var file os.File
 
 func NewMonitor(sku string) *Monitor {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	fmt.Println("TESTING")
 	m := Monitor{}
 	m.Availability = "SOLD_OUT"
 	var err error
-//	m.Client = http.Client{Timeout: 5 * time.Second}
+	//	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Best Buy"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
@@ -127,7 +127,7 @@ func NewMonitor(sku string) *Monitor {
 	if err != nil {
 		fmt.Print(err)
 	}
-		// fmt.Println(string(data))
+	// fmt.Println(string(data))
 	var monitorCheckJson []interface{}
 	err = json.Unmarshal(data, &monitorCheckJson)
 	fmt.Println(monitorCheckJson)
@@ -178,11 +178,11 @@ func NewMonitor(sku string) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-			defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+			}
+		}()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -196,40 +196,40 @@ func NewMonitor(sku string) *Monitor {
 		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
 		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
 		if !currentObject.Stop {
-		currentProxy := m.getProxy(proxyList)
-		splittedProxy := strings.Split(currentProxy, ":")
-		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-		//	fmt.Println(proxy, proxy.ip)
-		prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-		proxyUrl, err := url.Parse(prox1y)
-		if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return nil
-		}
-		defaultTransport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		m.Client.Transport = defaultTransport
-		m.monitor()
-	//	time.Sleep(500 * (time.Millisecond))
-		fmt.Println("Best Buy : ", m.Availability, m.Config.sku)
+			currentProxy := m.getProxy(proxyList)
+			splittedProxy := strings.Split(currentProxy, ":")
+			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
+			//	fmt.Println(proxy, proxy.ip)
+			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+			proxyUrl, err := url.Parse(prox1y)
+			if err != nil {
+				fmt.Println(err)
+				m.file.WriteString(err.Error() + "\n")
+				return nil
+			}
+			defaultTransport := &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			}
+			m.Client.Transport = defaultTransport
+			m.monitor()
+			//	time.Sleep(500 * (time.Millisecond))
+			fmt.Println("Best Buy : ", m.Availability, m.Config.sku)
 		} else {
-			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
+			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-	
+
 	}
 	return &m
 }
 
 func (m *Monitor) monitor() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
-//	fmt.Println("Monitoring")
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
+	//	fmt.Println("Monitoring")
 	// 	defer func() {
 	//      if r := recover(); r != nil {
 	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -310,10 +310,10 @@ func (m *Monitor) monitor() error {
 
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -327,10 +327,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -425,10 +425,10 @@ func (m *Monitor) sendWebhook() error {
 
 func (m *Monitor) getProductDetails() {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 
 	url := fmt.Sprintf("https://www.bestbuy.com/site/prada/%s.p", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
@@ -449,10 +449,10 @@ func (m *Monitor) getProductDetails() {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return 
-		}
+		fmt.Println(err)
+		m.file.WriteString(err.Error() + "\n")
+		return
+	}
 	defer res.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {

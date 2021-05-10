@@ -34,7 +34,7 @@ type Monitor struct {
 	Client              http.Client
 	file                *os.File
 	products            []string
-	keywords []string
+	keywords            []string
 }
 type Product struct {
 	name        string
@@ -249,7 +249,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
-//	fmt.Println("Monitoring")
+	//	fmt.Println("Monitoring")
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -314,8 +314,8 @@ func (m *Monitor) monitor() error {
 	}
 	products := realBody["data"].(map[string]interface{})["search"].(map[string]interface{})["products"].([]interface{})
 	for _, value := range products {
-	//	fmt.Println(value)
-			var isPresent bool
+		//	fmt.Println(value)
+		var isPresent bool
 		// var currentProduct targetNewProduct
 		tcin := value.(map[string]interface{})["tcin"].(string)
 		price := int(value.(map[string]interface{})["price"].(map[string]interface{})["current_retail"].(float64))
@@ -325,19 +325,18 @@ func (m *Monitor) monitor() error {
 		for _, v := range m.products {
 			if v == tcin {
 				isPresent = true
-				
-				
+
 			}
 		}
 		if isPresent == false {
-			for _, kw := range m.keywords{
-					// fmt.Println(kw, productName)
-					if strings.Contains(strings.ToUpper(productName), strings.ToUpper(kw)) {
-						m.products = append(m.products, tcin)
-						go m.sendWebhook(tcin, link, price, productName, image)
-					}
+			for _, kw := range m.keywords {
+				// fmt.Println(kw, productName)
+				if strings.Contains(strings.ToUpper(productName), strings.ToUpper(kw)) {
+					m.products = append(m.products, tcin)
+					go m.sendWebhook(tcin, link, price, productName, image)
 				}
-			
+			}
+
 		}
 		// fmt.Println(m.products)
 	}

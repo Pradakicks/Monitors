@@ -1,4 +1,4 @@
-package NewEggMonitor 
+package NewEggMonitor
 
 import (
 	"bufio"
@@ -14,14 +14,14 @@ import (
 )
 
 type Config struct {
-	sku           string
-	skuName string // Only for new Egg
-	startDelay    int
-	discord       string
-	site          string
-	priceRangeMax int
-	priceRangeMin int
-	proxyCount    int
+	sku              string
+	skuName          string // Only for new Egg
+	startDelay       int
+	discord          string
+	site             string
+	priceRangeMax    int
+	priceRangeMin    int
+	proxyCount       int
 	indexMonitorJson int
 }
 type Monitor struct {
@@ -37,7 +37,7 @@ type Product struct {
 	stockNumber int
 	offerId     string
 	price       int
-	image         string
+	image       string
 }
 type Proxy struct {
 	ip       string
@@ -48,18 +48,18 @@ type Proxy struct {
 type ItemInMonitorJson struct {
 	Sku  string `json:"sku"`
 	Site string `json:"site"`
-	Stop bool `json:"stop"`
+	Stop bool   `json:"stop"`
 	Name string `json:"name"`
 }
 type NewEggResponse struct {
-	MainItem            struct {
-		Description         struct {
-			ShortTitle        string      `json:"ShortTitle"`
-			Title             string      `json:"Title"`
+	MainItem struct {
+		Description struct {
+			ShortTitle string `json:"ShortTitle"`
+			Title      string `json:"Title"`
 		} `json:"Description"`
 		FinalPrice float64 `json:"FinalPrice"`
-		Image           struct {
-			ImagePathPattern   []struct {
+		Image      struct {
+			ImagePathPattern []struct {
 				PathPattern string `json:"PathPattern"`
 				Size        int64  `json:"Size"`
 			} `json:"ImagePathPattern"`
@@ -67,18 +67,18 @@ type NewEggResponse struct {
 			IsDFISImage       bool   `json:"IsDFISImage"`
 			ItemCellImageName string `json:"ItemCellImageName"`
 			Normal            struct {
-				ImageName      string      `json:"ImageName"`
-				ImageNameList  string      `json:"ImageNameList"`
+				ImageName     string `json:"ImageName"`
+				ImageNameList string `json:"ImageNameList"`
 			} `json:"Normal"`
 		} `json:"Image"`
-		Instock                 bool        `json:"Instock"`
-		NewImage               struct {
+		Instock  bool `json:"Instock"`
+		NewImage struct {
 			DFIS360ImgFlag interface{} `json:"DFIS360ImgFlag"`
 			ImageName      string      `json:"ImageName"`
 			ImageNameList  string      `json:"ImageNameList"`
 		} `json:"NewImage"`
-		Stock               int64       `json:"Stock"`
-		StockForCombo       int64       `json:"StockForCombo"`
+		Stock         int64 `json:"Stock"`
+		StockForCombo int64 `json:"StockForCombo"`
 	} `json:"MainItem"`
 }
 
@@ -91,10 +91,10 @@ var file os.File
 
 func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int) *Monitor {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	fmt.Println("TESTING", sku, skuName, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
@@ -123,7 +123,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	if err != nil {
 		fmt.Print(err)
 	}
-		// fmt.Println(string(data))
+	// fmt.Println(string(data))
 	var monitorCheckJson []interface{}
 	err = json.Unmarshal(data, &monitorCheckJson)
 	fmt.Println(monitorCheckJson)
@@ -174,11 +174,11 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	//fmt.Println(m)
 	i := true
 	for i == true {
-			defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+			}
+		}()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -192,40 +192,40 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
 		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
 		if !currentObject.Stop {
-		currentProxy := m.getProxy(proxyList)
-		splittedProxy := strings.Split(currentProxy, ":")
-		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-		//	fmt.Println(proxy, proxy.ip)
-		prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-		proxyUrl, err := url.Parse(prox1y)
-		if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return nil
-		}
-		defaultTransport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		m.Client.Transport = defaultTransport
-		go m.monitor()
-		time.Sleep(500 * (time.Millisecond))
-		// fmt.Println(m.Availability)
+			currentProxy := m.getProxy(proxyList)
+			splittedProxy := strings.Split(currentProxy, ":")
+			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
+			//	fmt.Println(proxy, proxy.ip)
+			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+			proxyUrl, err := url.Parse(prox1y)
+			if err != nil {
+				fmt.Println(err)
+				m.file.WriteString(err.Error() + "\n")
+				return nil
+			}
+			defaultTransport := &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			}
+			m.Client.Transport = defaultTransport
+			go m.monitor()
+			time.Sleep(500 * (time.Millisecond))
+			// fmt.Println(m.Availability)
 		} else {
-			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
+			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-	
+
 	}
 	return &m
 }
 
 func (m *Monitor) monitor() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
-//	fmt.Println("Monitoring")
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
+	//	fmt.Println("Monitoring")
 	// 	defer func() {
 	//      if r := recover(); r != nil {
 	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -309,10 +309,10 @@ func (m *Monitor) monitor() error {
 
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -326,10 +326,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
