@@ -329,14 +329,16 @@ func (m *Monitor) monitor() error {
 			}
 		}
 		if isPresent == false {
-			for _, kw := range m.keywords {
-				// fmt.Println(kw, productName)
-				if strings.Contains(strings.ToUpper(productName), strings.ToUpper(kw)) {
-					m.products = append(m.products, tcin)
-					go m.sendWebhook(tcin, link, price, productName, image)
-				}
-			}
-
+			m.products = append(m.products, tcin)
+			go m.sendWebhook(tcin, link, price, productName, image)
+			// for _, kw := range m.keywords{
+			// 		// fmt.Println(kw, productName)
+			// 		if strings.Contains(strings.ToUpper(productName), strings.ToUpper(kw)) {
+			// 			// m.products = append(m.products, tcin)
+			// 			// go m.sendWebhook(tcin, link, price, productName, image)
+			// 		}
+			// 	}
+			
 		}
 		// fmt.Println(m.products)
 	}

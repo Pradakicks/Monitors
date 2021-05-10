@@ -108,10 +108,10 @@ var file os.File
 
 func NewMonitor(sku string) *Monitor {
 	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
+	    }
+	  }()
 	fmt.Println("TESTING")
 	m := Monitor{}
 	m.Availability = "OUT_OF_STOCK_ONLINE"
@@ -188,11 +188,11 @@ func NewMonitor(sku string) *Monitor {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-			}
-		}()
+			defer func() {
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	    }
+	  }()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -235,14 +235,14 @@ func NewMonitor(sku string) *Monitor {
 
 func (m *Monitor) monitor() error {
 	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
-	//	fmt.Println("Monitoring")
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	    }
+	  }()
+//	fmt.Println("Monitoring")
 	// 	defer func() {
 	//      if r := recover(); r != nil {
-	//         fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 	//     }
 	//   }()
 	// url := "https://httpbin.org/ip"
@@ -319,10 +319,10 @@ func (m *Monitor) monitor() error {
 
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	    }
+	  }()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -336,10 +336,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	    }
+	  }()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -438,10 +438,10 @@ func (m *Monitor) sendWebhook() error {
 
 func (m *Monitor) getProductDetails() {
 	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
+	     if r := recover(); r != nil {
+	        	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	    }
+	  }()
 
 	url := fmt.Sprintf("https://www.academy.com/api/productinfo/v2?productIds=%s&summary=true&dbFallback=true", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)

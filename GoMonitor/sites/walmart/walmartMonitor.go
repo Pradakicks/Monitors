@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/bradhe/stopwatch"
+	"github.com/elgs/gojq"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,18 +13,17 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/bradhe/stopwatch"
 )
 
 type Config struct {
-	sku           string
-	startDelay    int
-	discord       string
-	site          string
-	priceRangeMax int
-	priceRangeMin int
-	image         string
-	proxyCount    int
+	sku              string
+	startDelay       int
+	discord          string
+	site             string
+	priceRangeMax    int
+	priceRangeMin    int
+	image            string
+	proxyCount       int
 	indexMonitorJson int
 }
 type Monitor struct {
@@ -48,7 +49,7 @@ type Proxy struct {
 type ItemInMonitorJson struct {
 	Sku  string `json:"sku"`
 	Site string `json:"site"`
-	Stop bool `json:"stop"`
+	Stop bool   `json:"stop"`
 	Name string `json:"name"`
 }
 
@@ -60,11 +61,11 @@ var file os.File
 // }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
-defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()	
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
+		}
+	}()
 	m := Monitor{}
 	m.Availability = false
 	var err error
@@ -91,7 +92,7 @@ defer func() {
 	if err != nil {
 		fmt.Print(err)
 	}
-		// fmt.Println(string(data))
+	// fmt.Println(string(data))
 	var monitorCheckJson []interface{}
 	err = json.Unmarshal(data, &monitorCheckJson)
 	fmt.Println(monitorCheckJson)
@@ -142,11 +143,11 @@ defer func() {
 	//fmt.Println(m)
 	i := true
 	for i == true {
-			defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			}
+		}()
 		data, err := ioutil.ReadFile("GoMonitors.json")
 		if err != nil {
 			fmt.Print(err)
@@ -160,43 +161,41 @@ defer func() {
 		currentObject.Name = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["name"].(string)
 		currentObject.Sku = monitorCheckJson[m.Config.indexMonitorJson].(map[string]interface{})["sku"].(string)
 		if !currentObject.Stop {
-		currentProxy := m.getProxy(proxyList)
-		splittedProxy := strings.Split(currentProxy, ":")
-		proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-		//	fmt.Println(proxy, proxy.ip)
-		prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-		proxyUrl, err := url.Parse(prox1y)
-		if err != nil {
-			fmt.Println(err)
-			m.file.WriteString(err.Error() + "\n")
-			return nil
-		}
-		defaultTransport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		m.Client.Transport = defaultTransport
-		watch := stopwatch.Start()
-		m.monitor()
-		watch.Stop()
-  		fmt.Printf("Milliseconds elapsed: %v\n", watch.Milliseconds())
-		// time.Sleep(500 * (time.Millisecond))
-		// fmt.Println(m.Availability)
+			currentProxy := m.getProxy(proxyList)
+			splittedProxy := strings.Split(currentProxy, ":")
+			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
+			//	fmt.Println(proxy, proxy.ip)
+			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+			proxyUrl, err := url.Parse(prox1y)
+			if err != nil {
+				fmt.Println(err)
+				m.file.WriteString(err.Error() + "\n")
+				return nil
+			}
+			defaultTransport := &http.Transport{
+				Proxy: http.ProxyURL(proxyUrl),
+			}
+			m.Client.Transport = defaultTransport
+			m.monitor()
+			// time.Sleep(500 * (time.Millisecond))
+			// fmt.Println(m.Availability)
 		} else {
-			fmt.Println(currentObject.Sku , "STOPPED STOPPED STOPPED")
+			fmt.Println(currentObject.Sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-	
+
 	}
 	return &m
 }
 
 func (m *Monitor) monitor() error {
-//a	fmt.Println("Monitoring")
-		defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf(" Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, r)
-	    }
-	  }()
+	//a	fmt.Println("Monitoring")
+	watch := stopwatch.Start()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -216,7 +215,7 @@ func (m *Monitor) monitor() error {
 		m.file.WriteString(err.Error() + "\n")
 		return nil
 	}
-//	req.Header.Add("authority", "discord.com")
+	//	req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -227,7 +226,6 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
@@ -249,54 +247,72 @@ func (m *Monitor) monitor() error {
 		}
 		return nil
 	}
-	var realBody map[string]interface{}
-	err = json.Unmarshal([]byte(body), &realBody)
-	if err != nil {
-		fmt.Println(err)
-		m.file.WriteString(err.Error() + "\n")
-		return nil
-	}
+	// var realBody map[string]interface{}
+	// err = json.Unmarshal([]byte(body), &realBody)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	m.file.WriteString(err.Error() + "\n")
+	// 	return nil
+	// }
 
 	var monitorAvailability bool
 	monitorAvailability = false
-	// fmt.Println(m)
-	// fmt.Println(realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{}))
-	selectedProduct := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["product"].(string)
-	m.monitorProduct.name = realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["productAttributes"].(map[string]interface{})["productName"].(string)
-	// fmt.Println(selectedProduct, m.monitorProduct.name)
-	productImageName := realBody["payload"].(map[string]interface{})["selected"].(map[string]interface{})["defaultImage"].(string)
-	m.Config.image = realBody["payload"].(map[string]interface{})["images"].(map[string]interface{})[productImageName].(map[string]interface{})["assetSizeUrls"].(map[string]interface{})["DEFAULT"].(string)
+	parser, err := gojq.NewStringQuery(string(body))
+	if err != nil {
+		fmt.Println(err)
+		// return nil
+	}
+	selectedProduct, err := parser.Query("payload.selected.product")
+	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
+	name, err := parser.Query(par)
+	if err != nil {
+		fmt.Println(err)
+	}
+	m.monitorProduct.name = name.(string)
+	im, err := parser.Query("payload.selected.defaultImage")
+	productImageName := im.(string)
+	ima, err := parser.Query(fmt.Sprintf("payload.images.%s.assetSizeUrls.DEFAULT", productImageName))
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		m.Config.image = ima.(string)
+
+	}
+	arr, err := parser.Query(fmt.Sprintf("payload.products.%s.offers", selectedProduct))
+	if err != nil {
+		fmt.Println(err)
+	}
 	var offerList []string
-	offerArray := realBody["payload"].(map[string]interface{})["products"].(map[string]interface{})[selectedProduct].(map[string]interface{})["offers"].([]interface{})
-	for _, value := range offerArray {
+	for _, value := range arr.([]interface{}) {
 		offerList = append(offerList, value.(string))
 	}
-
-	offers := realBody["payload"].(map[string]interface{})["offers"].(map[string]interface{})
-	for key, value := range offers {
+	off, err := parser.Query("payload.offers")
+	for key, _ := range off.(map[string]interface{}) {
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
 		for _, v := range offerList {
 			if key == v {
-				// fmt.Printf("%s === %s\n", key, v)
-				var currentAvailability interface{}
-				var currentPrice float64
+				//	var currentAvailability interface{}
 				var currentPrice1 int
-				if value.(map[string]interface{}) != nil {
-					currentOffer := value.(map[string]interface{})
-					if currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"] != nil {
-						currentAvailability = currentOffer["productAvailability"].(map[string]interface{})["availabilityStatus"]
-						if currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"] != nil {
-							currentPrice = currentOffer["pricesInfo"].(map[string]interface{})["priceMap"].(map[string]interface{})["CURRENT"].(map[string]interface{})["price"].(float64)
-							currentPrice1 = int(currentPrice)
-						}
-
-						if err != nil {
-							fmt.Println(err)
-							m.file.WriteString(err.Error() + "\n")
-							return nil
-						}
-					}
+				ca, err := parser.Query((fmt.Sprintf("payload.offers.%s.productAvailability.availabilityStatus", key)))
+				if err != nil {
+					fmt.Println(err)
+					break
 				}
-
+				currentAvailability := ca.(string)
+				CP, err := parser.Query(fmt.Sprintf("payload.offers.%s.pricesInfo.priceMap.CURRENT.price", key))
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+				currentPrice1 = int(CP.(float64))
+				if err != nil {
+					fmt.Println(err)
+					m.file.WriteString(err.Error() + "\n")
+					break
+				}
 				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
 					fmt.Println(currentAvailability, m.Config.priceRangeMin, currentPrice1, m.Config.priceRangeMax)
 					monitorAvailability = true
@@ -307,9 +323,8 @@ func (m *Monitor) monitor() error {
 		}
 	}
 
-	// To Do - Rewrite for loop so it only loops through specific offerIds
-	fmt.Println("Walmart : ", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku)
-	// // log.Printf("%+v", m.Availability)
+	fmt.Printf("Walmart : %s %s %s %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
+	watch.Stop()
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
@@ -322,7 +337,7 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-	
+
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -336,10 +351,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 
 func (m *Monitor) sendWebhook() error {
 	defer func() {
-	     if r := recover(); r != nil {
-	        fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-	    }
-	  }()
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
