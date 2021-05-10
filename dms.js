@@ -332,9 +332,7 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-								console.log(err)
-							})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -373,9 +371,7 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-								console.log(err)
-							})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -633,9 +629,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-								console.log(err)
-							})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -762,9 +756,7 @@ function massAdd (clients, triggerText, replyText){
 							currentBody.priceRangeMin = 1
 
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-								console.log(err)
-							})
+							
 						console.log(currentBody)
 							try {
 							rp.post({
@@ -862,6 +854,298 @@ async function getSku (skuName, proxyList) {
                 }
 }
 
+async function mass (string , content){
+	//	const SKU = content.split(' ')[2];
+			//	console.log(site)
+				const site = content.split(' ')[1].split('|')[0]
+				console.log(site.toUpperCase())
+				let g  = string.split('\n')
+			//	console.log(g)
+			for(let i = 0; i < g.length; i++){		
+				if(!g[i].toUpperCase().includes('!MASSADD')){
+					let isContinue = true
+					let SKU
+					let pricerange = ''	
+					SKU = g[i]
+					let original = g[i]
+					if(g[i].includes('[')){
+					pricerange = g[i].split('[')[1].split(']')[0]
+					SKU = g[i].split(' ')[0]
+					}
+				
+					console.log(g[i])
+					console.log(site.toUpperCase())
+					let skuBank = await getSkuBank()
+					let caseSite = site.toUpperCase()
+					if(skuBank[caseSite]){
+						if(skuBank[caseSite][SKU]){
+							console.log('Duplicate Found')
+							// message.channel.send(`${SKU} is already present in monitor`)
+							isContinue = false
+						}
+					}
+					if(isContinue){
+						if (site.toUpperCase() == 'TARGET') {
+						await pushSku({
+							sku: SKU,
+							site: 'TARGET',
+							stop: false,
+							name: "",
+							original : original})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Target",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/target`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
+					} else if (site.toUpperCase() == 'NEWEGG') {
+						await pushSku({
+							sku: SKU,
+							site: 'NEWEGG',
+							stop: false,
+							name: "",
+							original : original})
+
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "NewEgg",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+									skuName: await getSku(g[i], await getProxies())
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+						
+							try {
+							rp.post({
+							url : `http://localhost:7243/newEgg`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new newEggMonitor(g[i].toString())
+						// monitor.task()
+					} else if (site.toUpperCase() == 'GAMESTOP') {
+						await pushSku({
+							sku: SKU,
+							site: 'GAMESTOP',
+							stop: false,
+							name: "",
+							original : original})
+						let monitor = new gameStopMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'AMD') {
+							await pushSku({
+							sku: SKU,
+							site: 'AMD',
+							stop: false,
+							name: "",
+							original : original})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Amd",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/amd`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
+					} else if (site.toUpperCase() == 'AMDSITE') {
+						await pushSku({
+							sku: SKU,
+							site: 'AMDSITE',
+							stop: false,
+							name: "",
+							original : original})
+						let monitor = new amdSiteMonitor(g[i].toString())
+						monitor.task()
+					} else if (site.toUpperCase() == 'WALMART') {
+						await pushSku({
+							sku: SKU,
+							site: 'WALMART',
+							stop: false,
+							name: "",
+							original : original})
+						console.log(pricerange)
+							let currentBody = {
+								  	site: "Walmart",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+					if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+							console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/walmart`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new walmartMonitor(g[i].toString())
+						// monitor.task()
+						await delay(30000)
+					} else if (site.toUpperCase() == 'BESTBUY') {
+						await pushSku({
+							sku: SKU,
+							site: 'BESTBUY',
+							stop: false,
+							name: "",
+							original : original})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Best Buy",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
+							console.log(err)
+						})
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/bestBuy`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+	
+					} else if (site.toUpperCase() == 'ACADEMY') {
+						await pushSku({
+							sku: SKU,
+							site: 'ACADEMY',
+							stop: false,
+							name: "",
+							original : original})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Academy",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/academy`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
+					}
+					}
+				await delay(30000)
+				}
+				
+			}
+}
 
 // Fire Base Sku Bank ----------------------------------------------
 async function checkPresentSkus(){
@@ -869,6 +1153,14 @@ async function checkPresentSkus(){
 		url : `${pushEndpoint}.json`
 	})
 	skuBank = JSON.parse(skuBank?.body)
+	let deleteDB = await rp.delete({
+			url : `${pushEndpoint}/.json`
+		})
+		let initDB = await rp.post({
+			url : `${pushEndpoint}.json`,
+			body : JSON.stringify({init : "initialized"}),
+		})
+	console.log(deleteDB?.statusCode)
 	//console.log(skuBank)
 	let sites = Object.keys(skuBank)
 	console.log(sites)
@@ -880,6 +1172,7 @@ async function checkPresentSkus(){
 			string = string + `${skuBank[e][d].original}\n`
 		})
 		console.log(string)
+		mass(string, string)
 		// skuBank[e]
 	})
 	//skuBank
