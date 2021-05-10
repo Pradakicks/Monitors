@@ -163,7 +163,7 @@ function SKUADD(clients, triggerText, replyText) {
 							sku: SKU,
 							site: 'WALMART',
 							stop: false,
-                          name: ""
+                          	name: ""
 						})
 						console.log(pricerange)
 							let currentBody = {
@@ -517,7 +517,7 @@ function massAdd (clients, triggerText, replyText){
 					if(isContinue){
 						if (site.toUpperCase() == 'TARGET') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'TARGET',
 							stop: false,
                           name: ""
@@ -526,7 +526,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 							let currentBody = {
 								  	site: "Target",
-									sku: g[i],
+									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
 							}
@@ -556,7 +556,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'NEWEGG',
 							stop: false,
                           name: ""
@@ -566,7 +566,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 							let currentBody = {
 								  	site: "NewEgg",
-									sku: g[i],
+									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
 									skuName: await getSku(g[i], await getProxies())
@@ -596,7 +596,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'GAMESTOP',
 							stop: false,
                           name: ""
@@ -605,7 +605,7 @@ function massAdd (clients, triggerText, replyText){
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
 							await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'AMD',
 							stop: false,
                           name: ""
@@ -614,7 +614,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 							let currentBody = {
 								  	site: "Amd",
-									sku: g[i],
+									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
 							}
@@ -646,7 +646,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 					} else if (site.toUpperCase() == 'AMDSITE') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'AMDSITE',
 							stop: false,
                           name: ""
@@ -655,7 +655,7 @@ function massAdd (clients, triggerText, replyText){
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'WALMART',
 							stop: false,
                           name: ""
@@ -694,7 +694,7 @@ function massAdd (clients, triggerText, replyText){
 						await delay(30000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'BESTBUY',
 							stop: false,
                           name: ""
@@ -703,7 +703,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 							let currentBody = {
 								  	site: "Best Buy",
-									sku: g[i],
+									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
 							}
@@ -734,7 +734,7 @@ function massAdd (clients, triggerText, replyText){
 	
 					} else if (site.toUpperCase() == 'ACADEMY') {
 						await pushSku({
-							sku: g[i],
+							sku: SKU,
 							site: 'ACADEMY',
 							stop: false,
                           name: ""
@@ -743,7 +743,7 @@ function massAdd (clients, triggerText, replyText){
 						// monitor.task()
 							let currentBody = {
 								  	site: "Academy",
-									sku: g[i],
+									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
 							}
@@ -858,7 +858,10 @@ async function getSku (skuName, proxyList) {
 
 
 // Fire Base Sku Bank ----------------------------------------------
-
+async function checkPresentSkus(){
+	let skuBank = await getSkuBank()
+	skuBank.map()
+}
 
 async function getSkuBank(){
 	let getbank = await rp.get({
