@@ -290,7 +290,7 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -506,7 +506,7 @@ func (m *Monitor) checkStop() error {
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
 		req, _ := http.NewRequest("GET", url, nil)
 		res, _ := http.DefaultClient.Do(req)
-		defer res.Body.Close()
+
 		body, _ := ioutil.ReadAll(res.Body)
 		var currentObject ItemInMonitorJson
 		err := json.Unmarshal(body, &currentObject)
@@ -514,7 +514,8 @@ func (m *Monitor) checkStop() error {
 			fmt.Println(err)
 
 		}
-		m.stop = m.stop
+		m.stop = currentObject.Stop
+		res.Body.Close()
 		fmt.Println(currentObject)
 		time.Sleep(3500 * (time.Millisecond))
 	}
