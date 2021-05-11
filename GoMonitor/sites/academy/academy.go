@@ -134,11 +134,11 @@ func NewMonitor(sku string) *Monitor {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		if err = buf.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	// defer func() {
+	// 	if err = buf.Close(); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
 
 	snl := bufio.NewScanner(buf)
 	for snl.Scan() {

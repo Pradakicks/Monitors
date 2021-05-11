@@ -89,11 +89,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		if err = buf.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	// defer func() {
+	// 	if err = buf.Close(); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
 
 	snl := bufio.NewScanner(buf)
 	for snl.Scan() {
@@ -136,7 +136,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -163,6 +162,7 @@ func (m *Monitor) monitor() error {
 			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
+	
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -179,7 +179,6 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	//	req.Header.Add("authority", "discord.com")
@@ -196,7 +195,6 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	
@@ -211,17 +209,10 @@ func (m *Monitor) monitor() error {
 	if res.StatusCode != 200 {
 		if res.StatusCode == 412 {
 			fmt.Println("Blocked by PX")
+			res.Body.Close()
 		}
 		return nil
 	}
-	// var realBody map[string]interface{}
-	// err = json.Unmarshal([]byte(body), &realBody)
-	// if err != nil {
-	// 	fmt.Println(err)
-	//
-	// 	return nil
-	// }
-
 	var monitorAvailability bool
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
@@ -435,7 +426,7 @@ func (m *Monitor) checkStop() error {
 		m.stop = currentObject.Stop
 		res.Body.Close()
 		fmt.Println(currentObject)
-		time.Sleep(3500 * (time.Millisecond))
+		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
 }
