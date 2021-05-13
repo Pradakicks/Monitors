@@ -315,6 +315,8 @@ func (m *Monitor) sendWebhook() error {
 		m.monitorProduct.name = strings.Replace(m.monitorProduct.name, "                       ", "", -1)
 	}
 	fmt.Println("Testing Here : ", m.monitorProduct.name, "Here")
+	now := time.Now()
+	currentTime := strings.Split(now.String(), "-0400")[0]
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	payload := strings.NewReader(fmt.Sprintf(`{
   "content": null,
@@ -355,14 +357,14 @@ func (m *Monitor) sendWebhook() error {
       "footer": {
         "text": "Prada#4873"
       },
-      "timestamp": "2021-04-01T18:40:00.000Z",
+      "timestamp": "%s",
       "thumbnail": {
         "url": "https:%s"
       }
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.monitorProduct.link, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.stockNumber, m.monitorProduct.link, m.monitorProduct.image))
+}`, m.Config.site, m.monitorProduct.link, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.stockNumber, m.monitorProduct.link, currentTime, m.monitorProduct.image))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)

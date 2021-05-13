@@ -290,6 +290,8 @@ func (m *Monitor) getProxy(proxyList []string) string {
 }
 
 func (m *Monitor) sendWebhook() error {
+	now := time.Now()
+	currentTime := strings.Split(now.String(), "-0400")[0]
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -340,14 +342,14 @@ func (m *Monitor) sendWebhook() error {
       "footer": {
         "text": "Prada#4873"
       },
-      "timestamp": "2021-04-01T18:40:00.000Z",
+      "timestamp": "%s",
       "thumbnail": {
         "url": "http://c1.neweggimages.com/ProductImageOriginal/%s"
       }
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.Config.skuName, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.stockNumber, m.Config.sku, m.monitorProduct.image))
+}`, m.Config.site, m.Config.skuName, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.stockNumber, m.Config.sku, currentTime, m.monitorProduct.image))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)

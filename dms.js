@@ -386,6 +386,46 @@ function SKUADD(clients, triggerText, replyText) {
 							}
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
+					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
+						await pushSku({
+							sku: SKU,
+							site: 'SLICKDEALS',
+							stop: false,
+							name: "",
+							original : original
+						})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Slick Deals",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/slick`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
 					}
 				message.channel.send(`${SKU} Added to ${site}`)
 					}
@@ -761,6 +801,46 @@ function massAdd (clients, triggerText, replyText){
 							try {
 							rp.post({
 							url : `http://localhost:7243/academy`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
+					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
+						await pushSku({
+							sku: SKU,
+							site: 'SLICKDEALS',
+							stop: false,
+							name: "",
+							original : original
+						})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+								  	site: "Slick Deals",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/slick`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"

@@ -297,6 +297,8 @@ func (m *Monitor) sendWebhook() error {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
+	now := time.Now()
+	currentTime := strings.Split(now.String(), "-0400")[0]
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -343,14 +345,14 @@ func (m *Monitor) sendWebhook() error {
       "footer": {
         "text": "Prada#4873"
       },
-      "timestamp": "2021-04-01T18:40:00.000Z",
+      "timestamp": "%s",
       "thumbnail": {
         "url": "%s"
       }
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.Config.sku, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.Config.sku, m.monitorProduct.image))
+}`, m.Config.site, m.Config.sku, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.Config.sku, currentTime, m.monitorProduct.image))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)

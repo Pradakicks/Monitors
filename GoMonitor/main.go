@@ -15,6 +15,7 @@ import (
 	AcademyMonitor"github.con/prada-monitors-go/sites/academy"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
+	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 )
 
 type Monitor struct {
@@ -110,6 +111,16 @@ func amd(w http.ResponseWriter, r *http.Request) {
 	go AmdMonitor.NewMonitor(currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func slickDeals(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Slick Deals Monitor")
+	fmt.Println("Slick Deals")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go SlickDealsMonitor.NewMonitor()
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -121,6 +132,7 @@ func handleRequests() {
 	router.HandleFunc("/academy", academy).Methods("POST")
 	router.HandleFunc("/bestBuy", bestBuy).Methods("POST")
 	router.HandleFunc("/amd", amd).Methods("POST")
+	router.HandleFunc("/slick", slickDeals).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 
 }
