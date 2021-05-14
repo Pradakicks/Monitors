@@ -1246,18 +1246,17 @@ async function validateUser(clients, triggerText, replyText){
 					message.reply("Please Submit Valid Api Key!")
 				} else {
 					console.log(apikey)
+					let discordIdsDB = await getValidatedIds()
 					switch(apikey){
 						case "devAPIKEKg":
 							message.reply("Valid Api Key")
-							let discordIdsDB = await getValidatedIds()
-							let update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "DevTest")
+							var update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "DevTest")
 							if (update) message.reply(`${message.author} Validated`)
 							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
 							break
 						case "j1ggedKRaFD#7d5e508f5e40":
 							message.reply("Valid Api Key")
-							let discordIdsDB = await getValidatedIds()
-							let update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "Jigged")
+							var update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "Jigged")
 							if (update) message.reply(`${message.author} Validated`)
 							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
 							break
