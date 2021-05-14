@@ -329,6 +329,7 @@ func (m *Monitor) sendWebhook() error {
 		}
 	}
 	for _, comp := range m.CurrentCompanies {
+		fmt.Println(comp.Company)
 		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.offerId, "test", m.Config.image)
 	}
 	return nil
