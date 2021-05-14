@@ -32,6 +32,7 @@ type Monitor struct {
 	Client              http.Client
 	file                *os.File
 	stop                bool
+	CurrentCompanies    []Company
 }
 type Product struct {
 	name        string

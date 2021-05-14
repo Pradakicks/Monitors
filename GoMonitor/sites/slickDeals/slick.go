@@ -32,7 +32,7 @@ type Monitor struct {
 	file                *os.File
 	stop                bool
 	sku                 []string
-	Companies           []Company
+	CurrentCompanies    []Company
 }
 type Product struct {
 	name        string
