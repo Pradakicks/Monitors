@@ -36,6 +36,7 @@ type Monitor struct {
 	stop                bool
 	products            []string
 	keywords            []string
+	CurrentCompanies    []Company
 }
 type Product struct {
 	name        string
