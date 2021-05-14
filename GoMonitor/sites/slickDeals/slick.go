@@ -32,6 +32,7 @@ type Monitor struct {
 	file                *os.File
 	stop                bool
 	sku                 []string
+	Companies           []Company
 }
 type Product struct {
 	name        string
@@ -48,10 +49,17 @@ type Proxy struct {
 	userPass string
 }
 type ItemInMonitorJson struct {
-	Sku  string `json:"sku"`
-	Site string `json:"site"`
-	Stop bool   `json:"stop"`
-	Name string `json:"name"`
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
 }
 
 var file os.File
@@ -74,7 +82,7 @@ func NewMonitor() *Monitor {
 	//	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Slick Deals"
 	m.Config.startDelay = 3000
-//	m.Config.sku = sku
+	//	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/842460357607555075/pKynxp-r1_-VbWAcnhleC2vCKo357vCb29Y83jLG_NgPfiqY3WuUdjZILVWYpQ-SmAj5"
@@ -219,7 +227,7 @@ func (m *Monitor) monitor() error {
 	for _, value := range threads {
 		newThread := strings.Split(value, `]]></htmlbit>`)[0]
 		id := strings.Split(value, `"`)[0]
-	//	newThread := strings.Split(value, "]]>")[0]	
+		//	newThread := strings.Split(value, "]]>")[0]
 		firstDesc := strings.Split(newThread, `<a target="_blank" href="/f/`)
 		var link string
 		var title string
@@ -235,7 +243,7 @@ func (m *Monitor) monitor() error {
 			title = strings.Split(strings.Split(firstDesc[1], `" >`)[1], "</a>")[0]
 			price := strings.Split(title, "$")
 			var returnPrice string
-		
+
 			if len(price) == 2 {
 				d := fmt.Sprintf("$%s", returnSplitted(price[1]))
 				returnPrice = d
@@ -246,26 +254,22 @@ func (m *Monitor) monitor() error {
 			}
 
 			if isPresent != true {
-			m.sendWebhook(link, title, returnPrice, id)
-			m.sku = append(m.sku, id)
+				m.sendWebhook(link, title, returnPrice, id)
+				m.sku = append(m.sku, id)
+			}
 		}
-		}
-		
-		
 
 		// fmt.Println(len(price))
 		// fmt.Println(id,"\n", link, "\n",  title, "\n\n\n\n")
-		
-		
-		
+
 	}
 
 	return nil
 }
 
-func returnSplitted (s string) string {
+func returnSplitted(s string) string {
 	var returnString string
-		returnString = strings.Split(s , " ")[0]
+	returnString = strings.Split(s, " ")[0]
 	return returnString
 }
 
@@ -286,7 +290,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(link string , title string , price string, id string) error {
+func (m *Monitor) sendWebhook(link string, title string, price string, id string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -305,8 +309,8 @@ func (m *Monitor) sendWebhook(link string , title string , price string, id stri
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	now := time.Now()
 	currentTime := strings.Split(now.String(), "-0400")[0]
-	if strings.HasSuffix(currentTime, " "){
-		currentTime =  strings.TrimSuffix(currentTime, " ")
+	if strings.HasSuffix(currentTime, " ") {
+		currentTime = strings.TrimSuffix(currentTime, " ")
 	}
 	payload := strings.NewReader(fmt.Sprintf(`{
   "content": null,
@@ -338,7 +342,7 @@ func (m *Monitor) sendWebhook(link string , title string , price string, id stri
       "footer": {
         "text": "Prada#4873"
       },
-      "timestamp": "%s",
+      "timestamp": "2021-05-13 13:57:26.5157268",
       "thumbnail": {
         "url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
       }
@@ -403,9 +407,11 @@ func (m *Monitor) checkStop() error {
 
 		}
 		m.stop = currentObject.Stop
+		m.CurrentCompanies = currentObject.Companies
+		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		fmt.Println(currentObject)
-		time.Sleep(3500 * (time.Millisecond))
+		//	fmt.Println(currentObject)
+		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
 }

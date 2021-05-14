@@ -6,7 +6,7 @@ const {
 	bot_age,
 	bot_info,
 } = require('./config.json');
-const {SKUADD , findCommand , deleteSku, checkBank, massAdd, skuBank} = require('./dms');
+const {SKUADD , findCommand , deleteSku, checkBank, massAdd, validateUser} = require('./dms');
 const fs = require('fs')
 
 client.once('ready', () => {
@@ -25,7 +25,8 @@ client.once('ready', () => {
 	deleteSku(client, '!removesku', 'Deleted')
 	checkBank(client, '!checkBank', 'Returned')
 	massAdd(client, '!massAdd', 'Returned')
-
+	validateUser(client, '!validate', 'Returned')
+	
 	client.users.fetch('202862796965150720').then((user) => {
 		user.send('Hello World');
 	});
@@ -33,9 +34,8 @@ client.once('ready', () => {
 
 
 client.on('message', async  msg => {
-
 	console.log(msg.content);
-
+msg.repl
 });
 
 

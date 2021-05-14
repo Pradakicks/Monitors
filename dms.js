@@ -1,23 +1,12 @@
-const {
-	targetMonitor
-} = require('./sites/target');
-const {
-	newEggMonitor
-} = require('./sites/newEgg')
-const {
-	gameStopMonitor
-} = require('./sites/gameStop');
-const { bestBuyMonitor } = require('./sites/bestBuy')
 const {MessageAttachment } = require('discord.js');
-const { amdMonitor } = require('./sites/amd')
-const { amdSiteMonitor } = require('./sites/amdSite')
-const { walmartMonitor } = require('./sites/walmart')
 const delay = require('delay');
-const fs = require('fs').promises
+const fs = require('fs').promises;
+const { default: parse } = require('node-html-parser');
 require('newrelic');
+const config = require('./config.json')
 //  var skuBank = []
 let pushEndpoint = "https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor"
-
+let discordIds = "https://monitors-9ad2c-default-rtdb.firebaseio.com/validatedUsers"
 const rp = require('request-promise').defaults({
 	followAllRedirects: true,
 	resolveWithFullResponse: true,
@@ -32,14 +21,25 @@ function SKUADD(clients, triggerText, replyText) {
 				let pricerange = ''
 				let kw = []
 				const content = message.content;
-				
+				let validatedIds = await getValidatedIds()
+				let parsed = JSON.parse(validatedIds)
+				let isValidated = false
+				let group
+				parsed.ids.map(e =>{
+					let id = e?.split('-')[0]
+					console.log(id, message.author.id)
+					if (id == message.author.id) {
+						isValidated = true 
+						group = e?.split('-')[1]
+					}
+				})
+
+				if(isValidated){
 				const site = content.split(' ')[1];
 				let original = content.split(`${site} `)[1]
 				const SKU = content.split(' ')[2];
 				if(content.includes('[') && site.toUpperCase() !== "TARGETNEW"){
 					pricerange = content.split('[')[1].split(']')[0]
-				//	SKU = content.split('')
-
 				}
 				if(site.toUpperCase() == "TARGETNEW"){
 					let kwArray = content.split('[')[1].split(']')[0]
@@ -59,10 +59,34 @@ function SKUADD(clients, triggerText, replyText) {
 					let isContinue = true
 					let skuBank = await getSkuBank()
 					let caseSite = site.toUpperCase()
+					let currentCompany = config[group]
 					if(skuBank[caseSite]){
 						if(skuBank[caseSite][SKU]){
-							console.log('Duplicate Found')
-							message.channel.send(`${SKU} is already present in monitor`)
+							let skuWebhookArray = skuBank[caseSite][SKU]?.companies
+							let isPresent = false
+							skuWebhookArray.forEach(e => {
+								console.log(e.webhook, currentCompany[caseSite])
+								if(e.webhook == currentCompany[caseSite]) isPresent = true
+							})
+
+							if(isPresent){
+								message.channel.send(`${SKU} is already present in monitor`)
+							} else {
+								message.channel.send(`${SKU} is being added to monitor`)
+								let arr = []
+								skuWebhookArray.forEach(e =>{
+									arr.push(e)
+								})
+								arr.push({
+									company : group,
+									webhook : currentCompany[caseSite],
+									color : currentCompany?.companyColor,
+									companyImage : currentCompany?.companyImage
+								})
+								console.log(arr)
+								await updateSku(site, SKU, {companies : arr}, `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}/.json`)
+							}
+							console.log('Duplicate Found', isPresent)
 							isContinue = false
 					}
 					}
@@ -74,7 +98,15 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'TARGET',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+						})
 							let currentBody = {
 								  	site: "Target",
 									sku: SKU,
@@ -110,7 +142,15 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'NEWEGG',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+						})
 
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
@@ -149,17 +189,15 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'GAMESTOP',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						let monitor = new gameStopMonitor(SKU.toString())
-						monitor.task()
-					} else if (site.toUpperCase() == 'AMDSITE') {
-						await pushSku({
-							sku: SKU,
-							site: 'AMDSITE',
-							stop: false,
-							name: "",
-							original : original})
-						let monitor = new amdSiteMonitor(SKU.toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
 						console.log(pricerange)
@@ -183,7 +221,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'WALMART',
 							stop: false,
 							name: "",
-							original : original
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
 							})
 							console.log(currentBody)
 							try {
@@ -207,7 +252,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'BESTBUY',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -247,7 +299,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'BIGLOTS',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						console.log(pricerange)
 							let currentBody = {
 								  	site: "Big Lots",
@@ -286,7 +345,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'TARGETNEW',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						console.log(kw)
 							let currentBody = {
 									  endpoint : SKU,
@@ -314,7 +380,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'ACADEMY',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -353,7 +426,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'AMD',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
@@ -392,7 +472,14 @@ function SKUADD(clients, triggerText, replyText) {
 							site: 'SLICKDEALS',
 							stop: false,
 							name: "",
-							original : original
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
 						})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
@@ -431,6 +518,10 @@ function SKUADD(clients, triggerText, replyText) {
 					}
 				
 				}
+				} else {
+					message.channel.send(`${message.author} is not a validated user`)
+				}
+			
 		}});
 	} catch (error) {
 		console.log(error);
@@ -468,7 +559,7 @@ function deleteSku(clients, triggerText, replyText) {
 				console.log(currentBody)
 				currentBody.stop = true
 				console.log(currentBody)
-				await updateSku(caseSite, SKU, currentBody)
+				await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
 				await delay(10000)
 				await deleteSkuEnd(site, SKU)
 				// console.log(skuBank)
@@ -524,340 +615,7 @@ function massAdd (clients, triggerText, replyText){
 				
 				let string = message.content
 				const content = message.content;
-				const site = content.split(' ')[1].split('|')[0]
-				console.log(site.toUpperCase())
-				
-			
-
-			//	const SKU = content.split(' ')[2];
-			//	console.log(site)
-				let g  = string.split('\n')
-			//	console.log(g)
-			for(let i = 0; i < g.length; i++){		
-				if(!g[i].toUpperCase().includes('!MASSADD')){
-					let isContinue = true
-					let SKU
-					let pricerange = ''	
-					SKU = g[i]
-					let original = g[i]
-					if(g[i].includes('[')){
-					pricerange = g[i].split('[')[1].split(']')[0]
-					SKU = g[i].split(' ')[0]
-					}
-				
-					console.log(g[i])
-					console.log(site.toUpperCase())
-					let skuBank = await getSkuBank()
-					let caseSite = site.toUpperCase()
-					if(skuBank[caseSite]){
-						if(skuBank[caseSite][SKU]){
-							console.log('Duplicate Found')
-							message.channel.send(`${SKU} is already present in monitor`)
-							isContinue = false
-						}
-					}
-					if(isContinue){
-						if (site.toUpperCase() == 'TARGET') {
-						await pushSku({
-							sku: SKU,
-							site: 'TARGET',
-							stop: false,
-							name: "",
-							original : original})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "Target",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-							}
-							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/target`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
-					} else if (site.toUpperCase() == 'NEWEGG') {
-						await pushSku({
-							sku: SKU,
-							site: 'NEWEGG',
-							stop: false,
-							name: "",
-							original : original})
-
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "NewEgg",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-									skuName: await getSku(g[i], await getProxies())
-							}
-							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-						
-							try {
-							rp.post({
-							url : `http://localhost:7243/newEgg`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new newEggMonitor(g[i].toString())
-						// monitor.task()
-					} else if (site.toUpperCase() == 'GAMESTOP') {
-						await pushSku({
-							sku: SKU,
-							site: 'GAMESTOP',
-							stop: false,
-							name: "",
-							original : original})
-						let monitor = new gameStopMonitor(g[i].toString())
-						monitor.task()
-					} else if (site.toUpperCase() == 'AMD') {
-							await pushSku({
-							sku: SKU,
-							site: 'AMD',
-							stop: false,
-							name: "",
-							original : original})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "Amd",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-							}
-							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/amd`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
-					} else if (site.toUpperCase() == 'AMDSITE') {
-						await pushSku({
-							sku: SKU,
-							site: 'AMDSITE',
-							stop: false,
-							name: "",
-							original : original})
-						let monitor = new amdSiteMonitor(g[i].toString())
-						monitor.task()
-					} else if (site.toUpperCase() == 'WALMART') {
-						await pushSku({
-							sku: SKU,
-							site: 'WALMART',
-							stop: false,
-							name: "",
-							original : original})
-						console.log(pricerange)
-							let currentBody = {
-								  	site: "Walmart",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1])
-							}
-					if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							
-							console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/walmart`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new walmartMonitor(g[i].toString())
-						// monitor.task()
-						await delay(30000)
-					} else if (site.toUpperCase() == 'BESTBUY') {
-						await pushSku({
-							sku: SKU,
-							site: 'BESTBUY',
-							stop: false,
-							name: "",
-							original : original})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "Best Buy",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-							}
-						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-							console.log(err)
-						})
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/bestBuy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-	
-					} else if (site.toUpperCase() == 'ACADEMY') {
-						await pushSku({
-							sku: SKU,
-							site: 'ACADEMY',
-							stop: false,
-							name: "",
-							original : original})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "Academy",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-							}
-							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/academy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
-					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
-						await pushSku({
-							sku: SKU,
-							site: 'SLICKDEALS',
-							stop: false,
-							name: "",
-							original : original
-						})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
-							let currentBody = {
-								  	site: "Slick Deals",
-									sku: SKU,
-									priceRangeMin: parseInt(pricerange.split(',')[0]),
-									priceRangeMax: parseInt(pricerange.split(',')[1]),
-							}
-							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
-							console.log("No Max Price Range Detected")
-							currentBody.priceRangeMax = 100000
-
-						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
-							console.log("No Min Price Range Detected")
-							currentBody.priceRangeMin = 1
-
-						}
-							
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:7243/slick`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
-					}
-					}
-				await delay(30000)
-				}
-				
-			}
-			message.channel.send("SKUS Added")
+				mass(string, content, message)
 			}
 		});
 	} catch (error) {
@@ -935,12 +693,27 @@ async function getSku (skuName, proxyList) {
                 }
 }
 
-async function mass (string , content){
+async function mass (string , content, message){
 	//	const SKU = content.split(' ')[2];
 			//	console.log(site)
-				const site = content.split(' ')[1].split('|')[0]
-				console.log(site.toUpperCase())
-				let g  = string.split('\n')
+			const site = content.split(' ')[1].split('|')[0]
+			console.log(site.toUpperCase())
+			let validatedIds = await getValidatedIds()
+			let parsed = JSON.parse(validatedIds)
+			let isValidated = false
+			let group
+			parsed.ids.map(e =>{
+				let id = e?.split('-')[0]
+				console.log(id, message.author.id)
+				if (id == message.author.id) {
+					isValidated = true 
+					group = e?.split('-')[1]
+				}
+			})
+			if(isValidated){
+				//	const SKU = content.split(' ')[2];
+		//	console.log(site)
+			let g  = string.split('\n')
 			//	console.log(g)
 			for(let i = 0; i < g.length; i++){		
 				if(!g[i].toUpperCase().includes('!MASSADD')){
@@ -958,25 +731,57 @@ async function mass (string , content){
 					console.log(site.toUpperCase())
 					let skuBank = await getSkuBank()
 					let caseSite = site.toUpperCase()
+					let currentCompany = config[group]
 					if(skuBank[caseSite]){
 						if(skuBank[caseSite][SKU]){
-							console.log('Duplicate Found')
-							// message.channel.send(`${SKU} is already present in monitor`)
+							let skuWebhookArray = skuBank[caseSite][SKU]?.companies
+							let isPresent = false
+							skuWebhookArray.forEach(e => {
+								console.log(e.webhook, currentCompany[caseSite])
+								if(e.webhook == currentCompany[caseSite]) isPresent = true
+							})
+	
+							if(isPresent){
+								message.channel.send(`${SKU} is already present in monitor`)
+							} else {
+								message.channel.send(`${SKU} is being added to monitor`)
+								let arr = []
+								skuWebhookArray.forEach(e =>{
+									arr.push(e)
+								})
+								arr.push({
+									company : group,
+									webhook : currentCompany[caseSite],
+									color : currentCompany?.companyColor,
+									companyImage : currentCompany?.companyImage
+								})
+								console.log(arr)
+								await updateSku(site, SKU, {companies : arr}, `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}/.json`)
+							}
+							console.log('Duplicate Found', isPresent)
 							isContinue = false
-						}
+					}
 					}
 					if(isContinue){
-						if (site.toUpperCase() == 'TARGET') {
+					if (site.toUpperCase() == 'TARGET') {
 						await pushSku({
 							sku: SKU,
 							site: 'TARGET',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+						})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-								  	site: "Target",
+									  site: "Target",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
@@ -984,11 +789,11 @@ async function mass (string , content){
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 							
 						console.log(currentBody)
@@ -1008,15 +813,23 @@ async function mass (string , content){
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						await pushSku({
 							sku: SKU,
-							site: 'NEWEGG',
-							stop: false,
+							site: 'NEWEGG' ,
+        					stop: false,
 							name: "",
-							original : original})
-
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+                                                   })
+	
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-								  	site: "NewEgg",
+									  site: "NewEgg",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
@@ -1025,11 +838,11 @@ async function mass (string , content){
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 						
 							try {
@@ -1048,23 +861,39 @@ async function mass (string , content){
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						await pushSku({
 							sku: SKU,
-							site: 'GAMESTOP',
-							stop: false,
+							site: 'GAMESTOP' ,
+        					stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+                                                   })
 						let monitor = new gameStopMonitor(g[i].toString())
 						monitor.task()
 					} else if (site.toUpperCase() == 'AMD') {
 							await pushSku({
 							sku: SKU,
-							site: 'AMD',
-							stop: false,
+							site: 'AMD' ,
+        					stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+                                                   })
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-								  	site: "Amd",
+									  site: "Amd",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
@@ -1072,11 +901,11 @@ async function mass (string , content){
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 							
 						console.log(currentBody)
@@ -1093,25 +922,24 @@ async function mass (string , content){
 							}
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
-					} else if (site.toUpperCase() == 'AMDSITE') {
-						await pushSku({
-							sku: SKU,
-							site: 'AMDSITE',
-							stop: false,
-							name: "",
-							original : original})
-						let monitor = new amdSiteMonitor(g[i].toString())
-						monitor.task()
 					} else if (site.toUpperCase() == 'WALMART') {
 						await pushSku({
 							sku: SKU,
-							site: 'WALMART',
-							stop: false,
+							site: 'WALMART' ,
+        					stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+                                                   })
 						console.log(pricerange)
 							let currentBody = {
-								  	site: "Walmart",
+									  site: "Walmart",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1])
@@ -1119,11 +947,11 @@ async function mass (string , content){
 					if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 							
 							console.log(currentBody)
@@ -1147,11 +975,19 @@ async function mass (string , content){
 							site: 'BESTBUY',
 							stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+						})
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-								  	site: "Best Buy",
+									  site: "Best Buy",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
@@ -1159,11 +995,11 @@ async function mass (string , content){
 						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
 							console.log(err)
@@ -1184,14 +1020,22 @@ async function mass (string , content){
 					} else if (site.toUpperCase() == 'ACADEMY') {
 						await pushSku({
 							sku: SKU,
-							site: 'ACADEMY',
-							stop: false,
+							site: 'ACADEMY' ,
+        					stop: false,
 							name: "",
-							original : original})
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+                                                   })
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-								  	site: "Academy",
+									  site: "Academy",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
@@ -1199,11 +1043,11 @@ async function mass (string , content){
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
 							currentBody.priceRangeMax = 100000
-
+	
 						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
 							console.log("No Min Price Range Detected")
 							currentBody.priceRangeMin = 1
-
+	
 						}
 							
 						console.log(currentBody)
@@ -1220,12 +1064,64 @@ async function mass (string , content){
 							}
 						// let monitor = new targetMonitor(SKU.toString())
 						// monitor.task()
+					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
+						await pushSku({
+							sku: SKU,
+							site: 'SLICKDEALS',
+							stop: false,
+							name: "",
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+						})
+						// let monitor = new newEggMonitor(SKU.toString())
+						// monitor.task()
+							let currentBody = {
+									  site: "Slick Deals",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+	
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+	
+						}
+							
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:7243/slick`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
+						// let monitor = new targetMonitor(SKU.toString())
+						// monitor.task()
 					}
 					}
 				await delay(30000)
 				}
 				
 			}
+				message.channel.send("SKUS Added")
+			} else {
+				message.channel.send(`${message.author} is not a validated user`)
+			}
+		
 }
 
 // Fire Base Sku Bank ----------------------------------------------
@@ -1259,7 +1155,7 @@ async function checkPresentSkus(){
 	})
 	//skuBank
 }
-checkPresentSkus()
+// checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
@@ -1291,19 +1187,91 @@ async function deleteSkuEnd(site, sku){
 		console.log(error)
 	}
 }
-async function updateSku(site, sku, newBody){
+async function updateSku(site, sku, newBody, url){
 	try {
+		// No need for site and sku // Only reason I kept it here is for console logs
 		console.log(`Updating Sku ${sku}/${site}`)
 		let updateSku = await rp.patch({
-			url : `${pushEndpoint}/${site.toUpperCase()}/${sku}.json`,
+			url : url,
 			body: JSON.stringify(newBody)
 		})
-		console.log(updateSku.statusCode)
+		console.log(updateSku?.statusCode)
 	} catch (error) {
 		console.log(error)
 	}
 }
+async function getValidatedIds (){
+	try {
+		let getIds = await rp.get({
+		url : `${discordIds}/.json`
+		})
+		console.log(getIds?.statusCode)
+		return getIds?.body
+	} catch (error) {
+		console.log(error)
+	}
+}
+async function updateDiscordIdsDB (author, discordIdsArr, name){
+try {
+	let currentIds = []
+	let parsed = JSON.parse(discordIdsArr)
+	var isPresent = false
+	console.log(parsed)
+	parsed?.ids?.map(e => {
+		currentIds.push(e)
+		let id = e?.split('-')[0]
+		if(id == author) isPresent = true
+	})
+	if(!isPresent) currentIds.push(`${author}-${name}`)
+	else return false
+	let updateIds = await rp.patch({
+		url : `${discordIds}/.json`,
+		body : JSON.stringify({ids : currentIds})
+	})
+	console.log(updateIds?.statusCode)
+	return true
+} catch (error) {
+	console.log(error?.message)
+	return false
+}
+}
+async function validateUser(clients, triggerText, replyText){
+	try {
+		clients.on('message', async (message) => {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+				// message.author.send(replyText);
+				let content = message.content.split('!validate')[1]
+				let apikey = content?.split("apkey-")[1].split("%}")[0]
+				if(apikey == undefined){
+					message.reply("Please Submit Valid Api Key!")
+				} else {
+					console.log(apikey)
+					switch(apikey){
+						case "devAPIKEKg":
+							message.reply("Valid Api Key")
+							let discordIdsDB = await getValidatedIds()
+							let update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "DevTest")
+							if (update) message.reply(`${message.author} Validated`)
+							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
+							break
+						case "j1ggedKRaFD#7d5e508f5e40":
+							message.reply("Valid Api Key")
+							let discordIdsDB = await getValidatedIds()
+							let update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "Jigged")
+							if (update) message.reply(`${message.author} Validated`)
+							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
+							break
+						default:
+							message.reply("Unknown Api Key")
+					}
+				}
+				console.log(content)
 
+		}});
+	} catch (error) {
+		console.log(error);
+	}
+}
 //-----------------------------------------------------------------
 function replaceWithTheCapitalLetter(values){
 				return values.charAt(0).toUpperCase() + values.slice(1);
@@ -1313,5 +1281,6 @@ module.exports = {
 	findCommand,
 	deleteSku,
 	checkBank,
-	massAdd
+	massAdd,
+	validateUser
 } 

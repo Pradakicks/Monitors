@@ -49,10 +49,17 @@ type Proxy struct {
 	userPass string
 }
 type ItemInMonitorJson struct {
-	Sku  string `json:"sku"`
-	Site string `json:"site"`
-	Stop bool   `json:"stop"`
-	Name string `json:"name"`
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
 }
 
 var file os.File
@@ -358,7 +365,7 @@ func (m *Monitor) sendWebhook() error {
       "footer": {
         "text": "Prada#4873"
       },
-      "timestamp": "%s",
+      "timestamp": "2021-05-13 13:57:26.5157268",
       "thumbnail": {
         "url": "https://images.biglots.com/images?set=key[resolve.pixelRatio],value[1]&set=key[resolve.width],value[600]&set=key[resolve.height],value[10000]&set=key[resolve.imageFit],value[containerwidth]&set=key[resolve.allowImageUpscaling],value[0]&set=env[prod],%s"
       }
@@ -423,9 +430,11 @@ func (m *Monitor) checkStop() error {
 
 		}
 		m.stop = currentObject.Stop
+		m.CurrentCompanies = currentObject.Companies
+		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		fmt.Println(currentObject)
-		time.Sleep(3500 * (time.Millisecond))
+		//	fmt.Println(currentObject)
+		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
 }

@@ -35,7 +35,9 @@ type Monitor struct {
 	Client              http.Client
 	file                *os.File
 	stop                bool
+	CurrentCompanies    []Company
 }
+
 type Product struct {
 	name        string
 	stockNumber int
@@ -49,10 +51,17 @@ type Proxy struct {
 	userPass string
 }
 type ItemInMonitorJson struct {
-	Sku  string `json:"sku"`
-	Site string `json:"site"`
-	Stop bool   `json:"stop"`
-	Name string `json:"name"`
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
 }
 
 var file os.File
@@ -162,7 +171,7 @@ func (m *Monitor) monitor() error {
 			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	
+
 	// url := "https://httpbin.org/ip"
 
 	// req, _ := http.NewRequest("GET", url, nil)
@@ -197,7 +206,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
-	
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -319,63 +328,63 @@ func (m *Monitor) sendWebhook() error {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
 		}
 	}
-	
-	// now := time.Now()
-	// currentTime := strings.Split(now.String(), "-0400")[0]
-	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
+	for _, comp := range m.CurrentCompanies {
+		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.offerId, "test", m.Config.image)
+	}
+	return nil
+}
+func webHookSend(c Company, site string, sku string, name string, price int, offerId string, time string, image string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
-  "content": null,
-  "embeds": [
-    {
-      "title": "%s Monitor",
-      "url": "https://www.walmart.com/ip/prada/%s",
-      "color": 507758,
-      "fields": [
-        {
-          "name": "Product Name",
-          "value": "%s"
-        },
-        {
-          "name": "Product Availability",
-          "value": "In Stock",
-          "inline": true
-        },
-        {
-          "name": "Price",
-          "value": "%d",
-          "inline": true
-        },
-        {
-          "name": "Sku",
-          "value": "%s",
-          "inline": true
-        },
-        {
-          "name": "OfferId",
-          "value": "%s"
-        },
-        {
-          "name": "Links",
-          "value": "[Product](https://www.walmart.com/ip/prada/%s) | [ATC](https://affil.walmart.com/cart/buynow?items=%s) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)"
-        }
-      ],
-      "footer": {
-        "text": "Prada#4873"
-      },
-      "timestamp": "2021-05-13 13:57:26.5157268",
-      "thumbnail": {
-        "url": "%s"
-      }
-    }
-  ],
-  "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.offerId, m.Config.sku, m.Config.sku, m.Config.image))
-	req, err := http.NewRequest("POST", m.Config.discord, payload)
+		"content": null,
+		"embeds": [
+		  {
+			"title": "%s Monitor",
+			"url": "https://www.walmart.com/ip/prada/%s",
+			"color": %s,
+			"fields": [
+			  {
+				"name": "Product Name",
+				"value": "%s"
+			  },
+			  {
+				"name": "Product Availability",
+				"value": "In Stock",
+				"inline": true
+			  },
+			  {
+				"name": "Price",
+				"value": "%d",
+				"inline": true
+			  },
+			  {
+				"name": "Sku",
+				"value": "%s",
+				"inline": true
+			  },
+			  {
+				"name": "OfferId",
+				"value": "%s"
+			  },
+			  {
+				"name": "Links",
+				"value": "[Product](https://www.walmart.com/ip/prada/%s) | [ATC](https://affil.walmart.com/cart/buynow?items=%s) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)"
+			  }
+			],
+			"footer": {
+			  "text": "Prada#4873"
+			},
+			"timestamp": "2021-05-13 13:57:26.5157268",
+			"thumbnail": {
+			  "url": "%s"
+			}
+		  }
+		],
+		"avatar_url": "%s"
+	  }`, site, sku, c.Color, name, price, sku, offerId, sku, sku, image, c.CompanyImage))
+	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -391,23 +400,18 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	fmt.Println(res)
 	fmt.Println(string(body))
 	fmt.Println(payload)
-	return nil
+	return
 }
-
 func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
@@ -418,7 +422,7 @@ func (m *Monitor) checkStop() error {
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
 		req, _ := http.NewRequest("GET", url, nil)
 		res, _ := http.DefaultClient.Do(req)
-		
+
 		body, _ := ioutil.ReadAll(res.Body)
 		var currentObject ItemInMonitorJson
 		err := json.Unmarshal(body, &currentObject)
@@ -427,8 +431,10 @@ func (m *Monitor) checkStop() error {
 
 		}
 		m.stop = currentObject.Stop
+		m.CurrentCompanies = currentObject.Companies
+		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		fmt.Println(currentObject)
+		//	fmt.Println(currentObject)
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil

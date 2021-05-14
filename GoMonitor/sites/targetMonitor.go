@@ -132,6 +132,7 @@ type Monitor struct {
 	Client              http.Client
 	file                *os.File
 	stop                bool
+	CurrentCompanies    []Company
 }
 type Product struct {
 	name        string
@@ -147,10 +148,17 @@ type Proxy struct {
 	userPass string
 }
 type ItemInMonitorJson struct {
-	Sku  string `json:"sku"`
-	Site string `json:"site"`
-	Stop bool   `json:"stop"`
-	Name string `json:"name"`
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
 }
 
 var file os.File
@@ -356,74 +364,58 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
-
-func (m *Monitor) sendWebhook() error {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
-	for _, letter := range m.monitorProduct.name {
-		if string(letter) == `"` {
-			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
-		}
-	}
-	now := time.Now()
-	currentTime := strings.Split(now.String(), "-0400")[0]
-	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
+func webHookSend(c Company, site string, sku string, name string, price int, stockNum int, time string, image string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
-  "content": null,
-  "embeds": [
-    {
-      "title": "%s Monitor",
-      "url": "https://www.target.com/p/prada/-/A-%s",
-      "color": 507758,
-      "fields": [
-        {
-          "name": "Product Name",
-          "value": "%s"
-        },
-        {
-          "name": "Product Availability",
-          "value": "In Stock",
-          "inline": true
-        },
-        {
-          "name": "Price",
-          "value": "%d",
-          "inline": true
-        },
-        {
-          "name": "Tcin",
-          "value": "%s",
-          "inline": true
-        },
-        {
-          "name": "Stock Number",
-          "value": "%d"
-        },
-        {
-          "name": "Links",
-          "value": "[Product](https://www.target.com/p/prada/-/A-%ss) | [Cart](https://www.target.com/co-cart)"
-        }
-      ],
-      "footer": {
-        "text": "Prada#4873"
-      },
-      "timestamp": "%s",
-      "thumbnail": {
-        "url": "%s"
-      }
-    }
-  ],
-  "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.monitorProduct.stockNumber, m.Config.sku, currentTime, m.monitorProduct.image))
-	req, err := http.NewRequest("POST", m.Config.discord, payload)
+		"content": null,
+		"embeds": [
+		  {
+			"title": "%s Monitor",
+			"url": "https://www.target.com/p/prada/-/A-%s",
+			"color": %s,
+			"fields": [
+			  {
+				"name": "Product Name",
+				"value": "%s"
+			  },
+			  {
+				"name": "Product Availability",
+				"value": "In Stock",
+				"inline": true
+			  },
+			  {
+				"name": "Price",
+				"value": "%d",
+				"inline": true
+			  },
+			  {
+				"name": "Tcin",
+				"value": "%s",
+				"inline": true
+			  },
+			  {
+				"name": "Stock Number",
+				"value": "%d"
+			  },
+			  {
+				"name": "Links",
+				"value": "[Product](https://www.target.com/p/prada/-/A-%s) | [Cart](https://www.target.com/co-cart)"
+			  }
+			],
+			"footer": {
+			  "text": "Prada#4873"
+			},
+			"timestamp": "2021-05-13 13:57:26.5157268",
+			"thumbnail": {
+			  "url": "%s"
+			}
+		  }
+		],
+		"avatar_url": "%s"
+	  }`, site, sku, c.Color, name, price, sku, stockNum, sku, image, c.CompanyImage))
+	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -439,20 +431,35 @@ func (m *Monitor) sendWebhook() error {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	fmt.Println(res)
 	fmt.Println(string(body))
 	fmt.Println(payload)
+	return
+}
+func (m *Monitor) sendWebhook() error {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
+	for _, letter := range m.monitorProduct.name {
+		if string(letter) == `"` {
+			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
+		}
+	}
+	now := time.Now()
+	currentTime := strings.Split(now.String(), "-0400")[0]
+	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
+	for _, comp := range m.CurrentCompanies {
+		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.stockNumber, currentTime, m.monitorProduct.image)
+	}
 	return nil
 }
 
@@ -517,9 +524,11 @@ func (m *Monitor) checkStop() error {
 
 		}
 		m.stop = currentObject.Stop
+		m.CurrentCompanies = currentObject.Companies
+		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		fmt.Println(currentObject)
-		time.Sleep(3500 * (time.Millisecond))
+		//	fmt.Println(currentObject)
+		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
 }

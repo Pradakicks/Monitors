@@ -34,6 +34,7 @@ type Monitor struct {
 	Client              http.Client
 	file                *os.File
 	stop                bool
+	CurrentCompanies    []Company
 }
 type Product struct {
 	name        string
@@ -50,10 +51,17 @@ type Proxy struct {
 	userPass string
 }
 type ItemInMonitorJson struct {
-	Sku  string `json:"sku"`
-	Site string `json:"site"`
-	Stop bool   `json:"stop"`
-	Name string `json:"name"`
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
 }
 type bestBuyResponse []struct {
 	Sku struct {
@@ -297,8 +305,8 @@ func (m *Monitor) sendWebhook() error {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	now := time.Now()
-	currentTime := strings.Split(now.String(), "-0400")[0]
+	// now := time.Now()
+	// currentTime := strings.Split(now.String(), "-0400")[0]
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
@@ -309,85 +317,10 @@ func (m *Monitor) sendWebhook() error {
 		m.monitorProduct.name = strings.Replace(m.monitorProduct.name, "                       ", "", -1)
 	}
 	fmt.Println("Testing Here : ", m.monitorProduct.name, "Here")
+	for _, comp := range m.CurrentCompanies {
+		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, "test", m.monitorProduct.image)
+	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
-	payload := strings.NewReader(fmt.Sprintf(`{
-  "content": null,
-  "embeds": [
-    {
-      "title": "%s Monitor",
-      "url": "https://www.bestbuy.com/site/prada/%s.p?skuId=%s",
-      "color": 507758,
-      "fields": [
-        {
-          "name": "Product Name",
-		  "value": "%s"
-		},
-        {
-          "name": "Product Availability",
-          "value": "In Stock",
-          "inline": true
-        },
-        {
-          "name": "Price",
-          "value": "%d",
-          "inline": true
-        },
-        {
-          "name": "Product ID",
-          "value": "%s",
-          "inline": true
-        },
-        {
-          "name": "Links",
-          "value": "[ATC](https://api.bestbuy.com/click/tempo/%s/cart) | [Cart](https://www.bestbuy.com/cart)"
-        }
-      ],
-      "footer": {
-        "text": "Prada#4873"
-      },
-      "timestamp": "%s",
-      "thumbnail": {
-        "url": "%s"
-      }
-    }
-  ],
-  "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, m.Config.sku, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.Config.sku, m.Config.sku, currentTime, m.monitorProduct.image))
-	req, err := http.NewRequest("POST", m.Config.discord, payload)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(payload)
-
-		return nil
-	}
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("dnt", "1")
-	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
-	req.Header.Add("content-type", "application/json")
-	req.Header.Add("sec-fetch-site", "cross-site")
-	req.Header.Add("sec-fetch-mode", "cors")
-	req.Header.Add("sec-fetch-dest", "empty")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(payload)
-
-		return nil
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(payload)
-
-		return nil
-	}
-	fmt.Println(res)
-	fmt.Println(string(body))
-	fmt.Println(payload)
 	return nil
 }
 
@@ -429,7 +362,81 @@ func (m *Monitor) getProductDetails() {
 	m.monitorProduct.image = doc.Find(".primary-image").AttrOr("src", "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png")
 	fmt.Println(m.monitorProduct.image)
 }
-
+func webHookSend(c Company, site string, sku string, name string, price int, time string, image string) {
+	payload := strings.NewReader(fmt.Sprintf(`{
+		"content": null,
+		"embeds": [
+		  {
+			"title": "%s Monitor",
+			"url": "https://www.bestbuy.com/site/prada/%s.p?skuId=%s",
+			"color": %s,
+			"fields": [
+			  {
+				"name": "Product Name",
+				"value": "%s"
+			  },
+			  {
+				"name": "Product Availability",
+				"value": "In Stock",
+				"inline": true
+			  },
+			  {
+				"name": "Price",
+				"value": "%d",
+				"inline": true
+			  },
+			  {
+				"name": "Product Sku",
+				"value": "%s",
+				"inline": true
+			  },
+			  {
+				"name": "Links",
+				"value": "[ATC](https://api.bestbuy.com/click/tempo/%s/cart) | [Cart](https://www.bestbuy.com/cart)"
+			  }
+			],
+			"footer": {
+			  "text": "Prada#4873"
+			},
+			"timestamp": "2021-05-13 13:57:26.5157268",
+			"thumbnail": {
+			  "url": "%s"
+			}
+		  }
+		],
+		"avatar_url": "%s"
+	  }`, site, sku, sku, c.Color, name, price, sku, sku, image, c.CompanyImage))
+	req, err := http.NewRequest("POST", c.Webhook, payload)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(payload)
+	}
+	req.Header.Add("pragma", "no-cache")
+	req.Header.Add("cache-control", "no-cache")
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("dnt", "1")
+	req.Header.Add("accept-language", "en")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("sec-fetch-site", "cross-site")
+	req.Header.Add("sec-fetch-mode", "cors")
+	req.Header.Add("sec-fetch-dest", "empty")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(payload)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(payload)
+	}
+	fmt.Println(res)
+	fmt.Println(string(body))
+	fmt.Println(payload)
+	return
+}
 func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
@@ -449,9 +456,11 @@ func (m *Monitor) checkStop() error {
 
 		}
 		m.stop = currentObject.Stop
+		m.CurrentCompanies = currentObject.Companies
+		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		fmt.Println(currentObject)
-		time.Sleep(3500 * (time.Millisecond))
+		//	fmt.Println(currentObject)
+		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
 }

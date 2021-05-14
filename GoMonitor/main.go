@@ -134,7 +134,7 @@ func handleRequests() {
 	router.HandleFunc("/amd", amd).Methods("POST")
 	router.HandleFunc("/slick", slickDeals).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
-
+	
 }
 
 func main() {
