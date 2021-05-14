@@ -25,7 +25,7 @@ function SKUADD(clients, triggerText, replyText) {
 				let parsed = JSON.parse(validatedIds)
 				let isValidated = false
 				let group
-				parsed.ids.map(e =>{
+				parsed.ids.forEach(e =>{
 					let id = e?.split('-')[0]
 					console.log(id, message.author.id)
 					if (id == message.author.id) {
@@ -45,7 +45,7 @@ function SKUADD(clients, triggerText, replyText) {
 					let kwArray = content.split('[')[1].split(']')[0]
 					console.log(kwArray)
 					let eachItem = kwArray.split(',')
-					eachItem.map(e =>{
+					eachItem.forEach(e =>{
 						kw.push(e)
 					})
 				}
@@ -702,7 +702,7 @@ async function mass (string , content, message){
 			let parsed = JSON.parse(validatedIds)
 			let isValidated = false
 			let group
-			parsed.ids.map(e =>{
+			parsed.ids.forEach(e =>{
 				let id = e?.split('-')[0]
 				console.log(id, message.author.id)
 				if (id == message.author.id) {
@@ -1142,7 +1142,7 @@ async function checkPresentSkus(){
 	//console.log(skuBank)
 	let sites = Object.keys(skuBank)
 	console.log(sites)
-	sites.map(e => {
+	sites.forEach(e => {
 		let string = `!massAdd ${e}|\n`
 		let skus = Object.keys(skuBank[e])
 		console.log(skus)
@@ -1217,7 +1217,7 @@ try {
 	let parsed = JSON.parse(discordIdsArr)
 	var isPresent = false
 	console.log(parsed)
-	parsed?.ids?.map(e => {
+	parsed?.ids?.forEach(e => {
 		currentIds.push(e)
 		let id = e?.split('-')[0]
 		if(id == author) isPresent = true
