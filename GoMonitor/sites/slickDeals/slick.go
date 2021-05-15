@@ -422,7 +422,7 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 	req.Header.Add("sec-fetch-dest", "empty")
 	req.Header.Add("referer", "https://slickdeals.net/live/")
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
-	res, err := http.DefaultClient.Do(req)
+	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 
@@ -455,7 +455,7 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 		productlink = strings.Split(productlink, "?")[0]
 		productlink = m.getRealLink(productlink)
 	} else {
-		
+
 		productlink = m.getRealLink(productlink)
 	}
 	fmt.Println(image, productlink, exists, ex)
@@ -502,7 +502,7 @@ func (m *Monitor) getRealLink(url string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 	}
