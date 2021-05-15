@@ -258,8 +258,8 @@ func (m *Monitor) monitor() error {
 			}
 
 			if isPresent != true {
-				desc, image := m.getDesc(link)
-				go m.sendWebhook(link, title, returnPrice, id, desc, image)
+				desc, image, links := m.getDesc(link)
+				go m.sendWebhook(link, title, returnPrice, id, desc, image, links)
 				m.sku = append(m.sku, id)
 			}
 		}
@@ -295,7 +295,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(link string, title string, price string, id string, desc string, image string) error {
+func (m *Monitor) sendWebhook(link string, title string, price string, id string, desc string, image string, links string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -347,7 +347,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
         },
         {
           "name": "Links",
-          "value": "[Thread](%s)"
+          "value": "[Thread](%s) | [Product](%s)"
         }
       ],
       "footer": {
@@ -360,7 +360,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, link, title, desc, price, id, link, image))
+}`, m.Config.site, link, title, desc, price, id, link, links, image))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)
@@ -399,7 +399,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	return nil
 }
 
-func (m *Monitor) getDesc(link string) (string, string){
+func (m *Monitor) getDesc(link string) (string, string, string){
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -435,9 +435,16 @@ func (m *Monitor) getDesc(link string) (string, string){
 	// Find the review items
 	data := doc.Find("#detailsDescription").Text()
 	image, exists := doc.Find("#mainImage").Attr("src")
-	fmt.Println(image, exists)
+	if exists == false {
+		image = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
+	}
+	productlink, ex := doc.Find("#detailsDescription > span > a").Attr("href")
+	if ex == false {
+		productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
+	}
+	fmt.Println(image, exists, ex)
 	fmt.Println(strings.TrimSpace(data))
-	return strings.TrimSpace(data), image
+	return strings.TrimSpace(data), image, productlink
 }
 func (m *Monitor) checkStop() error {
 	for !m.stop {
