@@ -438,7 +438,7 @@ func (m *Monitor) getDesc(link string) (string, string, string){
 	if exists == false {
 		image = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
 	}
-	productlink, ex := doc.Find("#detailsDescription > span > a").Attr("href")
+	productlink, ex := doc.Find("#detailsTop > div > div.detailRightWrapper.forumThread > div.detailImages > div.mainImageContainer > a").Attr("href")
 	if ex == false {
 		productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
 	}
@@ -446,6 +446,7 @@ func (m *Monitor) getDesc(link string) (string, string, string){
 	fmt.Println(strings.TrimSpace(data))
 	return strings.TrimSpace(data), image, productlink
 }
+
 func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
