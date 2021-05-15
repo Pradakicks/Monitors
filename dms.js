@@ -722,7 +722,7 @@ async function getSku (skuName, proxyList) {
 async function mass (string , content, message, groupName){
 	//	const SKU = content.split(' ')[2];
 			//	console.log(site)
-			const site = content.split(' ')[1].split('|')[0]
+			const site = content?.split(' ')[1]?.split('|')[0]
 			console.log(site.toUpperCase())
 			let validatedIds = await getValidatedIds()
 			let parsed = JSON.parse(validatedIds)
@@ -1187,7 +1187,7 @@ async function checkPresentSkus(){
 	})
 	//skuBank
 }
- checkPresentSkus()
+ // checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`

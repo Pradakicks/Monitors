@@ -258,7 +258,8 @@ func (m *Monitor) monitor() error {
 			}
 
 			if isPresent != true {
-				go m.sendWebhook(link, title, returnPrice, id, m.getDesc(link))
+				desc, image := m.getDesc(link)
+				go m.sendWebhook(link, title, returnPrice, id, desc, image)
 				m.sku = append(m.sku, id)
 			}
 		}
@@ -294,7 +295,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(link string, title string, price string, id string, desc string) error {
+func (m *Monitor) sendWebhook(link string, title string, price string, id string, desc string, image string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -354,12 +355,12 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
       },
       "timestamp": "2021-05-13 13:57:26.5157268",
       "thumbnail": {
-        "url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
+        "url": "%s"
       }
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, link, title, desc, price, id, link))
+}`, m.Config.site, link, title, desc, price, id, link, image))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)
@@ -398,7 +399,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	return nil
 }
 
-func (m *Monitor) getDesc(link string) string {
+func (m *Monitor) getDesc(link string) (string, string){
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -433,8 +434,10 @@ func (m *Monitor) getDesc(link string) string {
 	}
 	// Find the review items
 	data := doc.Find("#detailsDescription").Text()
+	image, exists := doc.Find("#mainImage").Attr("src")
+	fmt.Println(image, exists)
 	fmt.Println(strings.TrimSpace(data))
-	return strings.TrimSpace(data)
+	return strings.TrimSpace(data), image
 }
 func (m *Monitor) checkStop() error {
 	for !m.stop {
