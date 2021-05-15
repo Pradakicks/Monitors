@@ -9,8 +9,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 type Config struct {
@@ -255,7 +258,7 @@ func (m *Monitor) monitor() error {
 			}
 
 			if isPresent != true {
-				m.sendWebhook(link, title, returnPrice, id)
+				go m.sendWebhook(link, title, returnPrice, id, m.getDesc(link))
 				m.sku = append(m.sku, id)
 			}
 		}
@@ -291,7 +294,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(link string, title string, price string, id string) error {
+func (m *Monitor) sendWebhook(link string, title string, price string, id string, desc string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -313,6 +316,8 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	if strings.HasSuffix(currentTime, " ") {
 		currentTime = strings.TrimSuffix(currentTime, " ")
 	}
+	re := regexp.MustCompile(`\r?\n`)
+	desc = re.ReplaceAllString(desc, `\n`)
 	payload := strings.NewReader(fmt.Sprintf(`{
   "content": null,
   "embeds": [
@@ -325,6 +330,10 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
           "name": "Product Name",
 		  "value": "%s"
 		},
+		{
+			"name": "Product Description",
+			"value": "%s"
+		  },
         {
           "name": "Price",
           "value": "%s",
@@ -350,7 +359,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
     }
   ],
   "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, m.Config.site, link, title, price, id, link, currentTime))
+}`, m.Config.site, link, title, desc, price, id, link))
 	req, err := http.NewRequest("POST", m.Config.discord, payload)
 	if err != nil {
 		fmt.Println(err)
@@ -389,6 +398,44 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	return nil
 }
 
+func (m *Monitor) getDesc(link string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
+
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("authority", "slickdeals.net")
+	req.Header.Add("pragma", "no-cache")
+	req.Header.Add("cache-control", "no-cache")
+	req.Header.Add("accept", "*/*")
+	req.Header.Add("dnt", "1")
+	req.Header.Add("x-requested-with", "XMLHttpRequest")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
+	req.Header.Add("sec-fetch-site", "same-origin")
+	req.Header.Add("sec-fetch-mode", "cors")
+	req.Header.Add("sec-fetch-dest", "empty")
+	req.Header.Add("referer", "https://slickdeals.net/live/")
+	req.Header.Add("accept-language", "en-US,en;q=0.9")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	defer res.Body.Close()
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Find the review items
+	data := doc.Find("#detailsDescription").Text()
+	fmt.Println(strings.TrimSpace(data))
+	return strings.TrimSpace(data)
+}
 func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {

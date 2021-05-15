@@ -64,7 +64,7 @@ function SKUADD(clients, triggerText, replyText) {
 						if(skuBank[caseSite][SKU]){
 							let skuWebhookArray = skuBank[caseSite][SKU]?.companies
 							let isPresent = false
-							skuWebhookArray.forEach(e => {
+							skuWebhookArray?.forEach(e => {
 								console.log(e.webhook, currentCompany[caseSite])
 								if(e.webhook == currentCompany[caseSite]) isPresent = true
 							})
@@ -581,10 +581,33 @@ function checkBank (clients, triggerText, replyText){
 			try {
 				
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
-				let skuBank = await getSkuBank()
+				let validatedIds = await getValidatedIds()
+				let parsed = JSON.parse(validatedIds)
+				let isValidated = false
+				let group
+				parsed.ids.forEach(e =>{
+					let id = e?.split('-')[0]
+					console.log(id, message.author.id)
+					if (id == message.author.id) {
+						isValidated = true 
+						group = e?.split('-')[1]
+					}
+				})
+				if(isValidated){
+					let skuBank = await getSkuBank()
 				let string = (skuBank)
 				let skuString = ''
 				if(skuBank.length != 0){
+					let bankArr = []
+					let sites = Object.keys(skuBank)
+					sites?.forEach(e =>{
+						if (e != "-M_bpveXSTSxZkahEQkQ"){
+							let currentSkus = Object.keys(skuBank[e])
+							currentSkus.forEach(e =>{
+								bankArr.push(e?.original)
+							})
+							}
+					})
 				await fs.appendFile(`monitorBank-${message.author.username}.txt`, JSON.stringify(skuBank, null, 2) , err => {
 						if(err) message.content.send('Error While Creating Text Document')
 								else console.log("File Sent")
@@ -598,6 +621,9 @@ function checkBank (clients, triggerText, replyText){
 				})
 				} else {
 					message.channel.send('Monitor Bank is empty')
+				}
+				} else {
+					message.channel.send(`${message.author} is not a validated user`)
 				}
 			}
 			} catch (error) {
@@ -693,7 +719,7 @@ async function getSku (skuName, proxyList) {
                 }
 }
 
-async function mass (string , content, message){
+async function mass (string , content, message, groupName){
 	//	const SKU = content.split(' ')[2];
 			//	console.log(site)
 			const site = content.split(' ')[1].split('|')[0]
@@ -702,7 +728,8 @@ async function mass (string , content, message){
 			let parsed = JSON.parse(validatedIds)
 			let isValidated = false
 			let group
-			parsed.ids.forEach(e =>{
+			if(message){
+				parsed.ids.forEach(e =>{
 				let id = e?.split('-')[0]
 				console.log(id, message.author.id)
 				if (id == message.author.id) {
@@ -710,6 +737,11 @@ async function mass (string , content, message){
 					group = e?.split('-')[1]
 				}
 			})
+			} else {
+				isValidated = true
+				group = groupName
+			}
+			
 			if(isValidated){
 				//	const SKU = content.split(' ')[2];
 		//	console.log(site)
@@ -1150,12 +1182,12 @@ async function checkPresentSkus(){
 			string = string + `${skuBank[e][d].original}\n`
 		})
 		console.log(string)
-		mass(string, string)
+		mass({string : string, content : string, groupName : "Jigged"})
 		// skuBank[e]
 	})
 	//skuBank
 }
-// checkPresentSkus()
+ checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
@@ -1271,10 +1303,11 @@ async function validateUser(clients, triggerText, replyText){
 		console.log(error);
 	}
 }
+
 //-----------------------------------------------------------------
 function replaceWithTheCapitalLetter(values){
 				return values.charAt(0).toUpperCase() + values.slice(1);
-				}
+}
 module.exports = {
 	SKUADD,
 	findCommand,
