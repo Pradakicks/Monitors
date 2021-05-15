@@ -445,13 +445,13 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 		productlink, e := doc.Find("#detailsDescription > a").Attr("href")
 		if e == false {
 			productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-		} else if !strings.Contains(productlink, "https://slickdeals.net/?") {
+		} else if !strings.Contains(productlink, "slickdeals.net/?") {
 			productlink = strings.Split(productlink, "?")[0]
 			
 		} else {
 			productlink = m.getRealLink(productlink)
 		}
-	} else if !strings.Contains(productlink, "https://slickdeals.net/?") {
+	} else if !strings.Contains(productlink, "slickdeals.net/?") {
 		productlink = strings.Split(productlink, "?")[0]
 		productlink = m.getRealLink(productlink)
 	} else {
@@ -502,7 +502,7 @@ func (m *Monitor) getRealLink(url string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	res, err := m.Client.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
 	}
