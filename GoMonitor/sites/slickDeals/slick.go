@@ -399,7 +399,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	return nil
 }
 
-func (m *Monitor) getDesc(link string) (string, string, string){
+func (m *Monitor) getDesc(link string) (string, string, string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -439,10 +439,26 @@ func (m *Monitor) getDesc(link string) (string, string, string){
 		image = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
 	}
 	productlink, ex := doc.Find("#detailsTop > div > div.detailRightWrapper.forumThread > div.detailImages > div.mainImageContainer > a").Attr("href")
+
 	if ex == false {
-		productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png'"
+		//= "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
+		productlink, e := doc.Find("#detailsDescription > a").Attr("href")
+		if e == false {
+			productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
+		} else if !strings.Contains(productlink, "https://slickdeals.net/?") {
+			productlink = strings.Split(productlink, "?")[0]
+			
+		} else {
+			productlink = m.getRealLink(productlink)
+		}
+	} else if !strings.Contains(productlink, "https://slickdeals.net/?") {
+		productlink = strings.Split(productlink, "?")[0]
+		productlink = m.getRealLink(productlink)
+	} else {
+		
+		productlink = m.getRealLink(productlink)
 	}
-	fmt.Println(image, exists, ex)
+	fmt.Println(image, productlink, exists, ex)
 	fmt.Println(strings.TrimSpace(data))
 	return strings.TrimSpace(data), image, productlink
 }
@@ -473,4 +489,27 @@ func (m *Monitor) checkStop() error {
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
+}
+
+func (m *Monitor) getRealLink(url string) string {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Real Link Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+	// body, _ := ioutil.ReadAll(res.Body)
+	url1 := res.Request.URL.String()
+	fmt.Println(url1)
+	fmt.Println(strings.Split(url1, "?")[0])
+	return strings.Split(url1, "?")[0]
 }
