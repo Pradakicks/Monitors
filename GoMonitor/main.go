@@ -121,9 +121,15 @@ func slickDeals(w http.ResponseWriter, r *http.Request) {
 	go SlickDealsMonitor.NewMonitor()
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func getPage(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Slick Deals Monitor")
+}
 func handleRequests() {
+	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
 
+	router.HandleFunc("/", getPage).Methods("GET")
 	router.HandleFunc("/target", target).Methods("POST")
 	router.HandleFunc("/walmart", walmart).Methods("POST")
 	router.HandleFunc("/newEgg", newegg).Methods("POST")
@@ -134,7 +140,6 @@ func handleRequests() {
 	router.HandleFunc("/amd", amd).Methods("POST")
 	router.HandleFunc("/slick", slickDeals).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
-	
 }
 
 func main() {

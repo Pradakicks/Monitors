@@ -1,8 +1,6 @@
 const {MessageAttachment } = require('discord.js');
 const delay = require('delay');
 const fs = require('fs').promises;
-const { default: parse } = require('node-html-parser');
-require('newrelic');
 const config = require('./config.json')
 //  var skuBank = []
 let pushEndpoint = "https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor"

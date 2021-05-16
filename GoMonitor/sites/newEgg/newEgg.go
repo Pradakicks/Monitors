@@ -121,7 +121,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
 
-	path := "newEggProxy.txt"
+	path := "cloud.txt"
 	var proxyList = make([]string, 0)
 	buf, err := os.Open(path)
 	if err != nil {
