@@ -10,7 +10,7 @@ const rp = require('request-promise').defaults({
 	resolveWithFullResponse: true,
 	gzip: true,
 });
-const port = 8080
+const port = 7243
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
