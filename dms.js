@@ -10,7 +10,7 @@ const rp = require('request-promise').defaults({
 	resolveWithFullResponse: true,
 	gzip: true,
 });
-
+const port = 8080
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
@@ -123,7 +123,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/target`,
+							url : `http://localhost:${port}/target`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -172,7 +172,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/newEgg`,
+							url : `http://localhost:${port}/newEgg`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -231,7 +231,7 @@ function SKUADD(clients, triggerText, replyText) {
 							console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/walmart`,
+							url : `http://localhost:${port}/walmart`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -281,7 +281,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/bestBuy`,
+							url : `http://localhost:${port}/bestBuy`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -324,7 +324,7 @@ function SKUADD(clients, triggerText, replyText) {
 							console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/bigLots`,
+							url : `http://localhost:${port}/bigLots`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -359,7 +359,7 @@ function SKUADD(clients, triggerText, replyText) {
 							console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/targetNew`,
+							url : `http://localhost:${port}/targetNew`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -407,7 +407,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/academy`,
+							url : `http://localhost:${port}/academy`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -453,7 +453,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/amd`,
+							url : `http://localhost:${port}/amd`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -500,7 +500,7 @@ function SKUADD(clients, triggerText, replyText) {
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/slick`,
+							url : `http://localhost:${port}/slick`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -829,7 +829,7 @@ async function mass (string , content, message, groupName){
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/target`,
+							url : `http://localhost:${port}/target`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -877,7 +877,7 @@ async function mass (string , content, message, groupName){
 						
 							try {
 							rp.post({
-							url : `http://localhost:7243/newEgg`,
+							url : `http://localhost:${port}/newEgg`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -941,7 +941,7 @@ async function mass (string , content, message, groupName){
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/amd`,
+							url : `http://localhost:${port}/amd`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -987,7 +987,7 @@ async function mass (string , content, message, groupName){
 							console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/walmart`,
+							url : `http://localhost:${port}/walmart`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -1037,7 +1037,7 @@ async function mass (string , content, message, groupName){
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/bestBuy`,
+							url : `http://localhost:${port}/bestBuy`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -1083,7 +1083,7 @@ async function mass (string , content, message, groupName){
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/academy`,
+							url : `http://localhost:${port}/academy`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
@@ -1130,7 +1130,7 @@ async function mass (string , content, message, groupName){
 						console.log(currentBody)
 							try {
 							rp.post({
-							url : `http://localhost:7243/slick`,
+							url : `http://localhost:${port}/slick`,
 							body : JSON.stringify(currentBody),
 							headers : {
 								"Content-Type": "application/json"
