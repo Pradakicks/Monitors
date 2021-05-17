@@ -1290,6 +1290,12 @@ async function validateUser(clients, triggerText, replyText){
 							if (update) message.reply(`${message.author} Validated`)
 							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
 							break
+						case "arialab91f37e6f36d2b2":
+							message.reply("Valid Api Key")
+							var update = await updateDiscordIdsDB(message.author.id, discordIdsDB, "Arial")
+							if (update) message.reply(`${message.author} Validated`)
+							else message.reply(`${message.author} Could not be Validated \n Contact Dev if this continues to be an issue`)
+							break
 						default:
 							message.reply("Unknown Api Key")
 					}

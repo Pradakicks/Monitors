@@ -7,4 +7,3 @@ RUN go build -o main .
 COPY . .
 EXPOSE 7243
 CMD ["/app/main"]
-

@@ -128,11 +128,6 @@ type targetNewProduct struct {
 
 var file os.File
 
-// func walmartMonitor(sku string) {
-// 	go NewMonitor(sku, 1, 1000)
-// 	fmt.Scanln()
-// }
-
 func NewMonitor(sku string, keywords []string) *Monitor {
 	// fmt.Println("TESTING", sku)
 	m := Monitor{}
@@ -222,7 +217,6 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 	}
 	return &m
 }
-
 func (m *Monitor) monitor() error {
 	//	fmt.Println("Monitoring")
 	defer func() {
@@ -319,7 +313,6 @@ func (m *Monitor) monitor() error {
 	}
 	return nil
 }
-
 func (m *Monitor) getProxy(proxyList []string) string {
 
 	//fmt.Scanln()
@@ -332,65 +325,74 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
-
 func (m *Monitor) sendWebhook(tcin string, link string, price int, productName string, image string) error {
+	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
 		}
 	}
-	now := time.Now()
-	currentTime := strings.Split(now.String(), "-0400")[0]
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
+	for _, comp := range m.CurrentCompanies {
+		fmt.Println(comp.Company)
+		fmt.Println(comp.Company)
+		go webHookSend(comp, m.Config.site, tcin, m.monitorProduct.name, price, "test", image, link)
+	}
+	return nil
+}
+func webHookSend(c Company, site string, sku string, name string, price int, time string, image string, link string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
-  "content": null,
-  "embeds": [
-    {
-      "title": "Target's New Products Monitor",
-      "url": "%s",
-      "color": 507758,
-      "fields": [
-        {
-          "name": "Product Name",
-          "value": "%s"
-        },
-        {
-          "name": "Product Availability",
-          "value": "New Product",
-          "inline": true
-        },
-        {
-          "name": "Price",
-          "value": "%d",
-          "inline": true
-        },
-        {
-          "name": "Tcin",
-          "value": "%s",
-          "inline": true
-        },
-        {
-          "name": "Links",
-          "value": "[Product](%s) | [Cart](https://www.target.com/co-cart)"
-        }
-      ],
-      "footer": {
-        "text": "Prada#4873"
-      },
-      "timestamp": "2021-05-13 13:57:26.5157268",
-      "thumbnail": {
-        "url": "%s"
-      }
-    }
-  ],
-  "avatar_url": "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
-}`, link, productName, price, tcin, link, currentTime, image))
-	req, err := http.NewRequest("POST", m.Config.discord, payload)
+		"content": null,
+		"embeds": [
+		  {
+			"title": "%s Monitor",
+			"url": "%s",
+			"color": %s,
+			"fields": [
+			  {
+				"name": "Product Name",
+				"value": "%s"
+			  },
+			  {
+				"name": "Product Availability",
+				"value": "In Stock",
+				"inline": true
+			  },
+			  {
+				"name": "Price",
+				"value": "%d",
+				"inline": true
+			  },
+			  {
+				"name": "Tcin",
+				"value": "%s",
+				"inline": true
+			  },
+			  {
+				"name": "Links",
+				"value": "[Product](%s) | [Cart](https://www.target.com/co-cart)"
+			  }
+			],
+			"footer": {
+			  "text": "Prada#4873"
+			},
+			"timestamp": "2021-05-13 13:57:26.5157268",
+			"thumbnail": {
+			  "url": "%s"
+			}
+		  }
+		],
+		"avatar_url": "%s"
+	  }`, site, link, c.Color, name, price, sku, link, image, c.CompanyImage))
+	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -406,23 +408,18 @@ func (m *Monitor) sendWebhook(tcin string, link string, price int, productName s
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
-		return nil
 	}
 	fmt.Println(res)
 	fmt.Println(string(body))
 	fmt.Println(payload)
-	return nil
+	return
 }
-
 func GetBytes(key interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
@@ -432,7 +429,6 @@ func GetBytes(key interface{}) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-
 func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
