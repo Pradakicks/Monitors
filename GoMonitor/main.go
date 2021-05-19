@@ -8,14 +8,15 @@ import (
 
 	"github.com/gorilla/mux"
 	TargetMonitor "github.con/prada-monitors-go/sites"
-	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
-	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
-	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
-	AcademyMonitor"github.con/prada-monitors-go/sites/academy"
-	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
+	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
+	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
+	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
+	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
+	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
+	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 )
 
 type Monitor struct {
@@ -27,7 +28,7 @@ type Monitor struct {
 }
 
 type KeyWordMonitor struct {
-	Endpoint string `json:"endpoint"`
+	Endpoint string   `json:"endpoint"`
 	Keywords []string `json:"keywords"`
 }
 
@@ -121,7 +122,17 @@ func slickDeals(w http.ResponseWriter, r *http.Request) {
 	go SlickDealsMonitor.NewMonitor()
 	json.NewEncoder(w).Encode(currentMonitor)
 }
-func getPage(w http.ResponseWriter, r *http.Request){
+func gameStop(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Game Stop Monitor")
+	fmt.Println("Game Stop")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go GameStopMonitor.NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
+func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Slick Deals Monitor")
 }
@@ -139,6 +150,7 @@ func handleRequests() {
 	router.HandleFunc("/bestBuy", bestBuy).Methods("POST")
 	router.HandleFunc("/amd", amd).Methods("POST")
 	router.HandleFunc("/slick", slickDeals).Methods("POST")
+	router.HandleFunc("/gameStop", gameStop).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 }
 

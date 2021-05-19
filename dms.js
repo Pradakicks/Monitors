@@ -31,7 +31,7 @@ function SKUADD(clients, triggerText, replyText) {
 						group = e?.split('-')[1]
 					}
 				})
-
+				console.log(group)
 				if(isValidated){
 				const site = content.split(' ')[1];
 				let original = content.split(`${site} `)[1]
@@ -182,21 +182,47 @@ function SKUADD(clients, triggerText, replyText) {
 								console.log(error)
 							}
 					} else if (site.toUpperCase() == 'GAMESTOP') {
-						await pushSku({
-							sku: SKU,
-							site: 'GAMESTOP',
-							stop: false,
-							name: "",
-							original : original,
-							companies : [
-								{
-								company : group,
-								webhook : currentCompany[caseSite],
-								color : currentCompany?.companyColor,
-								companyImage : currentCompany?.companyImage
-							}]})
-						let monitor = new gameStopMonitor(SKU.toString())
-						monitor.task()
+							await pushSku({
+								sku: SKU,
+								site: 'GAMESTOP',
+								stop: false,
+								name: "",
+								original : original,
+								companies : [
+									{
+									company : group,
+									webhook : currentCompany[caseSite],
+									color : currentCompany?.companyColor,
+									companyImage : currentCompany?.companyImage
+								}]
+							})
+								let currentBody = {
+										  site: "Game Stop",
+										sku: SKU,
+										priceRangeMin: parseInt(pricerange.split(',')[0]),
+										priceRangeMax: parseInt(pricerange.split(',')[1]),
+								}
+								if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+								console.log("No Max Price Range Detected")
+								currentBody.priceRangeMax = 100000
+	
+							} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+								console.log("No Min Price Range Detected")
+								currentBody.priceRangeMin = 1
+	
+							}
+							console.log(currentBody)
+								try {
+								rp.post({
+								url : `http://localhost:${port}/gameStop`,
+								body : JSON.stringify(currentBody),
+								headers : {
+									"Content-Type": "application/json"
+								}
+							})
+								} catch (error) {
+									console.log(error)
+								}
 					} else if (site.toUpperCase() == 'WALMART') {
 						console.log(pricerange)
 							let currentBody = {
@@ -891,8 +917,8 @@ async function mass (string , content, message, groupName){
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						await pushSku({
 							sku: SKU,
-							site: 'GAMESTOP' ,
-        					stop: false,
+							site: 'GAMESTOP',
+							stop: false,
 							name: "",
 							original : original,
 							companies : [
@@ -902,9 +928,34 @@ async function mass (string , content, message, groupName){
 								color : currentCompany?.companyColor,
 								companyImage : currentCompany?.companyImage
 							}]
-                                                   })
-						let monitor = new gameStopMonitor(g[i].toString())
-						monitor.task()
+						})
+							let currentBody = {
+									  site: "Game Stop",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1]),
+							}
+							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+						console.log(currentBody)
+							try {
+							rp.post({
+							url : `http://localhost:${port}/gameStop`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						})
+							} catch (error) {
+								console.log(error)
+							}
 					} else if (site.toUpperCase() == 'AMD') {
 							await pushSku({
 							sku: SKU,
@@ -1153,7 +1204,6 @@ async function mass (string , content, message, groupName){
 			}
 		
 }
-
 // Fire Base Sku Bank ----------------------------------------------
 async function checkPresentSkus(){
 	let skuBank = await rp.get({
