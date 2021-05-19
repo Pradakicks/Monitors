@@ -12,11 +12,11 @@ import (
 	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
-	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
+	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 )
 
 type Monitor struct {
