@@ -36,6 +36,7 @@ type Monitor struct {
 	file                *os.File
 	stop                bool
 	CurrentCompanies    []Company
+	useProxy            bool
 }
 
 type Product struct {
@@ -138,20 +139,25 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		}()
 
 		if !m.stop {
-			currentProxy := m.getProxy(proxyList)
-			splittedProxy := strings.Split(currentProxy, ":")
-			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-			//	fmt.Println(proxy, proxy.ip)
-			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-			proxyUrl, err := url.Parse(prox1y)
-			if err != nil {
-				fmt.Println(err)
-				return nil
+			if(m.useProxy){
+				currentProxy := m.getProxy(proxyList)
+				splittedProxy := strings.Split(currentProxy, ":")
+				proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
+				//	fmt.Println(proxy, proxy.ip)
+				prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+				proxyUrl, err := url.Parse(prox1y)
+				if err != nil {
+					fmt.Println(err)
+					return nil
+				}
+				defaultTransport := &http.Transport{
+					Proxy: http.ProxyURL(proxyUrl),
+				}
+				m.Client.Transport = defaultTransport
+			} else {
+				m.Client.Transport = http.DefaultTransport
 			}
-			defaultTransport := &http.Transport{
-				Proxy: http.ProxyURL(proxyUrl),
-			}
-			m.Client.Transport = defaultTransport
+			
 			m.monitor()
 			// time.Sleep(500 * (time.Millisecond))
 			// fmt.Println(m.Availability)
@@ -197,7 +203,7 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("dnt", "1")
 	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Walmart/2105142140 CFNetwork/1209 Darwin/20.2.0")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
@@ -219,9 +225,12 @@ func (m *Monitor) monitor() error {
 	if res.StatusCode != 200 {
 		if res.StatusCode == 412 {
 			fmt.Println("Blocked by PX")
+			m.useProxy = false
 			res.Body.Close()
 		}
 		return nil
+	} else {
+		m.useProxy = true
 	}
 	var monitorAvailability bool
 	monitorAvailability = false
