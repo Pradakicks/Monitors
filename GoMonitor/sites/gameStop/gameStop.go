@@ -168,7 +168,7 @@ func (m *Monitor) monitor() error {
 		}
 	}()
 
-	url := fmt.Sprintf("https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?dwvar_%s_condition=New&pid=%s&quantity=1&redesignFlag=true&rt=productDetailsRedesign", "11107421", "11107421")
+	url := fmt.Sprintf("https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?dwvar_%s_condition=New&pid=%s&quantity=1&redesignFlag=true&rt=productDetailsRedesign", m.Config.sku, m.Config.sku)
 
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -183,7 +183,6 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "same-origin")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	req.Header.Add("referer", "https://www.gamestop.com/video-games/pc-gaming/virtual-reality/products/oculus-quest-2-64gb/11107421.html")
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
 
 	res, _ := http.DefaultClient.Do(req)
