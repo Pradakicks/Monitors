@@ -1008,7 +1008,7 @@ async function checkPresentSkus(){
 				}
 				console.log(currentBody)
 				startGoMonitor(currentBody, site)
-				await delay(5000)
+				await delay(15000)
 			}
 		}
 		
