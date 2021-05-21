@@ -121,19 +121,8 @@ function SKUADD(clients, triggerText, replyText) {
 
 						}
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/target`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
+						
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						await pushSku({
 							sku: SKU,
@@ -170,17 +159,7 @@ function SKUADD(clients, triggerText, replyText) {
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/newEgg`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 							await pushSku({
 								sku: SKU,
@@ -212,17 +191,7 @@ function SKUADD(clients, triggerText, replyText) {
 	
 							}
 							console.log(currentBody)
-								try {
-								rp.post({
-								url : `http://localhost:${port}/gameStop`,
-								body : JSON.stringify(currentBody),
-								headers : {
-									"Content-Type": "application/json"
-								}
-							})
-								} catch (error) {
-									console.log(error)
-								}
+							startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'WALMART') {
 						console.log(pricerange)
 							let currentBody = {
@@ -255,21 +224,7 @@ function SKUADD(clients, triggerText, replyText) {
 							}]
 							})
 							console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/walmart`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						
-
-						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
-						// monitor.task()
+							startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						await pushSku({
 							sku: SKU,
@@ -305,18 +260,7 @@ function SKUADD(clients, triggerText, replyText) {
 							console.log(err)
 						})
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/bestBuy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-	
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'BIGLOTS') {
 						await pushSku({
 							sku: SKU,
@@ -347,22 +291,8 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/bigLots`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						
-
-						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
-						// monitor.task()
+						console.log(currentBody)
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'TARGETNEW') {
 						await pushSku({
 							sku: SKU,
@@ -383,21 +313,7 @@ function SKUADD(clients, triggerText, replyText) {
 									  keywords : kw
 							}
 							console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/targetNew`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						
-
-						// let monitor = new walmartMonitor(SKU.toString(), pricerange)
-						// monitor.task()
+							startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'ACADEMY') {
 						await pushSku({
 							sku: SKU,
@@ -431,19 +347,7 @@ function SKUADD(clients, triggerText, replyText) {
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/academy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'AMD') {
 						await pushSku({
 							sku: SKU,
@@ -477,19 +381,7 @@ function SKUADD(clients, triggerText, replyText) {
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/amd`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
 						await pushSku({
 							sku: SKU,
@@ -505,8 +397,6 @@ function SKUADD(clients, triggerText, replyText) {
 								companyImage : currentCompany?.companyImage
 							}]
 						})
-						// let monitor = new newEggMonitor(SKU.toString())
-						// monitor.task()
 							let currentBody = {
 								  	site: "Slick Deals",
 									sku: SKU,
@@ -522,25 +412,11 @@ function SKUADD(clients, triggerText, replyText) {
 							currentBody.priceRangeMin = 1
 
 						}
-							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/slick`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
 					}
-				message.channel.send(`${SKU} Added to ${site}`)
+					message.channel.send(`${SKU} Added to ${site}`)
 					}
-				
 				}
 				} else {
 					message.channel.send(`${message.author} is not a validated user`)
@@ -618,21 +494,26 @@ function checkBank (clients, triggerText, replyText){
 					}
 				})
 				if(isValidated){
-					let skuBank = await getSkuBank()
-				let string = (skuBank)
-				let skuString = ''
+				let skuBank = await getSkuBank()
 				if(skuBank.length != 0){
 					let bankArr = []
 					let sites = Object.keys(skuBank)
+					console.log(group)
 					sites?.forEach(e =>{
 						if (e != "-M_bpveXSTSxZkahEQkQ"){
 							let currentSkus = Object.keys(skuBank[e])
-							currentSkus.forEach(e =>{
-								bankArr.push(e?.original)
+							currentSkus.forEach(sku => {
+								skuBank[e][sku]?.companies?.forEach(company =>{
+									if (company.company == group){
+										bankArr.push(`${e}-${sku}-${group}`)
+									}
+								})
 							})
 							}
 					})
-				await fs.appendFile(`monitorBank-${message.author.username}.txt`, JSON.stringify(skuBank, null, 2) , err => {
+					console.log(bankArr)
+					
+				await fs.appendFile(`monitorBank-${message.author.username}.txt`, JSON.stringify(bankArr, null, 2) , err => {
 						if(err) message.content.send('Error While Creating Text Document')
 								else console.log("File Sent")
 				})
@@ -672,39 +553,6 @@ function massAdd (clients, triggerText, replyText){
 		console.log(error);
 	}
 }
-
-async function getProxies () {
-								try {
-						// read contents of the file
-						let proxyList = []
-						const data = await fs.readFile('proxies.txt', 'utf-8');
-
-						const lines = data.split(/\r?\n/);
-
-						// print all lines
-						lines.forEach((line) => {
-							const lineSplit = line.split(':');
-							const item1 = {
-								ip : lineSplit[0],
-								port: lineSplit[1],
-								userAuth: lineSplit[2],
-								userPass: lineSplit[3],
-							};
-							proxyList.push(item1);
-
-							// console.log(line);
-							// console.log(item1);
-							// console.log('\n\n\n\n\n');
-						});
-						return proxyList;
-					} catch (err) {
-						console.error(err);
-						fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
-							console.log(err)
-						}))
-					}
-}
-
 async function getSku (skuName, proxyList) {
         try {
                    console.log(skuName)
@@ -742,7 +590,19 @@ async function getSku (skuName, proxyList) {
                     await getSku()
                 }
 }
-
+async function startGoMonitor(currentBody, site){
+	try {
+		rp.post({
+			url : `http://localhost:${port}/${site}`,
+			body : JSON.stringify(currentBody),
+			headers : {
+				"Content-Type": "application/json"
+			}
+		}, (response) => console.log(response?.statusCode))
+	} catch (error) {
+		console.log(`Error Starting Go Monitor ${error}`)
+	}
+}
 async function mass (string , content, message, groupName){
 	//	const SKU = content.split(' ')[2];
 			//	console.log(site)
@@ -853,19 +713,7 @@ async function mass (string , content, message, groupName){
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/target`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'NEWEGG') {
 						await pushSku({
 							sku: SKU,
@@ -900,20 +748,8 @@ async function mass (string , content, message, groupName){
 							currentBody.priceRangeMin = 1
 	
 						}
-						
-							try {
-							rp.post({
-							url : `http://localhost:${port}/newEgg`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new newEggMonitor(g[i].toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
+
 					} else if (site.toUpperCase() == 'GAMESTOP') {
 						await pushSku({
 							sku: SKU,
@@ -945,17 +781,8 @@ async function mass (string , content, message, groupName){
 
 						}
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/gameStop`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
+						startGoMonitor(currentBody, site.toUpperCase())
+
 					} else if (site.toUpperCase() == 'AMD') {
 							await pushSku({
 							sku: SKU,
@@ -990,19 +817,8 @@ async function mass (string , content, message, groupName){
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/amd`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
+
 					} else if (site.toUpperCase() == 'WALMART') {
 						await pushSku({
 							sku: SKU,
@@ -1036,19 +852,8 @@ async function mass (string , content, message, groupName){
 						}
 							
 							console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/walmart`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new walmartMonitor(g[i].toString())
-						// monitor.task()
+							startGoMonitor(currentBody, site.toUpperCase())
+
 						await delay(30000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						await pushSku({
@@ -1082,22 +887,7 @@ async function mass (string , content, message, groupName){
 							currentBody.priceRangeMin = 1
 	
 						}
-							await fs.writeFile('./GoMonitor/GoMonitors.json', JSON.stringify(skuBank), err => {
-							console.log(err)
-						})
-						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/bestBuy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-	
+						startGoMonitor(currentBody, site.toUpperCase())
 					} else if (site.toUpperCase() == 'ACADEMY') {
 						await pushSku({
 							sku: SKU,
@@ -1132,19 +922,8 @@ async function mass (string , content, message, groupName){
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/academy`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
+
 					} else if (site.toUpperCase() == 'SLICKDEALS' || site.toUpperCase() == 'SLICK' || site.toUpperCase() == 'SLICKDEAL') {
 						await pushSku({
 							sku: SKU,
@@ -1179,19 +958,7 @@ async function mass (string , content, message, groupName){
 						}
 							
 						console.log(currentBody)
-							try {
-							rp.post({
-							url : `http://localhost:${port}/slick`,
-							body : JSON.stringify(currentBody),
-							headers : {
-								"Content-Type": "application/json"
-							}
-						})
-							} catch (error) {
-								console.log(error)
-							}
-						// let monitor = new targetMonitor(SKU.toString())
-						// monitor.task()
+						startGoMonitor(currentBody, site.toUpperCase())
 					}
 					}
 				await delay(30000)
@@ -1210,32 +977,45 @@ async function checkPresentSkus(){
 		url : `${pushEndpoint}.json`
 	})
 	skuBank = JSON.parse(skuBank?.body)
-	let deleteDB = await rp.delete({
-			url : `${pushEndpoint}/.json`
-		})
 	await delay(3000)
-		let initDB = await rp.post({
-			url : `${pushEndpoint}.json`,
-			body : JSON.stringify({init : "initialized"}),
-		})
-	console.log(deleteDB?.statusCode)
-	//console.log(skuBank)
 	let sites = Object.keys(skuBank)
-	console.log(sites)
-	sites.forEach(e => {
-		let string = `!massAdd ${e}|\n`
-		let skus = Object.keys(skuBank[e])
-		console.log(skus)
-		skus.forEach(d => {
-			string = string + `${skuBank[e][d].original}\n`
-		})
-		console.log(string)
-		mass({string : string, content : string, groupName : "Jigged"})
-		// skuBank[e]
+	sites.forEach(async (e) => {
+		if(site != "-M_iJkLwZh3hW5Pjys5Z"){
+			let site = e
+			let skus = Object.keys(skuBank[e])
+			for(let i = 0; i < skus.length; i++) {
+				let s = skus[i]
+				let currentSku = skuBank[site][s].original
+				let pricerange = ''
+				if(currentSku?.includes('[') && site?.toUpperCase() !== "TARGETNEW"){
+					pricerange = currentSku?.split('[')[1]?.split(']')[0]
+					currentSku = currentSku?.split('[')[0]
+				}
+				let currentBody = {
+					site: site,
+				  sku: currentSku?.trim(),
+				  priceRangeMin: parseInt(pricerange?.split(',')[0]),
+				  priceRangeMax: parseInt(pricerange?.split(',')[1]),
+				  }
+				  if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+					console.log("No Max Price Range Detected")
+					currentBody.priceRangeMax = 100000
+	
+				} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+					console.log("No Min Price Range Detected")
+					currentBody.priceRangeMin = 1
+	
+				}
+				console.log(currentBody)
+				startGoMonitor(currentBody, site)
+				await delay(5000)
+			}
+		}
+		
+		
 	})
-	//skuBank
 }
- // checkPresentSkus()
+checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
@@ -1361,6 +1141,37 @@ async function validateUser(clients, triggerText, replyText){
 //-----------------------------------------------------------------
 function replaceWithTheCapitalLetter(values){
 				return values.charAt(0).toUpperCase() + values.slice(1);
+}
+async function getProxies () {
+	try {
+// read contents of the file
+let proxyList = []
+const data = await fs.readFile('proxies.txt', 'utf-8');
+
+const lines = data.split(/\r?\n/);
+
+// print all lines
+lines.forEach((line) => {
+const lineSplit = line.split(':');
+const item1 = {
+	ip : lineSplit[0],
+	port: lineSplit[1],
+	userAuth: lineSplit[2],
+	userPass: lineSplit[3],
+};
+proxyList.push(item1);
+
+// console.log(line);
+// console.log(item1);
+// console.log('\n\n\n\n\n');
+});
+return proxyList;
+} catch (err) {
+console.error(err);
+fs.appendFileSync('./errors.txt', error.toString() + '\n', (err =>{
+console.log(err)
+}))
+}
 }
 module.exports = {
 	SKUADD,

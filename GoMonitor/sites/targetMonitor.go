@@ -254,7 +254,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			m.monitor()
 			watch.Stop()
 			fmt.Printf("Target : %t : %s : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, watch.Milliseconds())
-			time.Sleep(250 * (time.Millisecond))
+			time.Sleep(150 * (time.Millisecond))
 
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")

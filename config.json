@@ -13,16 +13,17 @@
     "NEWEGG" : "https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW",
     "BESTBUY" :"https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW",
     "WALMART" : "https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW",
+    "TARGETNEW" : "https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW",
     "companyImage" : "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png",
     "companyColor" : "1752220"
     },
     "Jigged" : {
         "TARGET" : "https://discord.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd",
+        "TARGETNEW" : "https://discord.com/api/webhooks/833902775196450818/wCEYgKpT7eJaOtNERfwe5AlietWcFomGp10zTP3JyDEc8Kk3f2ujqY-BpdXPmpQYANiT",
         "NEWEGG" : "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t",
         "BESTBUY" :"https://discord.com/api/webhooks/827263591114997790/chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY",
         "WALMART" : "https://discord.com/api/webhooks/826289643455643658/tRuYU2WQGSoyD5gH2QL8dKecI59F8IyH_wds5_pio7pOst79cBWs6wEe0jdkGI1qeYMC",
         "ACADEMY" : "https://discord.com/api/webhooks/838637042119213067/V7WQ7z-9u32rNh5SO4YyxS5kibcHadXW4FxjVJTosO5cSGRoSqv4CY5g3GrAcIcwZhkF",
-        "TARGETNEW" : "https://discord.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd",
         "GAMESTOP" : "https://discord.com/api/webhooks/844572421390729299/-2gkbUud7p77IrrwjllUZyeNWwbneE9Moom9NJMdK83NYyt1EABt-c7emIsplmt9yHEG",
         "companyImage" : "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png",
         "companyColor" : "507758"
@@ -34,6 +35,7 @@
         "WALMART" : "https://discord.com/api/webhooks/843879053182107678/wLAsdHlSyvvbAh-1qau7bYjQoedPXpsMRP97iQlG4iyVGKzz6sEDxxluAMF0eyDt67sb",
         "ACADEMY" : "https://discord.com/api/webhooks/843879377451614300/8W_YCZxePgv2DN6q8p-x6ZA0DquhCaGHU7obbuzhjoCl-I2wZWEbyTH6L7Lsx42SoFTn",
         "TARGETNEW" : "https://discord.com/api/webhooks/826281048480153641/rmifnt8w6NKFainUqAsE16RZM1LzNGrPdUB0jP5M3PJwm0hRvRmemyrqr0FdrZEBMOmd",
+        "GAMESTOP" : "https://discord.com/api/webhooks/844572421390729299/-2gkbUud7p77IrrwjllUZyeNWwbneE9Moom9NJMdK83NYyt1EABt-c7emIsplmt9yHEG",
         "companyImage" : "https://cdn.discordapp.com/attachments/780853356092588062/843906739492749312/Arial_Alerts_Social_PFP_by_iamnotsrc.png",
         "companyColor" : "15277667"
         }
