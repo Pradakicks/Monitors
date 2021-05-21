@@ -139,7 +139,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 		}()
 
 		if !m.stop {
-			if(m.useProxy){
+			if m.useProxy {
 				currentProxy := m.getProxy(proxyList)
 				splittedProxy := strings.Split(currentProxy, ":")
 				proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
@@ -157,7 +157,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			} else {
 				m.Client.Transport = http.DefaultTransport
 			}
-			
+
 			m.monitor()
 			// time.Sleep(500 * (time.Millisecond))
 			// fmt.Println(m.Availability)
@@ -233,6 +233,7 @@ func (m *Monitor) monitor() error {
 		m.useProxy = true
 	}
 	var monitorAvailability bool
+	var walmartOffer string
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
@@ -240,6 +241,21 @@ func (m *Monitor) monitor() error {
 		// return nil
 	}
 	res.Body.Close()
+	walmartOffers, err := parser.QueryToMap("payload.sellers")
+	for key, _ := range walmartOffers {
+		if err != nil {
+			fmt.Println(err)
+		}
+		sell := fmt.Sprintf("payload.sellers.%s.sellerName", key)
+		sellerName, err := parser.QueryToString(sell)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if sellerName == "Walmart.com" {
+			walmartOffer = key
+		}
+	}
+
 	selectedProduct, err := parser.Query("payload.selected.product")
 	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
 	name, err := parser.Query(par)
@@ -285,14 +301,17 @@ func (m *Monitor) monitor() error {
 					fmt.Println(err)
 					break
 				}
+				
+				currentSellerId, err := parser.Query(fmt.Sprintf("payload.offers.%s.sellerId", key))
 				currentPrice1 = int(CP.(float64))
 				if err != nil {
 					fmt.Println(err)
 
 					break
 				}
-				if currentAvailability == "IN_STOCK" && m.Config.priceRangeMin < currentPrice1 && currentPrice1 < m.Config.priceRangeMax {
-					fmt.Println(currentAvailability, m.Config.priceRangeMin, currentPrice1, m.Config.priceRangeMax)
+				// fmt.Println(key, walmartOffer)
+				if currentAvailability == "IN_STOCK" &&  currentSellerId == walmartOffer {
+					fmt.Println(currentAvailability, key, walmartOffer)
 					monitorAvailability = true
 					m.monitorProduct.offerId = key
 					m.monitorProduct.price = currentPrice1
@@ -301,7 +320,7 @@ func (m *Monitor) monitor() error {
 		}
 	}
 	watch.Stop()
-	fmt.Printf("Walmart : %t %s %d %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
+	fmt.Printf("Walmart : %t %s %d %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, watch.Milliseconds())
 
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
