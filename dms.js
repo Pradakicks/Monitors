@@ -980,7 +980,7 @@ async function checkPresentSkus(){
 	await delay(3000)
 	let sites = Object.keys(skuBank)
 	sites.forEach(async (e) => {
-		if(site != "-M_iJkLwZh3hW5Pjys5Z"){
+		if(e != "-M_iJkLwZh3hW5Pjys5Z"){
 			let site = e
 			let skus = Object.keys(skuBank[e])
 			for(let i = 0; i < skus.length; i++) {
