@@ -442,7 +442,6 @@ function deleteSku(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
 			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
-				// message.author.send(replyText);
 				const content = message.content;
 				const site = content.split(' ')[1];
 				const SKU = content.split(' ')[2];
@@ -455,16 +454,14 @@ function deleteSku(clients, triggerText, replyText) {
 				if(currentBody === undefined){
 					message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
 				} else {
-					message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
+				message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
 				console.log(currentBody)
 				currentBody.stop = true
 				console.log(currentBody)
 				await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
 				await delay(10000)
 				await deleteSkuEnd(site, SKU)
-				// console.log(skuBank)
 				message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
-				
 				}
 				return;
 
@@ -1015,7 +1012,7 @@ async function checkPresentSkus(){
 		
 	})
 }
-checkPresentSkus()
+// checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
@@ -1146,7 +1143,7 @@ async function getProxies () {
 	try {
 // read contents of the file
 let proxyList = []
-const data = await fs.readFile('proxies.txt', 'utf-8');
+const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
 
 const lines = data.split(/\r?\n/);
 
