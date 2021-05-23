@@ -156,7 +156,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
 	go m.checkStop()
-	time.Sleep(5000 * (time.Millisecond))
+	time.Sleep(3000 * (time.Millisecond))
 	i := true
 	for i == true {
 		defer func() {

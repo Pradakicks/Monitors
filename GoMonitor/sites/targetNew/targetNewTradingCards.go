@@ -182,7 +182,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 	//fmt.Println(m)
 	i := true
 	go m.checkStop()
-	time.Sleep(5000 * (time.Millisecond))
+	time.Sleep(3000 * (time.Millisecond))
 	for i == true {
 		defer func() {
 			if r := recover(); r != nil {

@@ -127,7 +127,7 @@ func NewMonitor() *Monitor {
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
 	go m.checkStop()
-	time.Sleep(5000 * (time.Millisecond))
+	time.Sleep(3000 * (time.Millisecond))
 	i := true
 	for i == true {
 		defer func() {
@@ -447,7 +447,7 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 			productlink = "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png"
 		} else if !strings.Contains(productlink, "slickdeals.net/?") {
 			productlink = strings.Split(productlink, "?")[0]
-			
+
 		} else {
 			productlink = m.getRealLink(productlink)
 		}

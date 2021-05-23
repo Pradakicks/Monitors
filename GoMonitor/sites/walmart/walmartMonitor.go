@@ -128,7 +128,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
 	go m.checkStop()
-	time.Sleep(5000 * (time.Millisecond))
+	time.Sleep(3000 * (time.Millisecond))
 
 	i := true
 	for i == true {
@@ -302,7 +302,7 @@ func (m *Monitor) monitor() error {
 					fmt.Println(err)
 					break
 				}
-				
+
 				currentSellerId, err := parser.Query(fmt.Sprintf("payload.offers.%s.sellerId", key))
 				currentPrice1 = int(CP.(float64))
 				if err != nil {
@@ -311,7 +311,7 @@ func (m *Monitor) monitor() error {
 					break
 				}
 				// fmt.Println(key, walmartOffer)
-				if currentAvailability == "IN_STOCK" &&  currentSellerId == walmartOffer {
+				if currentAvailability == "IN_STOCK" && currentSellerId == walmartOffer {
 					fmt.Println(currentAvailability, key, walmartOffer)
 					monitorAvailability = true
 					m.monitorProduct.offerId = key

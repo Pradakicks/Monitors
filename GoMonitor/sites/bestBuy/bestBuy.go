@@ -116,7 +116,7 @@ func NewMonitor(sku string) *Monitor {
 	m.Availability = "SOLD_OUT"
 	var err error
 	//	m.Client = http.Client{Timeout: 5 * time.Second}
-	m.Config.site = "Best Buy"
+	m.Config.site = "BestBuy"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
@@ -162,7 +162,7 @@ func NewMonitor(sku string) *Monitor {
 	//fmt.Println(m)
 	i := true
 	go m.checkStop()
-	time.Sleep(5000 * (time.Millisecond))
+	time.Sleep(3000 * (time.Millisecond))
 	for i == true {
 		defer func() {
 			if r := recover(); r != nil {
@@ -204,23 +204,6 @@ func (m *Monitor) monitor() error {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	//	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	//     }
-	//   }()
-	// url := "https://httpbin.org/ip"
-
-	// req, _ := http.NewRequest("GET", url, nil)
-
-	// res, _ := m.Client.Do(req)
-
-	// defer res.Body.Close()
-	// body, _ := ioutil.ReadAll(res.Body)
-
-	// fmt.Println(res)
-	// fmt.Println(string(body))
 
 	url := fmt.Sprintf("https://www.bestbuy.com/api/3.0/priceBlocks?skus=%s", m.Config.sku)
 	fmt.Println(url)
@@ -274,7 +257,7 @@ func (m *Monitor) monitor() error {
 	m.monitorProduct.price = int(realBody[0].Sku.Price.CurrentPrice)
 	if m.Availability == "SOLD_OUT" && monitorAvailability == "ADD_TO_CART" {
 		fmt.Println("Item in Stock")
-		m.sendWebhook()
+		go m.sendWebhook()
 	}
 	if m.Availability == "ADD_TO_CART" && monitorAvailability == "SOLD_OUT" {
 		fmt.Println("Item Out Of Stock")
@@ -325,7 +308,6 @@ func (m *Monitor) sendWebhook() error {
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	return nil
 }
-
 func (m *Monitor) getProductDetails() {
 	defer func() {
 		if r := recover(); r != nil {
