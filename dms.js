@@ -1012,7 +1012,7 @@ async function checkPresentSkus(){
 		
 	})
 }
-checkPresentSkus()
+ checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`

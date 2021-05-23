@@ -109,10 +109,10 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Availability = false
 	var err error
 	m.Client = http.Client{Timeout: 5 * time.Second}
-	m.Config.site = "New Egg"
+	m.Config.site = "NewEgg"
 	m.Config.startDelay = 3000
-	m.Config.sku = skuName
-	m.Config.skuName = sku
+	m.Config.sku = sku
+	m.Config.skuName = skuName
 	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t"
@@ -161,7 +161,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	for i == true {
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 			}
 		}()
 
@@ -185,7 +185,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 			time.Sleep(500 * (time.Millisecond))
 			// fmt.Println(m.Availability)
 		} else {
-			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
+			fmt.Println(m.Config.skuName, "STOPPED STOPPED STOPPED")
 			i = false
 		}
 
@@ -196,13 +196,13 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 func (m *Monitor) monitor() error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 		}
 	}()
 	//	fmt.Println("Monitoring")
 	// 	defer func() {
 	//      if r := recover(); r != nil {
-	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 	//     }
 	//   }()
 	// url := "https://httpbin.org/ip"
@@ -217,7 +217,7 @@ func (m *Monitor) monitor() error {
 	// fmt.Println(res)
 	// fmt.Println(string(body))
 
-	url := fmt.Sprintf("https://www.newegg.com/product/api/ProductRealtime?ItemNumber=%s", m.Config.sku)
+	url := fmt.Sprintf("https://www.newegg.com/product/api/ProductRealtime?ItemNumber=%s", m.Config.skuName)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -284,7 +284,7 @@ func (m *Monitor) monitor() error {
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 		}
 	}()
 	//fmt.Scanln()
@@ -303,7 +303,7 @@ func (m *Monitor) sendWebhook() error {
 	// currentTime := strings.Split(now.String(), "-0400")[0]
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 		}
 	}()
 	for _, letter := range m.monitorProduct.name {
@@ -313,7 +313,7 @@ func (m *Monitor) sendWebhook() error {
 	}
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
-		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.stockNumber, "test", m.monitorProduct.image)
+		go webHookSend(comp, m.Config.site, m.Config.skuName, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.stockNumber, "test", m.monitorProduct.image)
 	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	return nil
@@ -401,10 +401,11 @@ func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.skuName, r)
 			}
 		}()
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
+		fmt.Println(url)
 		req, _ := http.NewRequest("GET", url, nil)
 		res, _ := http.DefaultClient.Do(req)
 
