@@ -11,6 +11,7 @@ const rp = require('request-promise').defaults({
 	gzip: true,
 });
 const port = 7243
+const secondServer = `http://ec2-18-206-214-212.compute-1.amazonaws.com`
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
@@ -589,13 +590,26 @@ async function getSku (skuName, proxyList) {
 }
 async function startGoMonitor(currentBody, site){
 	try {
-		rp.post({
-			url : `http://localhost:${port}/${site}`,
-			body : JSON.stringify(currentBody),
-			headers : {
-				"Content-Type": "application/json"
-			}
-		}, (response) => console.log(response?.statusCode))
+		switch(site){
+			case "TARGET":
+				rp.post({
+					url : `${secondServer}:${port}/${site}`,
+					body : JSON.stringify(currentBody),
+					headers : {
+						"Content-Type": "application/json"
+					}
+				}, (response) => console.log(response?.statusCode))
+				break
+			default:
+				rp.post({
+					url : `http://localhost:${port}/${site}`,
+					body : JSON.stringify(currentBody),
+					headers : {
+						"Content-Type": "application/json"
+					}
+				}, (response) => console.log(response?.statusCode))
+		}
+		
 	} catch (error) {
 		console.log(`Error Starting Go Monitor ${error}`)
 	}
