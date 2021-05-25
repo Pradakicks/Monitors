@@ -233,21 +233,22 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
+		res.Body.Close()
 		return nil
 	}
 	//	fmt.Println(res)
 	if res.StatusCode != 200 {
 		watch.Stop()
 		fmt.Printf("Best Buy : %s : %s : Milliseconds elapsed: %v\n", m.Config.sku, watch.Milliseconds(), res.StatusCode)
+		res.Body.Close()
 		return nil
 	}
 	var realBody bestBuyResponse
 	err = json.Unmarshal([]byte(body), &realBody)
+	res.Body.Close()
 	if err != nil {
 		fmt.Println(err)
 

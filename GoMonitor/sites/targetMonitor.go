@@ -306,6 +306,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	if res.StatusCode == 404 || res.StatusCode == 429 {
+		res.Body.Close()
 		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode)
 		return nil
 	} else {
