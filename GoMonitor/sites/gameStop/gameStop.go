@@ -144,7 +144,8 @@ func NewMonitor(sku string) *Monitor {
 			m.Client.Transport = defaultTransport
 			m.monitor()
 			fmt.Println("Gamestop : ", m.Availability, m.Config.sku, m.statusCode)
-		} else {
+			time.Sleep(250 * (time.Millisecond))
+	} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
