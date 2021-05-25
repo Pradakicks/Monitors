@@ -181,9 +181,9 @@ func (m *Monitor) monitor() error {
 
 	res, _ := m.Client.Do(req)
 	m.statusCode = res.StatusCode
-	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)
 	parser, err := gojq.NewStringQuery(string(body))
+	res.Body.Close()
 	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
 	m.monitorProduct.name, err = parser.QueryToString("gtmData.productInfo.name")
 	m.monitorProduct.sku, err = parser.QueryToString("gtmData.productInfo.sku")
