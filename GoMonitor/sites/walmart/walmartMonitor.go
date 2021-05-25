@@ -229,6 +229,8 @@ func (m *Monitor) monitor() error {
 			m.useProxy = false
 			res.Body.Close()
 		}
+		watch.Stop()
+		fmt.Printf("Walmart : %s %d %s : Milliseconds elapsed: %v\n", m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())	
 		return nil
 	} else {
 		m.useProxy = true

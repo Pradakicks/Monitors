@@ -258,7 +258,6 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal([]byte(body), &realBody)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	// fmt.Println(realBody)

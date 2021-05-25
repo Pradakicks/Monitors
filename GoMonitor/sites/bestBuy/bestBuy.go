@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bradhe/stopwatch"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -199,6 +200,7 @@ func NewMonitor(sku string) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
+	watch := stopwatch.Start()
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -239,8 +241,9 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	//	fmt.Println(res)
-	fmt.Println("Best Buy", res.StatusCode)
 	if res.StatusCode != 200 {
+		watch.Stop()
+		fmt.Printf("Best Buy : %s : %s : Milliseconds elapsed: %v\n", m.Config.sku, watch.Milliseconds(), res.StatusCode)
 		return nil
 	}
 	var realBody bestBuyResponse
@@ -255,6 +258,8 @@ func (m *Monitor) monitor() error {
 	monitorAvailability = realBody[0].Sku.ButtonState.ButtonState
 	m.monitorProduct.name = realBody[0].Sku.Names.Short
 	m.monitorProduct.price = int(realBody[0].Sku.Price.CurrentPrice)
+	watch.Stop()
+	fmt.Printf("Best Buy : %s : %s : Milliseconds elapsed: %v\n", m.Config.sku, watch.Milliseconds(), res.StatusCode)
 	if m.Availability == "SOLD_OUT" && monitorAvailability == "ADD_TO_CART" {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()
