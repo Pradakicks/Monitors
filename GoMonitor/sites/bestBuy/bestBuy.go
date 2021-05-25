@@ -344,11 +344,11 @@ func (m *Monitor) getProductDetails() {
 
 		return
 	}
-	defer res.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
+	res.Body.Close()
 	m.monitorProduct.image = doc.Find(".primary-image").AttrOr("src", "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png")
 	fmt.Println(m.monitorProduct.image)
 }
