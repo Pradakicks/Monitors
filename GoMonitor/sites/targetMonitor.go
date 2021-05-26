@@ -189,11 +189,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	go m.checkStop()
 	time.Sleep(3000 * (time.Millisecond))
 	for i == true {
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-			}
-		}()
 		if !m.stop {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
