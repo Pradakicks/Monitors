@@ -248,7 +248,7 @@ func (m *Monitor) monitor() error {
 	}
 	if res.StatusCode == 404 || res.StatusCode == 429 {
 		res.Body.Close()
-		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode)
+		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode, m.monitorProduct.image)
 		return nil
 	} else {
 		fmt.Println("Target : ", m.Availability, m.Config.sku, res.StatusCode)
@@ -276,7 +276,7 @@ func (m *Monitor) monitor() error {
 	}
 	m.monitorProduct.stockNumber = int(realBody.Data.Product.Fulfillment.ShippingOptions.AvailableToPromiseQuantity)
 	//	m.monitorProduct.price = realBody.Data.Product.Fulfillment.
-	fmt.Println(m.monitorProduct.image)
+	
 	// log.Printf("%+v", m.Availability)
 	if m.Availability == false && m.currentAvailability == true {
 		fmt.Println("Item in Stock")
