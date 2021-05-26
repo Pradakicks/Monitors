@@ -34,7 +34,7 @@ func Get() []string {
 	}
 //	fmt.Println(proxies)
 	for _, proxy := range proxies {
-		fmt.Println(proxy)
+	//	fmt.Println(proxy)
 		proxyList = append(proxyList, proxy)
 	}
 	return proxyList
