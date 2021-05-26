@@ -180,6 +180,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
+	m.monitorProduct.image = "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png"
 	m.getProductImage(sku)
 	proxyList := FetchProxies.Get()
 	// fmt.Println(timeout)
@@ -249,6 +250,9 @@ func (m *Monitor) monitor() error {
 	if res.StatusCode == 404 || res.StatusCode == 429 {
 		res.Body.Close()
 		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode, m.monitorProduct.image)
+		if m.monitorProduct.image == "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png" {
+			fmt.Println("KJF:LKJD:LKJF:LSKDJF:KDJLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLKJF:LKJD:LKJF:LSKDJF:KDJLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLKJF:LKJD:LKJF:LSKDJF:KDJLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLKJF:LKJD:LKJF:LSKDJF:KDJLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLKJF:LKJD:LKJF:LSKDJF:KDJLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
+		}
 		return nil
 	} else {
 		fmt.Println("Target : ", m.Availability, m.Config.sku, res.StatusCode)
@@ -281,7 +285,10 @@ func (m *Monitor) monitor() error {
 	if m.Availability == false && m.currentAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-		
+		if m.monitorProduct.image == "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png" {
+			m.getProductImage(m.Config.sku)
+			m.sendWebhook()
+		}
 	}
 	if m.Availability == true && m.currentAvailability == false {
 		fmt.Println("Item Out Of Stock")
