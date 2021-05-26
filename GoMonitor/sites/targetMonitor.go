@@ -163,7 +163,7 @@ type Company struct {
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
+			fmt.Printf("Site : %s, Product : %s NEW MONITOR Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
 		}
 	}()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
@@ -249,7 +249,7 @@ func (m *Monitor) monitor() error {
 	}
 	if res.StatusCode == 404 || res.StatusCode == 429 {
 		res.Body.Close()
-		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode, m.monitorProduct.image)
+		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode)
 		return nil
 	} else {
 		fmt.Println("Target : ", m.Availability, m.Config.sku, res.StatusCode)
@@ -297,7 +297,7 @@ func (m *Monitor) monitor() error {
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s FETCHING PROXY Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
 	if m.Config.proxyCount+1 == len(proxyList) {
@@ -388,7 +388,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, sto
 func (m *Monitor) sendWebhook() error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s SENDING WEBHOOK Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
 	for _, letter := range m.monitorProduct.name {
@@ -410,7 +410,7 @@ func (m *Monitor) sendWebhook() error {
 func (m *Monitor) getProductImage(tcin string) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+			fmt.Printf("Site : %s, Product : %s  GETTING PRODUCT IMAGE Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
 	fmt.Println("Getting Product Image")
@@ -458,7 +458,7 @@ func (m *Monitor) checkStop() error {
 	for !m.stop {
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+				fmt.Printf("Site : %s, Product : %s  CHECK STOP Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 			}
 		}()
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
