@@ -596,7 +596,8 @@ async function getSku (skuName, proxyList) {
 async function startGoMonitor(currentBody, site){
 	try {
 		switch(site){
-			case "TARGET":
+			case "2341":
+		//	case "TARGET":
 			// case "GAMESTOP":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
