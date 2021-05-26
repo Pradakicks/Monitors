@@ -1,18 +1,18 @@
 package TargetNewTradingCards
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
 type Config struct {
@@ -132,7 +132,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 	// fmt.Println("TESTING", sku)
 	m := Monitor{}
 	m.Availability = false
-	var err error
+	// var err error
 	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Target New"
 	m.Config.startDelay = 3000
@@ -146,36 +146,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 	m.keywords = keywords
 	fmt.Println(keywords)
 
-	path := "cloud.txt"
-	var proxyList = make([]string, 0)
-	buf, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer func() {
-	// 	if err = buf.Close(); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
-
-	snl := bufio.NewScanner(buf)
-	for snl.Scan() {
-		proxy := snl.Text()
-		proxyList = append(proxyList, proxy)
-		splitProxy := strings.Split(string(proxy), ":")
-		newProxy := Proxy{}
-		newProxy.userAuth = splitProxy[2]
-		newProxy.userPass = splitProxy[3]
-		newProxy.ip = splitProxy[0]
-		newProxy.port = splitProxy[1]
-		//	go NewMonitor(newProxy)
-		//	time.Sleep(5 * time.Second)
-	}
-	buf.Close()
-	err = snl.Err()
-	if err != nil {
-		fmt.Println(err)
-	}
+	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"

@@ -1,11 +1,9 @@
 package GameStopMonitor
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,6 +11,7 @@ import (
 	"time"
 
 	"github.com/elgs/gojq"
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
 type Config struct {
@@ -66,13 +65,6 @@ type Company struct {
 	CompanyImage string `json:"companyImage"`
 }
 
-var file os.File
-
-// func walmartMonitor(sku string) {
-// 	go NewMonitor(sku, 1, 1000)
-// 	fmt.Scanln()
-// }
-
 func NewMonitor(sku string) *Monitor {
 	defer func() {
 		if r := recover(); r != nil {
@@ -82,7 +74,7 @@ func NewMonitor(sku string) *Monitor {
 	fmt.Println("TESTING")
 	m := Monitor{}
 	m.Availability = "Not Available"
-	var err error
+	// var err error
 	//	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "GameStop"
 	m.Config.startDelay = 3000
@@ -93,31 +85,7 @@ func NewMonitor(sku string) *Monitor {
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
 
-	path := "cloud.txt"
-	var proxyList = make([]string, 0)
-	buf, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	snl := bufio.NewScanner(buf)
-	for snl.Scan() {
-		proxy := snl.Text()
-		proxyList = append(proxyList, proxy)
-		splitProxy := strings.Split(string(proxy), ":")
-		newProxy := Proxy{}
-		newProxy.userAuth = splitProxy[2]
-		newProxy.userPass = splitProxy[3]
-		newProxy.ip = splitProxy[0]
-		newProxy.port = splitProxy[1]
-		//	go NewMonitor(newProxy)
-		//	time.Sleep(5 * time.Second)
-	}
-	buf.Close()
-	err = snl.Err()
-	if err != nil {
-		fmt.Println(err)
-	}
+	proxyList := FetchProxies.Get()
 	go m.checkStop()
 	time.Sleep(3000 * (time.Millisecond))
 	i := true
@@ -145,7 +113,7 @@ func NewMonitor(sku string) *Monitor {
 			m.monitor()
 			fmt.Println("Gamestop : ", m.Availability, m.Config.sku, m.statusCode)
 			time.Sleep(250 * (time.Millisecond))
-	} else {
+		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
 		}
@@ -155,11 +123,11 @@ func NewMonitor(sku string) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	// 	}
-	// }()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 
 	url := fmt.Sprintf("https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?dwvar_%s_condition=New&pid=%s&quantity=1&redesignFlag=true&rt=productDetailsRedesign", m.Config.sku, m.Config.sku)
 	req, _ := http.NewRequest("GET", url, nil)
@@ -181,6 +149,10 @@ func (m *Monitor) monitor() error {
 
 	res, _ := m.Client.Do(req)
 	m.statusCode = res.StatusCode
+	if res.StatusCode != 200 {
+		res.Body.Close()
+		return nil
+	}
 	body, _ := ioutil.ReadAll(res.Body)
 	parser, err := gojq.NewStringQuery(string(body))
 	res.Body.Close()
@@ -207,12 +179,11 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	// 	}
-	// }()
-
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 	//fmt.Scanln()
 	// rand.Seed(time.Now().UnixNano())
 	// randomPosition := rand.Intn(len(proxyList)-0) + 0
@@ -225,12 +196,11 @@ func (m *Monitor) getProxy(proxyList []string) string {
 }
 
 func (m *Monitor) sendWebhook() error {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	// 	}
-	// }()
-
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
 	for _, letter := range m.monitorProduct.name {
 		if string(letter) == `"` {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)

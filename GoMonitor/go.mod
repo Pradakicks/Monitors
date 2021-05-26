@@ -15,6 +15,7 @@ require (
 	github.com/itchyny/gojq v0.12.3 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
+	github.com/mattia-git/go-capmonster v0.0.0-20210410140216-2fc1b3384941 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/pbnjay/strptime v0.0.0-20140226051138-5c05b0d668c9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

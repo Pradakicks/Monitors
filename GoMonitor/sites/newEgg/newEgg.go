@@ -1,16 +1,16 @@
 package NewEggMonitor
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
 type Config struct {
@@ -91,13 +91,6 @@ type NewEggResponse struct {
 	} `json:"MainItem"`
 }
 
-var file os.File
-
-// func walmartMonitor(sku string) {
-// 	go NewMonitor(sku, 1, 1000)
-// 	fmt.Scanln()
-// }
-
 func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int) *Monitor {
 	defer func() {
 		if r := recover(); r != nil {
@@ -107,7 +100,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	fmt.Println("TESTING", sku, skuName, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
-	var err error
+	// var err error
 	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "NewEgg"
 	m.Config.startDelay = 3000
@@ -121,36 +114,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
 
-	path := "cloud.txt"
-	var proxyList = make([]string, 0)
-	buf, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer func() {
-	// 	if err = buf.Close(); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
-
-	snl := bufio.NewScanner(buf)
-	for snl.Scan() {
-		proxy := snl.Text()
-		proxyList = append(proxyList, proxy)
-		splitProxy := strings.Split(string(proxy), ":")
-		newProxy := Proxy{}
-		newProxy.userAuth = splitProxy[2]
-		newProxy.userPass = splitProxy[3]
-		newProxy.ip = splitProxy[0]
-		newProxy.port = splitProxy[1]
-		//	go NewMonitor(newProxy)
-		//	time.Sleep(5 * time.Second)
-	}
-	buf.Close()
-	err = snl.Err()
-	if err != nil {
-		fmt.Println(err)
-	}
+	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
