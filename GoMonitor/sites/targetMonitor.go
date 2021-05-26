@@ -276,12 +276,12 @@ func (m *Monitor) monitor() error {
 	}
 	m.monitorProduct.stockNumber = int(realBody.Data.Product.Fulfillment.ShippingOptions.AvailableToPromiseQuantity)
 	//	m.monitorProduct.price = realBody.Data.Product.Fulfillment.
-
+	fmt.Println(m.monitorProduct.image)
 	// log.Printf("%+v", m.Availability)
 	if m.Availability == false && m.currentAvailability == true {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-
+		
 	}
 	if m.Availability == true && m.currentAvailability == false {
 		fmt.Println("Item Out Of Stock")
@@ -414,21 +414,26 @@ func (m *Monitor) getProductImage(tcin string) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return
 	}
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
+		res.Body.Close()
 		return
 	}
-
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
+		res.Body.Close()
 		return
+	}
+	if res.StatusCode != 200 {
+	fmt.Println("FAILED FETCHING PRODUCT IMAGE : ", m.Config.site, m.Config.sku, res.StatusCode)
+	fmt.Println("FAILED FETCHING PRODUCT IMAGE : ", m.Config.site, m.Config.sku, res.StatusCode)
+	fmt.Println("FAILED FETCHING PRODUCT IMAGE : ", m.Config.site, m.Config.sku, res.StatusCode)
+	fmt.Println("FAILED FETCHING PRODUCT IMAGE : ", m.Config.site, m.Config.sku, res.StatusCode)
+	return
 	}
 	fmt.Println(res.StatusCode)
 	var realBody MyJsonName
@@ -436,7 +441,6 @@ func (m *Monitor) getProductImage(tcin string) {
 	res.Body.Close()
 	if err != nil {
 		fmt.Println(err)
-
 		return
 	}
 	m.monitorProduct.name = realBody.Data.Product.Item.ProductDescription.Title
@@ -454,15 +458,30 @@ func (m *Monitor) checkStop() error {
 			}
 		}()
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
-		req, _ := http.NewRequest("GET", url, nil)
-		res, _ := http.DefaultClient.Do(req)
-
-		body, _ := ioutil.ReadAll(res.Body)
-		var currentObject ItemInMonitorJson
-		err := json.Unmarshal(body, &currentObject)
+		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			fmt.Println(err)
+			return nil
+		}
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
 
+		}
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
+		}	
+		var currentObject ItemInMonitorJson
+		err = json.Unmarshal(body, &currentObject)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
 		}
 		m.stop = currentObject.Stop
 		m.CurrentCompanies = currentObject.Companies

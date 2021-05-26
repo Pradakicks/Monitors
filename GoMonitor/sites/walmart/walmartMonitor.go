@@ -299,15 +299,10 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-
-	//fmt.Scanln()
-	// rand.Seed(time.Now().UnixNano())
-	// randomPosition := rand.Intn(len(proxyList)-0) + 0
 	if m.Config.proxyCount+1 == len(proxyList) {
 		m.Config.proxyCount = 0
 	}
 	m.Config.proxyCount++
-	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
 
@@ -415,15 +410,30 @@ func (m *Monitor) checkStop() error {
 			}
 		}()
 		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
-		req, _ := http.NewRequest("GET", url, nil)
-		res, _ := http.DefaultClient.Do(req)
-
-		body, _ := ioutil.ReadAll(res.Body)
-		var currentObject ItemInMonitorJson
-		err := json.Unmarshal(body, &currentObject)
+		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			fmt.Println(err)
+			return nil
+		}
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
 
+		}
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
+		}
+		var currentObject ItemInMonitorJson
+		err = json.Unmarshal(body, &currentObject)
+		if err != nil {
+			fmt.Println(err)
+			res.Body.Close()
+			return nil
 		}
 		m.stop = currentObject.Stop
 		m.CurrentCompanies = currentObject.Companies
