@@ -236,7 +236,6 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		res.Body.Close()
 		return nil
 	}
 
