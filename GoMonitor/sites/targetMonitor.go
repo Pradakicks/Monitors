@@ -225,11 +225,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 func (m *Monitor) monitor() error {
 	//	fmt.Println("Monitoring")
 
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+	// 	}
+	// }()
 
 	url := fmt.Sprintf("https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=%s&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
