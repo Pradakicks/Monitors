@@ -235,21 +235,20 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
+		res.Body.Close()
 		return nil
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
+		res.Body.Close()	
 		return nil
 	}
 	if res.StatusCode == 404 || res.StatusCode == 429 {
@@ -267,8 +266,8 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
-
-		return nil
+		res.Body.Close()
+			return nil
 	}
 	res.Body.Close()
 	currentAvailability := realBody.Data.Product.Fulfillment.ShippingOptions.AvailabilityStatus
