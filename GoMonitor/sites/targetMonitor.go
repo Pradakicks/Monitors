@@ -486,7 +486,7 @@ func (m *Monitor) getProductImage(tcin string) {
 
 		return
 	}
-	defer res.Body.Close()
+	
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -496,6 +496,7 @@ func (m *Monitor) getProductImage(tcin string) {
 	fmt.Println(res.StatusCode)
 	var realBody MyJsonName
 	err = json.Unmarshal(body, &realBody)
+	res.Body.Close()
 	if err != nil {
 		fmt.Println(err)
 
