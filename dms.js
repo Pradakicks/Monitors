@@ -20,18 +20,7 @@ function SKUADD(clients, triggerText, replyText) {
 				let pricerange = ''
 				let kw = []
 				const content = message.content;
-				let validatedIds = await getValidatedIds()
-				let parsed = JSON.parse(validatedIds)
-				let isValidated = false
-				let group
-				parsed.ids.forEach(e =>{
-					let id = e?.split('-')[0]
-					console.log(id, message.author.id)
-					if (id == message.author.id) {
-						isValidated = true 
-						group = e?.split('-')[1]
-					}
-				})
+				const {group, isValidated} = await checkIfUserValidated(message)
 				console.log(group)
 				if(isValidated){
 				const site = content.split(' ')[1];
@@ -452,17 +441,33 @@ function deleteSku(clients, triggerText, replyText) {
 				let skuBank = await getSkuBank()
 				let caseSite = site.toUpperCase()
 				let currentBody = skuBank[caseSite][SKU]
+				const {group, isValidated} = await checkIfUserValidated(message)
+
 				if(currentBody === undefined){
 					message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
 				} else {
-				message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
-				console.log(currentBody)
-				currentBody.stop = true
-				console.log(currentBody)
-				await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
-				await delay(10000)
-				await deleteSkuEnd(site, SKU)
-				message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+					console.log("Current length")
+					console.log(currentBody.companies.length)
+					message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
+					if (currentBody.companies.length > 1){
+						for(let i = 0; i < currentBody.companies.length; i++){
+							if(currentBody.companies[i].company = group){
+								console.log(currentBody.companies)
+								currentBody.companies.splice(i, 1)
+								console.log(currentBody.companies)
+								await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)}
+								message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+							}
+					} else {
+						currentBody.stop = true
+						console.log(currentBody)
+						await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
+						await delay(10000)
+						await deleteSkuEnd(site, SKU)
+						message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+					}
+					
+				
 				}
 				return;
 
@@ -1027,7 +1032,7 @@ async function checkPresentSkus(){
 		
 	})
 }
- checkPresentSkus()
+checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
@@ -1048,7 +1053,7 @@ async function pushSku(body){
 	}
 	
 }
-async function deleteSkuEnd(site, sku){
+async function deleteSkuEnd(site, sku, group){
 	try {
 		console.log(`Deleting ${sku}/${site}`)
 		let deleteSku = await rp.delete({
@@ -1149,7 +1154,24 @@ async function validateUser(clients, triggerText, replyText){
 		console.log(error);
 	}
 }
+async function checkIfUserValidated (message){
+	let returnObj = {
+		isValidated : false,
+		group : undefined
+	}
+	let validatedIds = await getValidatedIds()
+	let parsed = JSON.parse(validatedIds)
+	parsed.ids.forEach(e => {
+		let id = e?.split('-')[0]
+		console.log(id, message.author.id)
+		if (id == message.author.id) {
+			returnObj.isValidated = true
+			returnObj.group = e?.split('-')[1]
+		}
+	})
+	return returnObj
 
+}
 //-----------------------------------------------------------------
 function replaceWithTheCapitalLetter(values){
 				return values.charAt(0).toUpperCase() + values.slice(1);
@@ -1185,6 +1207,7 @@ console.log(err)
 }))
 }
 }
+
 
 module.exports = {
 	SKUADD,
