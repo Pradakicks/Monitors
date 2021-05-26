@@ -32,7 +32,7 @@ func Get() []string {
 		log.Fatal(err)
 		res.Body.Close()
 	}
-	fmt.Println(proxies)
+//	fmt.Println(proxies)
 	for _, proxy := range proxies {
 		fmt.Println(proxy)
 		proxyList = append(proxyList, proxy)
