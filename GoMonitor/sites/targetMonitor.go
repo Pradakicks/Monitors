@@ -161,15 +161,14 @@ type Company struct {
 }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s NEW MONITOR Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
-		}
-	}()
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		fmt.Printf("Site : %s, Product : %s NEW MONITOR Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
+	// 	}
+	// }()
 	fmt.Println("TESTING", sku, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
-	// var err error
 	m.Client = http.Client{Timeout: 5 * time.Second}
 	m.Config.site = "Target"
 	m.Config.startDelay = 3000
