@@ -235,16 +235,14 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
-
+	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		res.Body.Close()	
 		return nil
 	}
 
 	if res.StatusCode == 404 || res.StatusCode == 429 {
-		res.Body.Close()
 		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode)
 		return nil
 	} else {
@@ -256,10 +254,8 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
-		res.Body.Close()
 		return nil
 	}
-	res.Body.Close()
 	currentAvailability := realBody.Data.Product.Fulfillment.ShippingOptions.AvailabilityStatus
 	if currentAvailability == "PRE_ORDER_UNSELLABLE" || currentAvailability == "UNAVAILABLE" || currentAvailability == "OUT_OF_STOCK" {
 		m.currentAvailability = false
@@ -272,10 +268,10 @@ func (m *Monitor) monitor() error {
 	m.monitorProduct.stockNumber = int(realBody.Data.Product.Fulfillment.ShippingOptions.AvailableToPromiseQuantity)
 	if m.Availability == false && m.currentAvailability == true {
 		fmt.Println("Item in Stock")
-		m.sendWebhook()
+		go m.sendWebhook()
 		if m.monitorProduct.image == "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png" {
 			m.getProductImage(m.Config.sku)
-			m.sendWebhook()
+			go m.sendWebhook()
 		}
 	}
 	if m.Availability == true && m.currentAvailability == false {
