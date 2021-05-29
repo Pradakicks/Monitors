@@ -233,6 +233,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
+	req.Close = true
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -428,6 +429,7 @@ func (m *Monitor) getProductImage(tcin string) {
 }
 
 func (m *Monitor) checkStop() error {
+	http.DefaultClient.Timeout = time.Second * 10
 	for !m.stop {
 		defer func() {
 			if r := recover(); r != nil {
