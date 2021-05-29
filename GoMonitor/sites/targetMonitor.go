@@ -228,12 +228,13 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
+	req.Header.Set("Connection", "close")
+	req.Close = true
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	req.Close = true
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
