@@ -76,12 +76,12 @@ func NewMonitor() *Monitor {
 	m := Monitor{}
 	m.Availability = "OUT_OF_STOCK_ONLINE"
 	// var err error
-	//	m.Client = http.Client{Timeout: 5 * time.Second}
+	//	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.Config.site = "Slick Deals"
 	m.Config.startDelay = 3000
 	//	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
-	m.Client = http.Client{Timeout: 5 * time.Second}
+	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/842460357607555075/pKynxp-r1_-VbWAcnhleC2vCKo357vCb29Y83jLG_NgPfiqY3WuUdjZILVWYpQ-SmAj5"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""

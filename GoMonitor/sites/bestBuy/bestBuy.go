@@ -109,12 +109,12 @@ func NewMonitor(sku string) *Monitor {
 	m := Monitor{}
 	m.Availability = "SOLD_OUT"
 	// var err error
-	//	m.Client = http.Client{Timeout: 5 * time.Second}
+	//	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.Config.site = "BestBuy"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
-	m.Client = http.Client{Timeout: 5 * time.Second}
+	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/827263591114997790/chAZK84Gnad7rjHDlh4BnF7dz5KQ7-0l4atsFzJGgcTkAaeZno6ePYB_A-WiiClS3FpY"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
@@ -363,7 +363,6 @@ func webHookSend(c Company, site string, sku string, name string, price int, tim
 	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(payload)
 	}
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -378,13 +377,11 @@ func webHookSend(c Company, site string, sku string, name string, price int, tim
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(payload)
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(payload)
 	}
 	fmt.Println(res)
 	fmt.Println(string(body))

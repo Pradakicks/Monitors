@@ -11,7 +11,7 @@ const rp = require('request-promise').defaults({
 	gzip: true,
 });
 const port = 7243
-const secondServer = `http://ec2-18-206-214-212.compute-1.amazonaws.com`
+const secondServer = `ec2-3-239-126-177.compute-1.amazonaws.com`
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
@@ -596,8 +596,8 @@ async function getSku (skuName, proxyList) {
 async function startGoMonitor(currentBody, site){
 	try {
 		switch(site){
-			case "2341":
-		//	case "TARGET":
+			//case "2341":
+			case "TARGET":
 			// case "GAMESTOP":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
