@@ -461,10 +461,17 @@ function deleteSku(clients, triggerText, replyText) {
 					} else {
 						currentBody.stop = true
 						console.log(currentBody)
-						await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
-						await delay(10000)
-						await deleteSkuEnd(site, SKU)
-						message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+						if (group == currentBody.companies[0].company){
+							await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
+							await delay(10000)
+							await deleteSkuEnd(site, SKU)
+							message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+						} else {
+							console.log(`${group} is not present for this sku`)
+							message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
+							message.channel.send(`If this is an error please contact developer`)
+						}
+						
 					}
 					
 				
@@ -1033,7 +1040,7 @@ async function checkPresentSkus(){
 		
 	})
 }
-checkPresentSkus()
+// checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`
