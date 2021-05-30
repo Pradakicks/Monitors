@@ -14,6 +14,7 @@ import (
 
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 
+	"github.com/bradhe/stopwatch"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -95,16 +96,10 @@ func NewMonitor() *Monitor {
 	time.Sleep(3000 * (time.Millisecond))
 	i := true
 	for i == true {
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-			}
-		}()
 		if !m.stop {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
 			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-			//	fmt.Println(proxy, proxy.ip)
 			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
@@ -117,8 +112,6 @@ func NewMonitor() *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			//	time.Sleep(500 * (time.Millisecond))
-			fmt.Println("Slick Deals : ", len(m.sku))
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -129,37 +122,18 @@ func NewMonitor() *Monitor {
 }
 
 func (m *Monitor) monitor() error {
+	watch := stopwatch.Start()
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	//	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	//     }
-	//   }()
-	// url := "https://httpbin.org/ip"
-
-	// req, _ := http.NewRequest("GET", url, nil)
-
-	// res, _ := m.Client.Do(req)
-
-	// defer res.Body.Close()
-	// body, _ := ioutil.ReadAll(res.Body)
-
-	// fmt.Println(res)
-	// fmt.Println(string(body))
-
 	url := "https://slickdeals.net/live/spy.php?thread=15023128&post=147235393&threadrate=93848830&time=1620921696&maxitems=20&forum=9"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	// req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -170,18 +144,21 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
+	req.Header.Set("Connection", "close")
+	req.Close = true // req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Println("Slick Deals : ", len(m.sku))
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	//	fmt.Println(res)
@@ -206,7 +183,6 @@ func (m *Monitor) monitor() error {
 				isPresent = true
 			}
 		}
-
 		if isPresent != true {
 			link = fmt.Sprintf("https://slickdeals.net/f/%s", strings.Split(firstDesc[1], `"`)[0])
 			title = strings.Split(strings.Split(firstDesc[1], `" >`)[1], "</a>")[0]

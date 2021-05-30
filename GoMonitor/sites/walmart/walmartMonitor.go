@@ -131,27 +131,17 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	}
 	return &m
 }
-
 func (m *Monitor) monitor() error {
-	//a	fmt.Println("Monitoring")
 	watch := stopwatch.Start()
+	var monitorAvailability bool
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		} else {
+			watch.Stop()
+			fmt.Printf("Walmart : %t %s %d %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, watch.Milliseconds())	
 		}
 	}()
-
-	// url := "https://httpbin.org/ip"
-
-	// req, _ := http.NewRequest("GET", url, nil)
-
-	// res, _ := m.Client.Do(req)
-
-	// defer res.Body.Close()
-	// body, _ := ioutil.ReadAll(res.Body)
-
-	// fmt.Println(res)
-	// fmt.Println(string(body))
 
 	url := fmt.Sprintf("https://www.walmart.com/terra-firma/item/%s", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
@@ -159,7 +149,6 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
-	//	req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -171,25 +160,24 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
+	req.Header.Set("Connection", "close")
+	req.Close = true
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-
+	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	//	fmt.Println(res)
 	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		if res.StatusCode == 412 {
 			fmt.Println("Blocked by PX")
 			m.useProxy = false
-			res.Body.Close()
 		}
 		watch.Stop()
 		fmt.Printf("Walmart : %s %d %s : Milliseconds elapsed: %v\n", m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
@@ -197,15 +185,12 @@ func (m *Monitor) monitor() error {
 	} else {
 		m.useProxy = true
 	}
-	var monitorAvailability bool
 	var walmartOffer string
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
 		fmt.Println(err)
-		// return nil
 	}
-	res.Body.Close()
 	walmartOffers, err := parser.QueryToMap("payload.sellers")
 	for key, _ := range walmartOffers {
 		if err != nil {
@@ -220,7 +205,6 @@ func (m *Monitor) monitor() error {
 			walmartOffer = key
 		}
 	}
-
 	selectedProduct, err := parser.Query("payload.selected.product")
 	par := fmt.Sprintf("payload.products.%s.productAttributes.productName", selectedProduct)
 	name, err := parser.Query(par)
@@ -284,12 +268,10 @@ func (m *Monitor) monitor() error {
 			}
 		}
 	}
-	watch.Stop()
-	fmt.Printf("Walmart : %t %s %d %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, watch.Milliseconds())
 
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
-		m.sendWebhook()
+		go m.sendWebhook()
 	}
 	if m.Availability == true && monitorAvailability == false {
 		fmt.Println("Item Out Of Stock")
@@ -297,7 +279,6 @@ func (m *Monitor) monitor() error {
 	m.Availability = monitorAvailability
 	return nil
 }
-
 func (m *Monitor) getProxy(proxyList []string) string {
 	if m.Config.proxyCount+1 == len(proxyList) {
 		m.Config.proxyCount = 0
@@ -305,7 +286,6 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	m.Config.proxyCount++
 	return proxyList[m.Config.proxyCount]
 }
-
 func (m *Monitor) sendWebhook() error {
 	defer func() {
 		if r := recover(); r != nil {
@@ -436,7 +416,6 @@ func (m *Monitor) checkStop() error {
 		m.CurrentCompanies = currentObject.Companies
 		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		//	fmt.Println(currentObject)
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil

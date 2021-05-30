@@ -200,10 +200,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				Proxy: http.ProxyURL(proxyUrl),
 			}
 			m.Client.Transport = defaultTransport
-			watch := stopwatch.Start()
 			m.monitor()
-			watch.Stop()
-			fmt.Printf("Target : %t : %s : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, watch.Milliseconds())
 			time.Sleep(150 * (time.Millisecond))
 
 		} else {
@@ -214,34 +211,34 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	return &m
 }
 func (m *Monitor) monitor() error {
-	//	fmt.Println("Monitoring")
-
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	// 	}
-	// }()
+	watch := stopwatch.Start()
 
 	url := fmt.Sprintf("https://redsky.target.com/redsky_aggregations/v1/web/pdp_fulfillment_v1?key=ff457966e64d5e877fdbad070f276d18ecec4a01&tcin=%s&store_id=2067&store_positions_store_id=2067&has_store_positions_store_id=true&scheduled_delivery_store_id=2067&pricing_store_id=2067&fulfillment_test_mode=grocery_opu_team_member_test", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
+
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
+
 	req.Header.Set("Connection", "close")
 	req.Close = true
 	res, err := m.Client.Do(req)
+	
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Target : %t : %s : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, watch.Milliseconds())
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-
 	if res.StatusCode == 404 || res.StatusCode == 429 {
 		fmt.Println("Product Not Loaded on Target : ", m.Config.sku, res.StatusCode)
 		return nil
