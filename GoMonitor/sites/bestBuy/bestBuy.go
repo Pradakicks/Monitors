@@ -190,7 +190,7 @@ func (m *Monitor) monitor() error {
 	if err != nil {
 		fmt.Println(err)
 		return nil
-	}	
+	}
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
@@ -372,12 +372,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, tim
 		fmt.Println(err)
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
 	fmt.Println(res)
-	fmt.Println(string(body))
 	fmt.Println(payload)
 	return
 }

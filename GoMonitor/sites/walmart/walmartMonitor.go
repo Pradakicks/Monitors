@@ -185,7 +185,7 @@ func (m *Monitor) monitor() error {
 	} else {
 		m.useProxy = true
 	}
-	
+
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
@@ -370,12 +370,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, off
 		fmt.Println(err)
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
 	fmt.Println(res)
-	fmt.Println(string(body))
 	fmt.Println(payload)
 	return
 }

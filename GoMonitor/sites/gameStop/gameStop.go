@@ -154,7 +154,7 @@ func (m *Monitor) monitor() error {
 	if res.StatusCode != 200 {
 		return nil
 	}
-	
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -165,6 +165,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 		return nil
 	}
+
 	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
 	m.monitorProduct.name, err = parser.QueryToString("gtmData.productInfo.name")
 	m.monitorProduct.sku, err = parser.QueryToString("gtmData.productInfo.sku")
@@ -283,12 +284,7 @@ func webHookSend(c Company, site string, pid string, sku string, name string, pr
 		fmt.Println(err)
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
 	fmt.Println(res)
-	fmt.Println(string(body))
 	fmt.Println(payload)
 	return
 }

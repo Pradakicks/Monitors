@@ -185,7 +185,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("New Egg Monitor : %s, %d, %t, %t, Status Code : %d, %d Milliseconds elapsed: %v \n", m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber, res.StatusCode,watch.Milliseconds())
+		fmt.Printf("New Egg Monitor : %s, %d, %t, %t, Status Code : %d, %d Milliseconds elapsed: %v \n", m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber, res.StatusCode, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -206,7 +206,7 @@ func (m *Monitor) monitor() error {
 	monitorAvailability = realBody.MainItem.Instock
 	m.monitorProduct.stockNumber = int(realBody.MainItem.Stock)
 	m.monitorProduct.image = realBody.MainItem.Image.ItemCellImageName
-	
+
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()
@@ -310,12 +310,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, sto
 		fmt.Println(err)
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
 	fmt.Println(res)
-	fmt.Println(string(body))
 	fmt.Println(payload)
 	return
 }

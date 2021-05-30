@@ -162,14 +162,13 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	//	fmt.Println(res)
-	fmt.Println(res.StatusCode)
+//	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		return nil
 	}
 
 	parsed := string(body)
 	threads := strings.Split(parsed, `<![CDATA[<div id="thread_`)
-	// fmt.Println(threads[1])
 	for _, value := range threads {
 		newThread := strings.Split(value, `]]></htmlbit>`)[0]
 		id := strings.Split(value, `"`)[0]
@@ -220,19 +219,10 @@ func returnSplitted(s string) string {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
-	//fmt.Scanln()
-	// rand.Seed(time.Now().UnixNano())
-	// randomPosition := rand.Intn(len(proxyList)-0) + 0
 	if m.Config.proxyCount+1 == len(proxyList) {
 		m.Config.proxyCount = 0
 	}
 	m.Config.proxyCount++
-	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
 
@@ -306,7 +296,6 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
-
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -322,20 +311,9 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(payload)
-
-		return nil
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(payload)
-
 		return nil
 	}
 	fmt.Println(res)
-	fmt.Println(string(body))
 	fmt.Println(payload)
 	return nil
 }
