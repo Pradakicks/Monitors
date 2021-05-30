@@ -196,7 +196,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	var realBody NewEggResponse
-	err = json.Unmarshal([]byte(body), &realBody)
+	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
 		return nil
