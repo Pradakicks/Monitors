@@ -134,6 +134,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 func (m *Monitor) monitor() error {
 	watch := stopwatch.Start()
 	var monitorAvailability bool
+	var walmartOffer string
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -185,7 +186,6 @@ func (m *Monitor) monitor() error {
 	} else {
 		m.useProxy = true
 	}
-	var walmartOffer string
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
