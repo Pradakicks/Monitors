@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
@@ -90,11 +91,6 @@ func NewMonitor(sku string) *Monitor {
 	time.Sleep(3000 * (time.Millisecond))
 	i := true
 	for i == true {
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-			}
-		}()
 		if !m.stop {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
@@ -103,7 +99,6 @@ func NewMonitor(sku string) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -111,7 +106,6 @@ func NewMonitor(sku string) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			fmt.Println("Gamestop : ", m.Availability, m.Config.sku, m.statusCode)
 			time.Sleep(250 * (time.Millisecond))
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
@@ -123,16 +117,15 @@ func NewMonitor(sku string) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
+	watch := stopwatch.Start()
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-
 	url := fmt.Sprintf("https://www.gamestop.com/on/demandware.store/Sites-gamestop-us-Site/default/Product-Variation?dwvar_%s_condition=New&pid=%s&quantity=1&redesignFlag=true&rt=productDetailsRedesign", m.Config.sku, m.Config.sku)
 	req, _ := http.NewRequest("GET", url, nil)
 	gmeRef := fmt.Sprintf("https://www.gamestop.com/products/prada/%s.html", m.Config.sku)
-	//	req.Header.Add("cookie", "dwac_a78eb5a11975e4c9cbc84f55ad=hsID1-Tt0AwdpVxt3843SGPN-twDq54LmqE%253D%7Cdw-only%7C%7C%7CUSD%7Cfalse%7CUS%252FCentral%7Ctrue; cqcid=ab5UPFZX9yyAfmyTsKUgaaHFzv; cquid=%7C%7C; customergroups=Everyone; sid=hsID1-Tt0AwdpVxt3843SGPN-twDq54LmqE; dwanonymous_420142ceefb9f0c103b3815e84e9fcef=ab5UPFZX9yyAfmyTsKUgaaHFzv; userInfo=S%3DN%7CR%3DN%7CC%3D0; __cq_dnt=0; dw_dnt=0; dwsid=Wlq6vy6WB_fCXkDfe9xQG79VQ7TJ0EnwRVpVHu76k74TZNmN_l1gaPvcKEW4cHBDjoAZPqq1X-8Fep-T3_Al6A%3D%3D; akaas_ChatThrottling=2147483647~rv%3D96~id%3D63cbc0fee3058ac39b466275a70905af~rn%3D; _abck=87E16D9492B4FF25B48E128780C8B242~-1~YAAQFjPKF3WLVop5AQAA%2FdqAigUCb4OWPBCZD53lDEvJlGuVt0EWx8aijJXv78XmQNE3Jcn0HhA7uuDlcW46NkbVrSezW78SqsyDvh%2BcuXwNI1HodryzQYa8myrq7UClFXdgMQl0LGO3hMu2u8K1rKbX4i2th5MajKHLGz12mYraytOUtFQfgOc79XF6DkO2cdHzPUY7S0KlwrdPyQLJ1gnYTX6%2Bwv8VTblTlANXfdMOCuTJwglqgpDHjfT0CAzItmKKyzFA7q45VESCP4m%2F2TYBY4dP0gdLf62je%2F%2FND27XoxnDLyHTI%2Fpoz4Tu62E8VEBhj1OUASBncq7bVeqYdF3hK%2Btd6ANpSRnEEJpAZ%2FEQWFU6oSOny%2BYMjazZR8NKN13Y6GSeFSPJ2K52~-1~-1~-1")
 	req.Header.Add("authority", "www.gamestop.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -145,17 +138,33 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-dest", "empty")
 	req.Header.Add("referer", gmeRef)
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
-	//	req.Header.Add("$cookie", "akaas_ChatThrottling=2147483647~rv=14~id=f9ecbc4735b5a359f6c7d9ce04a4478e~rn=; _caid=a9fc9999-b8eb-497c-84eb-f5e30de59b5c; RES_TRACKINGID=831656757534380; ResonanceSegment=1; notice_behavior=implied,eu; _gcl_au=1.1.403930278.1621428291; cquid=||; customergroups=Everyone; userInfo=S=N|R=N|C=0; __cq_dnt=0; dw_dnt=0; cqcid=abbwdRaFf3tfLzthJuEsJWoOX0; dwanonymous_420142ceefb9f0c103b3815e84e9fcef=abbwdRaFf3tfLzthJuEsJWoOX0; _mibhv=anon-1611193773687-9267464732_6874; _gid=GA1.2.139986699.1621428292; _ga=GA1.2.470299063.1621428292; _fbp=fb.1.1621428291733.400088248; __cq_uuid=ac2nyrc9myCuCaJd7go98GvLl7; sto__vuid=9b0a62ad062fe7634881c08be1357815; QuantumMetricUserID=3255d30ede3179288cea36f3fcb75bee; _aeaid=0b21af47-dd3a-427e-a8dc-d4ff1db632ed; aeatstartmessage=true; lastVisitedCgid=pc; BVBRANDID=21f8293a-6961-4947-8643-e3c4da07b51c; salsify_session_id=3f8d9c2e-46b0-4bdd-8873-d026aef0f5c7; __cq_seg=0~0.16\u00211~-0.30\u00212~-0.23\u00213~-0.78\u00214~0.16\u00215~0.03\u00216~-0.42\u00217~0.10\u00218~-0.11\u00219~0.01; AnonymousSaveForLaterCookie=a2b82aafce4c3ecb32c055217c; spCheckout=true; BVImplsfcc=9014_3_0; bm_sz=6E4624F205C8D9D157959B7DC72F043C~YAAQBjPKFwdSvDR5AQAA9/1/igv0dp9v2oGrh6RLT8nLJ78toTLM9AKEnOEnDk+IKGsIUTfOpoNOy40aYKU6awzO49Duc3SYBHm85I6w68tP7KFbZN0NfTStPy8tcLMmFVtb7P8WoscTtYZSPlFoMb5ER+cGpta3vFwp2d/KvQHl20Bqxf4i1hDpKpVeTBe3rg==; _gaexp=GAX1.2.IodINR6fQb--45IDXrQ7eQ.18851.2\u0021kQ74Gh4ZQ3ic2rdDBej41Q.18860.0\u0021UZIDaZ6yRSCK79It9Iq0ew.18860.0; _cavisit=1798a800045|; BVBRANDSID=562c3483-d621-4e1f-a87b-2be56fd4ee24; RES_SESSIONID=950727001230365; _gat_UA-10897913-30=1; dwac_a78eb5a11975e4c9cbc84f55ad=xtZB7DghmV3O0XUSJMQIyAQnNAviCQQxDKo%3D|dw-only|||USD|false|US%2FCentral|true; sid=xtZB7DghmV3O0XUSJMQIyAQnNAviCQQxDKo; dwsid=cPacK9ND5wH-rPX9-0yTF7IH6cwJa3ptPNdh2US1PhJDd_0DB0MPdHxCeLFbx5mswTKEhw64haEzQfkJ0qFu5w==; bm_mi=C40316A27AF356148E35871AAFE5AC3C~RVY/QOu/xX5cZD1z7xMu9AqHST30b/wkMXYdSXKDSoTGAiZXlU3CxYFbLqkYQROZaFgGXkavMtfE2LSTGMdAoiYQd9ww4nSDZc/e2xZntTKaYuruK1bsn/PTyF7jtPryhNwyJlgJJABg583jhKxwcdaJ2uRxcUVXUBFyOXrFGDvFYmJhPXVHpR1V1inoQfdj3NFdcOSk/Ip71dJEVpirpR3mJi34Pw0cwMJ0DI75yGvxp2V9XB2bvv2TdCrg38lj0A6j3rrQsBG++DdFb+WXhSZCBnuFIOXtEiKuS2Z77ikHN+1elTdjAVPYUiGfVo9a; ak_bmsc=7C4EDD042E8147FA924491DE2161CF0417CA3306844B00002A87A6606EF3E77A~plEzQxzJ892lN2n9XR27jfZkGrTNUrOlaBBC+n7OxU3Ypbokp31vwzRV0AT2+U5l/BiEQJtSGeNqMgqGXPdD2LPWIQcq3cE2cJU+x2QP65irmHevt16mFk3X9AM/unop8cufXssMTVMkNHureuWkT8RTcHdIwP9ngax267K/NkF/tChl/3LDevJ7spk0JDwStMgXK7bMgqNjHa7MOC/g9tbfe69ghPEwADvtd0cPzKnJrLqAldhHQK1y8esRoZlM3n; sto__session=1621526317850; QuantumMetricSessionID=f62e7111fa6c11abd96e7c92429b0358; _uetsid=00fa3ab0b8a011eba0a725a2ac83ba10; _uetvid=00fa3f90b8a011eb804207a6f4a89e19; __cq_bc=%7B%22bcpk-gamestop-us%22%3A%5B%7B%22id%22%3A%2211146493%22%2C%22sku%22%3A%22295368%22%7D%2C%7B%22id%22%3A%2211107421%22%7D%2C%7B%22id%22%3A%2211095775%22%7D%5D%7D; stc118903=env:1621526315%7C20210620155835%7C20210520162845%7C2%7C1084111:20220520155845|uid:1621428291596.933694301.3955164.118903.1117792204.:20220520155845|srchist:1084110%3A1%3A20210619124451%7C1084111%3A1621526315%3A20210620155835:20220520155845|tsa:1621526315835.1379394640.781375.174304299060569.42:20210520162845; sto__count=1; _abck=97165556E8D94CA58EB68395D61C1EE0~-1~YAAQBjPKFwVTvDR5AQAAoUuAigWGeft0uIYVC3ciasUfslYO2AS9c9po2kBv2W+Wj8B36dfFq+nEc5UO6EwyjQSVV++LcRREW4hIsy+iv/f4fTQ+Lpdxlb1bvi9b+lGXNJqcJvGZ1L/17XkU9PBfEhYD8Gp6SBUSE/JjiCbQijN8FIPnW8eC59aDWPE+y9QNcMH1QxgORCYd7NEOWGXz7HlWCO1pChv+ySD6sINUrZ7DLztY5NQBAJ430yNJ3xW4hLvMICs8XWoT50Zak7cSCGA3u7er9Vl9uDk54vIRmvQqKwvn5KipZICgRKAm8Es6/MA7PAYgCxNf/YFgAJV4pogrko8JmyOlfhaC74+VpBKKFhQaiXfjfMO5ToAYF5UdI1bDuw06goWXhGD1Cr0+bRImVOH44vcNsmkYx4fxKgJ1/hHmXPdh~-1~-1~-1")
-
-	res, _ := m.Client.Do(req)
-	m.statusCode = res.StatusCode
-	if res.StatusCode != 200 {
-		res.Body.Close()
+	req.Header.Set("Connection", "close")
+	req.Close = true
+	res, err := m.Client.Do(req)
+	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
-	body, _ := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Game Stop : %s, %s, Status Code : %d,  Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, m.statusCode, watch.Milliseconds())
+	}()
+	m.statusCode = res.StatusCode
+	if res.StatusCode != 200 {
+		return nil
+	}
+	
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	parser, err := gojq.NewStringQuery(string(body))
-	res.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
 	m.monitorProduct.name, err = parser.QueryToString("gtmData.productInfo.name")
 	m.monitorProduct.sku, err = parser.QueryToString("gtmData.productInfo.sku")
@@ -179,19 +188,10 @@ func (m *Monitor) monitor() error {
 }
 
 func (m *Monitor) getProxy(proxyList []string) string {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
-	//fmt.Scanln()
-	// rand.Seed(time.Now().UnixNano())
-	// randomPosition := rand.Intn(len(proxyList)-0) + 0
 	if m.Config.proxyCount+1 == len(proxyList) {
 		m.Config.proxyCount = 0
 	}
 	m.Config.proxyCount++
-	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
 

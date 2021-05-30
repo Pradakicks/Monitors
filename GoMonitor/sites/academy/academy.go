@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bradhe/stopwatch"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
@@ -160,8 +161,6 @@ func NewMonitor(sku string) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			//	time.Sleep(500 * (time.Millisecond))
-			fmt.Println("Academy : ", m.Availability, m.Config.sku)
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -172,37 +171,18 @@ func NewMonitor(sku string) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
+	watch := stopwatch.Start()
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	//	fmt.Println("Monitoring")
-	// 	defer func() {
-	//      if r := recover(); r != nil {
-	//         	        fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-	//     }
-	//   }()
-	// url := "https://httpbin.org/ip"
-
-	// req, _ := http.NewRequest("GET", url, nil)
-
-	// res, _ := m.Client.Do(req)
-
-	// defer res.Body.Close()
-	// body, _ := ioutil.ReadAll(res.Body)
-
-	// fmt.Println(res)
-	// fmt.Println(string(body))
-
 	url := fmt.Sprintf("https://www.academy.com/api/inventory/v2?productId=%s&bopisEnabled=true&isSTSEnabled=true", m.Config.sku)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	// req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -213,22 +193,24 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
+	req.Header.Set("Connection", "close")
+	req.Close = true
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
 	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Academy : %s : %s : Status Code : %d, Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, res.StatusCode, watch.Milliseconds())
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	//	fmt.Println(res)
-	fmt.Println(res.StatusCode)
+
 	if res.StatusCode != 200 {
 		return nil
 	}
@@ -236,10 +218,8 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal([]byte(body), &realBody)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	// fmt.Println(realBody)
 	var monitorAvailability string
 	monitorAvailability = realBody.Online[0].DeliveryMessage.OnlineDeliveryMessage.Key
 	m.monitorProduct.stockNumber = realBody.Online[0].AvailableQuantity
@@ -261,14 +241,10 @@ func (m *Monitor) getProxy(proxyList []string) string {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	//fmt.Scanln()
-	// rand.Seed(time.Now().UnixNano())
-	// randomPosition := rand.Intn(len(proxyList)-0) + 0
 	if m.Config.proxyCount+1 == len(proxyList) {
 		m.Config.proxyCount = 0
 	}
 	m.Config.proxyCount++
-	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
 

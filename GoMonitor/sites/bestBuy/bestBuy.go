@@ -139,12 +139,10 @@ func NewMonitor(sku string) *Monitor {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
 			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
-			//	fmt.Println(proxy, proxy.ip)
 			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -153,7 +151,6 @@ func NewMonitor(sku string) *Monitor {
 			m.Client.Transport = defaultTransport
 			m.monitor()
 			time.Sleep(250 * (time.Millisecond))
-			fmt.Println("Best Buy : ", m.Availability, m.Config.sku)
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -172,14 +169,11 @@ func (m *Monitor) monitor() error {
 	}()
 
 	url := fmt.Sprintf("https://www.bestbuy.com/api/3.0/priceBlocks?skus=%s", m.Config.sku)
-	fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	// req.Header.Add("authority", "discord.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("accept", "application/json")
@@ -190,41 +184,40 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
-	// req.Header.Add("cookie", "TealeafAkaSid=r5S-XRsuxWbk94tkqVB3CruTmaJKz32Z")
+	req.Header.Set("Connection", "close")
+	req.Close = true
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
-	}
+	}	
+	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Best Buy : %s, %s : Status Code : %d : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, res.StatusCode, watch.Milliseconds())
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		res.Body.Close()
 		return nil
 	}
-	//	fmt.Println(res)
 	if res.StatusCode != 200 {
-		watch.Stop()
-		fmt.Printf("Best Buy : %s : %s : Milliseconds elapsed: %v\n", m.Config.sku, watch.Milliseconds(), res.StatusCode)
-		res.Body.Close()
 		return nil
 	}
 	var realBody bestBuyResponse
 	err = json.Unmarshal([]byte(body), &realBody)
-	res.Body.Close()
 	if err != nil {
 		fmt.Println(err)
-
 		return nil
 	}
-	// fmt.Println(realBody)
 	var monitorAvailability string
 	monitorAvailability = realBody[0].Sku.ButtonState.ButtonState
 	m.monitorProduct.name = realBody[0].Sku.Names.Short
 	m.monitorProduct.price = int(realBody[0].Sku.Price.CurrentPrice)
-	watch.Stop()
-	fmt.Printf("Best Buy : %s : %s : Milliseconds elapsed: %v\n", m.Config.sku, watch.Milliseconds(), res.StatusCode)
+	if monitorAvailability != "ADD_TO_CART" {
+		monitorAvailability = "SOLD_OUT"
+	}
+
 	if m.Availability == "SOLD_OUT" && monitorAvailability == "ADD_TO_CART" {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()

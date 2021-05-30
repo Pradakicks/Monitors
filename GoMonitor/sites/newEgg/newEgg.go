@@ -185,14 +185,13 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Println("New Egg Monitor : ", m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber)
+		fmt.Printf("New Egg Monitor : %s, %d, %t, %t, Status Code : %d, %d Milliseconds elapsed: %v \n", m.monitorProduct.name, m.monitorProduct.price, m.Availability, monitorAvailability, m.monitorProduct.stockNumber, res.StatusCode,watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		return nil
 	}

@@ -138,9 +138,6 @@ func (m *Monitor) monitor() error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		} else {
-			watch.Stop()
-			fmt.Printf("Walmart : %t %s %d %s %s : Milliseconds elapsed: %v\n", monitorAvailability, m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, watch.Milliseconds())	
 		}
 	}()
 
@@ -169,23 +166,26 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	defer res.Body.Close()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Walmart : %s %d %s %s: Status Code : %d, Milliseconds elapsed: %v\n", m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, res.StatusCode, watch.Milliseconds())
+	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		if res.StatusCode == 412 {
 			fmt.Println("Blocked by PX")
 			m.useProxy = false
 		}
-		watch.Stop()
-		fmt.Printf("Walmart : %s %d %s : Milliseconds elapsed: %v\n", m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, watch.Milliseconds())
+
 		return nil
 	} else {
 		m.useProxy = true
 	}
+	
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
