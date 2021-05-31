@@ -3,20 +3,24 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"time"
 	"net/http"
 
+	"github.com/bradhe/stopwatch"
+	"github.com/elgs/gojq"
 	"github.com/gorilla/mux"
 	TargetMonitor "github.con/prada-monitors-go/sites"
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
 	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
+	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
-	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 )
 
 type Monitor struct {
@@ -31,6 +35,27 @@ type KeyWordMonitor struct {
 	Endpoint string   `json:"endpoint"`
 	Keywords []string `json:"keywords"`
 }
+
+type DB struct {
+	Site string `json:"site"`
+	Sku  string `json:"sku"`
+}
+
+type ItemInMonitorJson struct {
+	Sku       string `json:"sku"`
+	Site      string `json:"site"`
+	Stop      bool   `json:"stop"`
+	Name      string `json:"name"`
+	Companies []Company
+}
+type Company struct {
+	Company      string `json:"company"`
+	Webhook      string `json:"webhook"`
+	Color        string `json:"color"`
+	CompanyImage string `json:"companyImage"`
+}
+
+var DBString string
 
 func target(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL)
@@ -136,11 +161,69 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Slick Deals Monitor")
 }
+
+func getDB(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Request Sent")
+	
+	watch := stopwatch.Start()
+
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request Took : %v\n", watch.Milliseconds())
+	}()
+
+	parser, err := gojq.NewStringQuery(DBString)
+
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+
+	var requestData DB
+	_ = json.NewDecoder(r.Body).Decode(&requestData)
+
+	fmt.Println(requestData)
+
+	requestedItems, err := parser.QueryToMap(fmt.Sprintf("%s.%s", requestData.Site, requestData.Sku))
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+
+	fmt.Println(requestedItems)
+	j, err := json.Marshal(requestedItems)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, string(j))
+}
+
+func DBWorker() {
+
+	url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/.json")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// fmt.Println(body)
+	DBString = string(body)
+}
+
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", getPage).Methods("GET")
+	router.HandleFunc("/DB", getDB).Methods("POST")
 	router.HandleFunc("/TARGET", target).Methods("POST")
 	router.HandleFunc("/WALMART", walmart).Methods("POST")
 	router.HandleFunc("/NEWEGG", newegg).Methods("POST")
@@ -156,5 +239,13 @@ func handleRequests() {
 }
 
 func main() {
+	fmt.Println("Initiating Server")
+	DBWorker()
+	go func() {
+		for true {
+			DBWorker()
+			time.Sleep(10000 * (time.Millisecond))
+		}
+	}()
 	handleRequests()
 }

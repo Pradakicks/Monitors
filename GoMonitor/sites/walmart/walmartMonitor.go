@@ -381,8 +381,12 @@ func (m *Monitor) checkStop() error {
 				fmt.Printf("Site : %s, Product : %s  CHECK STOP Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 			}
 		}()
-		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
-		req, err := http.NewRequest("GET", url, nil)
+		getDBPayload := strings.NewReader(fmt.Sprintf(`{
+			"site" : "%s",
+			"sku" : "%s"
+		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
+		url := fmt.Sprintf("http://localhost:7243/DB")
+		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
 			return nil

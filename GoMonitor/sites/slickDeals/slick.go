@@ -14,8 +14,8 @@ import (
 
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 
-	"github.com/bradhe/stopwatch"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/bradhe/stopwatch"
 )
 
 type Config struct {
@@ -162,7 +162,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	//	fmt.Println(res)
-//	fmt.Println(res.StatusCode)
+	//	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
 		return nil
 	}
@@ -389,8 +389,12 @@ func (m *Monitor) checkStop() error {
 				fmt.Printf("Site : %s, Product : %s  CHECK STOP Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 			}
 		}()
-		url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/%s/%s.json", strings.ToUpper(m.Config.site), m.Config.sku)
-		req, err := http.NewRequest("GET", url, nil)
+		getDBPayload := strings.NewReader(fmt.Sprintf(`{
+			"site" : "%s",
+			"sku" : "%s"
+		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
+		url := fmt.Sprintf("http://localhost:7243/DB")
+		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
 			return nil
@@ -419,7 +423,6 @@ func (m *Monitor) checkStop() error {
 		m.CurrentCompanies = currentObject.Companies
 		fmt.Println(m.CurrentCompanies)
 		res.Body.Close()
-		//	fmt.Println(currentObject)
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
