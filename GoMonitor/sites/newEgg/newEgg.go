@@ -141,7 +141,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 			}
 			m.Client.Transport = defaultTransport
 			go m.monitor()
-			time.Sleep(250 * (time.Millisecond))
+			time.Sleep(100 * (time.Millisecond))
 		} else {
 			fmt.Println(m.Config.skuName, "STOPPED STOPPED STOPPED")
 			i = false

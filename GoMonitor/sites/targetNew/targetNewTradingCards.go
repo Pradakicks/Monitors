@@ -178,7 +178,7 @@ func NewMonitor(sku string, keywords []string) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			go m.monitor()
-			time.Sleep(300 * (time.Millisecond))
+			time.Sleep(150 * (time.Millisecond))
 			// fmt.Println(m.Availability)
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
