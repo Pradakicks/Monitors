@@ -232,7 +232,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Target : %t : %s : Status Code %d : Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Target - Status Code %d : %t : %s :  Milliseconds elapsed: %v \n", res.StatusCode, m.Availability, m.Config.sku,  watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

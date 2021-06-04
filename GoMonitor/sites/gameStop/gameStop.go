@@ -148,7 +148,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Game Stop : %s, %s, Status Code : %d,  Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, m.statusCode, watch.Milliseconds())
+		fmt.Printf("Game Stop - Status Code : %d, %s, %s, Milliseconds elapsed: %v \n", m.statusCode, m.Availability, m.Config.sku, watch.Milliseconds())
 	}()
 	m.statusCode = res.StatusCode
 	if res.StatusCode != 200 {

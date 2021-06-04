@@ -203,7 +203,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Academy : %s : %s : Status Code : %d, Milliseconds elapsed: %v \n", m.Availability, m.Config.sku, res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Academy - Status Code : %d : %s : %s :  Milliseconds elapsed: %v \n", res.StatusCode, m.Availability, m.Config.sku,  watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

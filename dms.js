@@ -444,38 +444,43 @@ function deleteSku(clients, triggerText, replyText) {
 				let currentBody = skuBank[caseSite][SKU]
 				const {group, isValidated} = await checkIfUserValidated(message)
 
-				if(currentBody === undefined){
-					message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
-				} else {
-					console.log("Current length")
-					console.log(currentBody.companies.length)
-					message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
-					if (currentBody.companies.length > 1){
-						for(let i = 0; i < currentBody.companies.length; i++){
-							if(currentBody.companies[i].company = group){
-								console.log(currentBody.companies)
-								currentBody.companies.splice(i, 1)
-								console.log(currentBody.companies)
-								await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)}
-								message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
-							}
+				if(isValidated) {
+					if(currentBody === undefined){
+						console.log("undefined body")
+						message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
 					} else {
-						currentBody.stop = true
-						console.log(currentBody)
-						if (group == currentBody.companies[0].company){
-							await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
-							await delay(10000)
-							await deleteSkuEnd(site, SKU)
-							message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+						console.log("Current length")
+						console.log(currentBody.companies.length)
+						message.channel.send(`Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`)
+						if (currentBody.companies.length > 1){
+							for(let i = 0; i < currentBody.companies.length; i++){
+								if(currentBody.companies[i].company = group){
+									console.log(currentBody.companies)
+									currentBody.companies.splice(i, 1)
+									console.log(currentBody.companies)
+									await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)}
+									message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+								}
 						} else {
-							console.log(`${group} is not present for this sku`)
-							message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
-							message.channel.send(`If this is an error please contact developer`)
+							currentBody.stop = true
+							console.log(currentBody)
+							if (group == currentBody.companies[0].company){
+								await updateSku(caseSite, SKU, currentBody,  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`)
+								await delay(10000)
+								await deleteSkuEnd(site, SKU)
+								message.channel.send(`${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`)
+							} else {
+								console.log(`${group} is not present for this sku`)
+								message.channel.send(`${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(site)}`)
+								message.channel.send(`If this is an error please contact developer`)
+							}
+							
 						}
 						
-					}
 					
-				
+					}
+				} else {
+					message.channel.send(`${message.author} is not a validated user`)
 				}
 				return;
 

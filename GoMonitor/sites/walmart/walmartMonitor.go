@@ -168,7 +168,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Walmart : %s %d %s %s: Status Code : %d, Milliseconds elapsed: %v\n", m.monitorProduct.offerId, m.monitorProduct.price, m.Config.sku, walmartOffer, res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode , m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price,  walmartOffer, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -177,6 +177,10 @@ func (m *Monitor) monitor() error {
 	}
 	if res.StatusCode != 200 {
 		if res.StatusCode == 412 {
+			fmt.Println("Blocked by PX")
+			fmt.Println("Blocked by PX")
+			fmt.Println("Blocked by PX")
+			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			m.useProxy = false
 		}
