@@ -196,7 +196,7 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println(string(body))
+		fmt.Println(string(body), m.Config.sku, m.Config.skuName)
 		return nil
 	}
 	m.monitorProduct.name = realBody.MainItem.Description.Title
