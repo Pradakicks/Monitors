@@ -88,7 +88,6 @@ type NewEggResponse struct {
 			ImageNameList  string      `json:"ImageNameList"`
 		} `json:"NewImage"`
 		Stock         int64 `json:"Stock"`
-		StockForCombo int64 `json:"StockForCombo"`
 	} `json:"MainItem"`
 }
 
@@ -101,13 +100,11 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	fmt.Println("TESTING", sku, skuName, priceRangeMin, priceRangeMax)
 	m := Monitor{}
 	m.Availability = false
-	// var err error
 	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.Config.site = "NewEgg"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.Config.skuName = skuName
-	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t"
 	m.monitorProduct.name = "Testing Product"
@@ -199,6 +196,7 @@ func (m *Monitor) monitor() error {
 	err = json.Unmarshal(body, &realBody)
 	if err != nil {
 		fmt.Println(err)
+		fmt.Println(string(body))
 		return nil
 	}
 	m.monitorProduct.name = realBody.MainItem.Description.Title
