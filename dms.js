@@ -1026,7 +1026,7 @@ async function checkPresentSkus(){
 				  sku: currentSku?.trim(),
 				  priceRangeMin: parseInt(pricerange?.split(',')[0]),
 				  priceRangeMax: parseInt(pricerange?.split(',')[1]),
-				  skuName : site == 'NEWEGG' ? await getSku(SKU, await getProxies()) : ''
+				  skuName : site == 'NEWEGG' ? await getSku(currentSku?.trim(), await getProxies()) : ''
 				  }
 				  if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 					console.log("No Max Price Range Detected")
