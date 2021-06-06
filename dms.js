@@ -419,7 +419,6 @@ function SKUADD(clients, triggerText, replyText) {
 	}
 
 }
-
 function findCommand(clients, triggerText, replyText) {
 	clients.on('message', message => {
 		if (message.content.toLowerCase() === triggerText.toLowerCase()) {
@@ -1023,10 +1022,11 @@ async function checkPresentSkus(){
 					currentSku = currentSku?.split('[')[0]
 				}
 				let currentBody = {
-					site: site,
+				site: site,
 				  sku: currentSku?.trim(),
 				  priceRangeMin: parseInt(pricerange?.split(',')[0]),
 				  priceRangeMax: parseInt(pricerange?.split(',')[1]),
+				  skuName : site == 'NEWEGG' ? await getSku(SKU, await getProxies()) : ''
 				  }
 				  if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 					console.log("No Max Price Range Detected")
@@ -1046,6 +1046,10 @@ async function checkPresentSkus(){
 		
 	})
 }
+// (async () =>{
+// getSku('N82E16814126452', await getProxies()).then(res => console.log(res))
+
+// })()
  checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
