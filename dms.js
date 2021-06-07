@@ -611,6 +611,7 @@ async function startGoMonitor(currentBody, site){
 			// case "2341":
 			case "TARGET":
 			case "GAMESTOP":
+			case "BESTBUY":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
@@ -1007,8 +1008,18 @@ async function checkPresentSkus(){
 		url : `${pushEndpoint}.json`
 	})
 	skuBank = JSON.parse(skuBank?.body)
-	await delay(3000)
 	let sites = Object.keys(skuBank)
+	let numberOfSkus = 0
+	sites.forEach(site =>{
+		let skus = Object.keys(skuBank[site])
+		if(site != "-M_iJkLwZh3hW5Pjys5Z"){
+			skus.forEach(sku =>{
+			numberOfSkus++
+		})
+	}}
+	)
+	console.log(`Number Of Items In Monitor : ${numberOfSkus}`)
+	await delay(3000)
 	sites.forEach(async (e) => {
 		if(e != "-M_iJkLwZh3hW5Pjys5Z"){
 			let site = e
@@ -1045,6 +1056,8 @@ async function checkPresentSkus(){
 		
 		
 	})
+
+	
 }
 // (async () =>{
 // getSku('N82E16814126452', await getProxies()).then(res => console.log(res))
