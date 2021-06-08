@@ -1088,7 +1088,7 @@ async function deleteSkuEnd(site, sku, group){
 	try {
 		console.log(`Deleting ${sku}/${site}`)
 		let deleteSku = await rp.delete({
-			url : `${pushEndpoint}/${site.toUpperCase()}/${sku}.json`
+			url : `${pushEndpoint}/${site.toUpperCase()}/${encodeURIComponent(sku)}.json`
 		})
 		console.log(deleteSku?.statusCode)
 	} catch (error) {
