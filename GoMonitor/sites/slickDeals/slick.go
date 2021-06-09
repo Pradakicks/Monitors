@@ -13,6 +13,7 @@ import (
 	"time"
 
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bradhe/stopwatch"
@@ -104,6 +105,7 @@ func NewMonitor() *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
+				go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 
 				return nil
 			}
@@ -132,6 +134,7 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -149,6 +152,7 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	defer res.Body.Close()
@@ -159,6 +163,7 @@ func (m *Monitor) monitor() error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	//	fmt.Println(res)
@@ -296,6 +301,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(payload)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -311,6 +317,7 @@ func (m *Monitor) sendWebhook(link string, title string, price string, id string
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	fmt.Println(res)
@@ -327,6 +334,7 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		fmt.Println(err)
 	}
 	req.Header.Add("authority", "slickdeals.net")
@@ -343,13 +351,15 @@ func (m *Monitor) getDesc(link string) (string, string, string) {
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
 	res, err := m.Client.Do(req)
 	if err != nil {
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		fmt.Println(err)
 
 	}
 	defer res.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+		fmt.Println(err)
 	}
 	// Find the review items
 	data := doc.Find("#detailsDescription").Text()
@@ -397,27 +407,31 @@ func (m *Monitor) checkStop() error {
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
-			return nil
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+		return nil
 		}
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-			return nil
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+		return nil
 
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-			return nil
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+		return nil
 		}
 		var currentObject ItemInMonitorJson
 		err = json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-			return nil
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+		return nil
 		}
 		m.stop = currentObject.Stop
 		m.CurrentCompanies = currentObject.Companies
@@ -437,10 +451,12 @@ func (m *Monitor) getRealLink(url string) string {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		fmt.Println(err)
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		fmt.Println(err)
 	}
 	defer res.Body.Close()

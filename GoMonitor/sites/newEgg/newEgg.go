@@ -105,7 +105,7 @@ func NewMonitor(sku string, skuName string, priceRangeMin int, priceRangeMax int
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	m.Config.skuName = skuName
-	m.Client = http.Client{Timeout: 60 * time.Second}
+	// m.Client = http.Client{Timeout: 60 * time.Second}
 	m.Config.discord = "https://discord.com/api/webhooks/816740348222767155/2APr1EdhzNO4hRWznexhMRlO0g7qOiCkI7HFtmuU7_r48PCWnGYmSTGJmRVX0LPCNN_t"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = 10

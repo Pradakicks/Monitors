@@ -13,6 +13,7 @@ import (
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
 )
 
 type Config struct {
@@ -145,6 +146,7 @@ func (m *Monitor) monitor() error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	req.Header.Add("pragma", "no-cache")
@@ -163,6 +165,7 @@ func (m *Monitor) monitor() error {
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	defer res.Body.Close()
@@ -173,6 +176,7 @@ func (m *Monitor) monitor() error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
 	if res.StatusCode != 200 {
@@ -193,12 +197,13 @@ func (m *Monitor) monitor() error {
 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
+		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		fmt.Println(err)
 	}
 	walmartOffers, err := parser.QueryToMap("payload.sellers")
 	for key, _ := range walmartOffers {
 		if err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 		}
 		sell := fmt.Sprintf("payload.sellers.%s.sellerName", key)
 		sellerName, err := parser.QueryToString(sell)
@@ -358,6 +363,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, off
 	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(site, sku, err)
 	}
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
@@ -372,6 +378,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, off
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
+		go MonitorLogger.LogError(site, sku, err)
 	}
 	defer res.Body.Close()
 	fmt.Println(res)
@@ -393,12 +400,14 @@ func (m *Monitor) checkStop() error {
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 			return nil
 		}
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 			return nil
 
 		}
@@ -406,6 +415,7 @@ func (m *Monitor) checkStop() error {
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 			return nil
 		}
 		var currentObject ItemInMonitorJson
@@ -413,6 +423,7 @@ func (m *Monitor) checkStop() error {
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 			return nil
 		}
 		m.stop = currentObject.Stop
