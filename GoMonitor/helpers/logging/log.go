@@ -10,7 +10,7 @@ import (
 type itemLogger struct {
 	site  string
 	sku   string
-	Error error
+	Error string
 }
 
 func LogError(site string, sku string, Error error) {
@@ -20,7 +20,7 @@ func LogError(site string, sku string, Error error) {
 	itemErr := itemLogger{
 		site:  site,
 		sku:   sku,
-		Error: Error,
+		Error: Error.Error(),
 	}
 
 	payload, err := json.Marshal(itemErr)
