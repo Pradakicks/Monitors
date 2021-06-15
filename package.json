@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node discord",
     "docker-production" : "docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
-    "production" : "cd GoMonitor && npm run docker-production",
+    "production" : "cd GoMonitor && docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
     "production-build" : "cd GoMonitor && go build && ./prada-monitors-go"
   },
   "keywords": [], 
