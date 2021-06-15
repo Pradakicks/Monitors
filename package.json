@@ -5,7 +5,10 @@
   "description": "",
   "main": "discord.js",
   "scripts": {
-    "start": "node discord"
+    "start": "sudo node discord",
+    "docker-production" : "docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
+    "production" : "cd GoMonitor && docker-production",
+    "production-build" : "cd GoMonitor && go build && ./prada-monitors-go"
   },
   "keywords": [],
   "license": "ISC",
