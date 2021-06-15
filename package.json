@@ -10,7 +10,7 @@
     "production" : "cd GoMonitor && docker-production",
     "production-build" : "cd GoMonitor && go build && ./prada-monitors-go"
   },
-  "keywords": [],
+  "keywords": [], 
   "license": "ISC",
   "dependencies": {
     "delay": "^4.4.0",
