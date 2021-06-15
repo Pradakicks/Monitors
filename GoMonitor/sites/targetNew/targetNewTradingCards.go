@@ -308,11 +308,13 @@ func (m *Monitor) sendWebhook(tcin string, link string, price int, productName s
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
 		}
 	}
+	t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
 		fmt.Println(comp.Company)
-		go webHookSend(comp, m.Config.site, tcin, m.monitorProduct.name, price, "test", image, link)
+		go webHookSend(comp, m.Config.site, tcin, m.monitorProduct.name, price, t, image, link)
 	}
 	return nil
 }
@@ -352,14 +354,14 @@ func webHookSend(c Company, site string, sku string, name string, price int, tim
 			"footer": {
 			  "text": "Prada#4873"
 			},
-			"timestamp": "2021-05-13 13:57:26.5157268",
+			"timestamp": "%s",
 			"thumbnail": {
 			  "url": "%s"
 			}
 		  }
 		],
 		"avatar_url": "%s"
-	  }`, site, link, c.Color, name, price, sku, link, image, c.CompanyImage))
+	  }`, site, link, c.Color, name, price, sku, link, time, image, c.CompanyImage))
 	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)

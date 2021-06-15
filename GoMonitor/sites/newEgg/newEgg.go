@@ -235,9 +235,11 @@ func (m *Monitor) sendWebhook() error {
 			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
 		}
 	}
+	t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
-		go webHookSend(comp, m.Config.site, m.Config.skuName, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.stockNumber, "test", m.monitorProduct.image)
+		go webHookSend(comp, m.Config.site, m.Config.skuName, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.stockNumber, t, m.monitorProduct.image)
 	}
 	return nil
 }
@@ -281,14 +283,14 @@ func webHookSend(c Company, site string, sku string, name string, price int, sto
 			"footer": {
 			  "text": "Prada#4873"
 			},
-			"timestamp": "2021-05-13 13:57:26.5157268",
+			"timestamp": "%s",
 			"thumbnail": {
 			  "url": "http://c1.neweggimages.com/ProductImageOriginal/%s"
 			}
 		  }
 		],
 		"avatar_url": "%s"
-	  }`, site, sku, c.Color, name, price, sku, stockNumber, sku, image, c.CompanyImage))
+	  }`, site, sku, c.Color, name, price, sku, stockNumber, sku, time, image, c.CompanyImage))
 	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
