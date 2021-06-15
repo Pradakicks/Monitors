@@ -637,8 +637,10 @@ async function startGoMonitor(currentBody, site){
 async function mass (string , content, message, groupName){
 	//	const SKU = content.split(' ')[2];
 			//	console.log(site)
-			const site = content?.split(' ')[1]?.split('|')[0]
-			console.log(site.toUpperCase())
+			const site = content?.split(' ')[1]?.split('\n')[0].trim()
+			console.log(content?.split(' ')[1]?.split('\n')[0].length)
+			console.log(site.toUpperCase().length)
+			console.log(site)
 			let validatedIds = await getValidatedIds()
 			let parsed = JSON.parse(validatedIds)
 			let isValidated = false
@@ -656,7 +658,6 @@ async function mass (string , content, message, groupName){
 				isValidated = true
 				group = groupName
 			}
-			
 			if(isValidated){
 				//	const SKU = content.split(' ')[2];
 		//	console.log(site)
@@ -1059,11 +1060,7 @@ async function checkPresentSkus(){
 
 	
 }
-// (async () =>{
-// getSku('N82E16814126452', await getProxies()).then(res => console.log(res))
-
-// })()
- checkPresentSkus()
+checkPresentSkus()
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`

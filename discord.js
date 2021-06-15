@@ -1,8 +1,10 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const os = require('os')
 const {
 	prefix,
 	token,
+	development,
 	bot_age,
 	bot_info,
 } = require('./config.json');
@@ -39,5 +41,12 @@ msg.repl
 });
 
 
+console.log(os.release())
+if(os.platform() == "win32"){
+	console.log("Development Environment")
+	client.login(development)
+} else {
+	console.log("Production Environment")
+	client.login(token);
 
-client.login(token);
+}
