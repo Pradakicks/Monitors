@@ -5,9 +5,9 @@
   "description": "",
   "main": "discord.js",
   "scripts": {
-    "start": "node discord",
+    "discord": "node discord",
     "docker-production" : "docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
-    "production" : "cd GoMonitor && docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
+    "production" : "cd GoMonitor && npm run docker-production",
     "production-build" : "cd GoMonitor && go build && ./prada-monitors-go"
   },
   "keywords": [], 
