@@ -12,7 +12,7 @@ const rp = require('request-promise').defaults({
 });
 const port = 7243
 // const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
-const secondServer = `http://162.243.165.41`
+const secondServer = `http://143.244.164.115`
 
 function SKUADD(clients, triggerText, replyText) {
 	try {

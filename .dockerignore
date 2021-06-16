@@ -2,3 +2,8 @@ Dockerfile
 .dockerignore
 node_modules
 npm-debug.log
+Procile
+.gitignore
+.eslintrc.json
+.vscode
+
