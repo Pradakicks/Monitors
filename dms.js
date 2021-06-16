@@ -11,7 +11,8 @@ const rp = require('request-promise').defaults({
 	gzip: true,
 });
 const port = 7243
-const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
+// const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
+const secondServer = `http://162.243.165.41`
 
 function SKUADD(clients, triggerText, replyText) {
 	try {
