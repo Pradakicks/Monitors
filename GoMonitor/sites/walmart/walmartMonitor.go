@@ -156,7 +156,6 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("accept-language", "en")
 	req.Header.Add("user-agent", "Walmart/2105142140 CFNetwork/1209 Darwin/20.2.0")
 	req.Header.Add("content-type", "application/json")
-	req.Header.Add("x-px-authorization", " ")
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
@@ -180,7 +179,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	if res.StatusCode != 200 {
-		if res.StatusCode == 412 {
+		if res.StatusCode == 412 || res.StatusCode == 444 {
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
