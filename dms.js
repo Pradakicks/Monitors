@@ -610,10 +610,10 @@ async function startGoMonitor(currentBody, site){
 	try {
 		switch(site){
 			// case "2341":
-			case "TARGET":
-			case "GAMESTOP":
-			case "BESTBUY":
-			// case "WALMART":
+			// case "TARGET":
+			//case "GAMESTOP":
+			// case "BESTBUY":
+			case "WALMART":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
