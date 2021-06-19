@@ -9,11 +9,11 @@ import (
 	"os"
 	"strings"
 	"time"
-	"net/http/cookiejar"
+
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
-	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
 type Config struct {
@@ -170,7 +170,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode , m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price,  walmartOffer, watch.Milliseconds())
+		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode, m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price, walmartOffer, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -202,7 +202,7 @@ func (m *Monitor) monitor() error {
 	walmartOffers, err := parser.QueryToMap("payload.sellers")
 	for key, _ := range walmartOffers {
 		if err != nil {
-		fmt.Println(err)
+			fmt.Println(err)
 		}
 		sell := fmt.Sprintf("payload.sellers.%s.sellerName", key)
 		sellerName, err := parser.QueryToString(sell)
