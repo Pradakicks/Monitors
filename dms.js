@@ -599,10 +599,6 @@ async function getSku (skuName, proxyList) {
                 return sku
                 } catch (error) {
                     console.log(error)
-                    // skuBank[this.index].name = 'Restart'
-                    // skuBank[this.index]["error"] = error.message
-                    // skuBank[this.index].stop = true
-                  //  console.log(skuBank[this.index])
                     await getSku()
                 }
 }
@@ -767,11 +763,11 @@ async function mass (string , content, message, groupName){
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-									  site: "NewEgg",
+									site: "New Egg",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
-									skuName: await getSku(g[i], await getProxies())
+									skuName: await getSku(SKU, await getProxies())
 							}
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
@@ -1224,11 +1220,8 @@ const item1 = {
 	userPass: lineSplit[3],
 };
 proxyList.push(item1);
-
-// console.log(line);
-// console.log(item1);
-// console.log('\n\n\n\n\n');
 });
+console.log(`Proxy list Length : ${proxyList.length}`)
 return proxyList;
 } catch (err) {
 console.error(err);
