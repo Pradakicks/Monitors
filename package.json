@@ -6,17 +6,18 @@
   "main": "discord.js",
   "scripts": {
     "discord": "node discord",
-    "docker-production" : " cd GoMonitor && docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
-    "production" : "cd GoMonitor && npm run docker-production",
-    "production-build" : "cd GoMonitor && go build && ./prada-monitors-go"
+    "docker-production": " cd GoMonitor && docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
+    "production": "cd GoMonitor && npm run docker-production",
+    "production-build": "cd GoMonitor && go build && ./prada-monitors-go"
   },
-  "keywords": [], 
+  "keywords": [],
   "license": "ISC",
   "dependencies": {
-    "delay": "^4.4.0",
+    "delay": "^4.4.1",
     "discord": "^0.8.2",
     "discord.js": "^12.5.1",
     "fs": "0.0.1-security",
+    "puppeteer": "^10.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "tough-cookie": "^4.0.0"
