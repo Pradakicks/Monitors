@@ -138,7 +138,7 @@ function SKUADD(clients, triggerText, replyText) {
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
-									skuName: await getSku(message, SKU, await getProxies())
+									skuName: await getSku(SKU, await getProxies())
 							}
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
@@ -569,9 +569,8 @@ function massAdd (clients, triggerText, replyText){
 		console.log(error);
 	}
 }
-async function getSku (message, skuName, proxyList) {
+async function getSku (skuName, proxyList) {
         try {
-				   await delay(15000)
                     let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
                     console.log(proxy1)
                     let fetchProductPage = await rp.get({
@@ -598,8 +597,8 @@ async function getSku (message, skuName, proxyList) {
                 console.log(sku)
                 return sku
                 } catch (error) {
-					message.channel.send(error.toString())
                     console.log(error)
+					await delay(10000)
                     await getSku()
                 }
 }
@@ -768,7 +767,7 @@ async function mass (string , content, message, groupName){
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
-									skuName: await getSku(message, SKU, await getProxies())
+									skuName: await getSku(SKU, await getProxies())
 							}
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
