@@ -571,8 +571,6 @@ function massAdd (clients, triggerText, replyText){
 }
 async function getSku (message, skuName, proxyList) {
         try {
-                   console.log(skuName, proxyList)
-				   message.channel.send(skuName, proxyList)
 				   await delay(15000)
                     let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
                     console.log(proxy1)
