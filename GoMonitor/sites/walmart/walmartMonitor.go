@@ -185,7 +185,7 @@ func (m *Monitor) monitor() error {
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
-			m.useProxy = false
+			m.useProxy = !m.useProxy
 		}
 
 		return nil
