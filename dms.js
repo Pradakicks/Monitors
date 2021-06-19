@@ -571,7 +571,8 @@ function massAdd (clients, triggerText, replyText){
 }
 async function getSku (skuName, proxyList) {
         try {
-                   console.log(skuName)
+                   console.log(skuName, proxyList)
+				   await delay(15000)
                     let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
                     console.log(proxy1)
                     let fetchProductPage = await rp.get({
