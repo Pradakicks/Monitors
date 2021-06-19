@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 	"time"
-
+	"net/http/cookiejar"
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
@@ -118,6 +118,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				}
 				m.Client.Transport = defaultTransport
 			} else {
+				fmt.Println("No Proxy")
 				m.Client.Transport = http.DefaultTransport
 			}
 
@@ -128,7 +129,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			fmt.Println(m.stop, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-
 	}
 	return &m
 }
@@ -154,7 +154,7 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("dnt", "1")
 	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Walmart/2105142140 CFNetwork/1209 Darwin/20.2.0")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
