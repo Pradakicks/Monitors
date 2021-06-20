@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -154,7 +155,19 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("dnt", "1")
 	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
+
+	rand.Seed(time.Now().Unix())
+	n := rand.Int() % 3
+	switch n {
+	case 0:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
+	case 1:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
+	case 2:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	default:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
+	}
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")

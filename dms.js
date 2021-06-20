@@ -608,7 +608,7 @@ async function startGoMonitor(currentBody, site){
 			// case "2341":
 			// case "TARGET":
 			//case "GAMESTOP":
-			// case "BESTBUY":
+			case "BESTBUY":
 			case "WALMART":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
