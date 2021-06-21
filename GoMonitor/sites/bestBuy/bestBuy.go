@@ -150,7 +150,7 @@ func NewMonitor(sku string) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			time.Sleep(250 * (time.Millisecond))
+			time.Sleep(500 * (time.Millisecond))
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false
@@ -159,7 +159,6 @@ func NewMonitor(sku string) *Monitor {
 	}
 	return &m
 }
-
 func (m *Monitor) monitor() error {
 	watch := stopwatch.Start()
 	defer func() {
@@ -228,7 +227,6 @@ func (m *Monitor) monitor() error {
 	m.Availability = monitorAvailability
 	return nil
 }
-
 func (m *Monitor) getProxy(proxyList []string) string {
 	defer func() {
 		if r := recover(); r != nil {
@@ -245,7 +243,6 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	//fmt.Println(proxyList[m.Config.proxyCount])
 	return proxyList[m.Config.proxyCount]
 }
-
 func (m *Monitor) sendWebhook() error {
 	defer func() {
 		if r := recover(); r != nil {
