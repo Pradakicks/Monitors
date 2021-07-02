@@ -643,7 +643,6 @@ async function startGoMonitor(currentBody, site){
 			// case "2341":
 			case "TARGET":
 			case "GAMESTOP":
-			// case "WALMART":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
@@ -652,8 +651,7 @@ async function startGoMonitor(currentBody, site){
 					}
 				}, (response) => console.log(response?.statusCode))
 				break
-				// case "BESTBUY":
-				 case "WALMART":
+			case "WALMART":
 						rp.post({
 							url : `${thirdServer}:${port}/${site}`,
 							body : JSON.stringify(currentBody),
