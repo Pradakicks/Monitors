@@ -40,7 +40,7 @@ COPY . ./
 EXPOSE 7243
 
 # Run the web service on container startup.
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "docker-production" ]
 
 # [END run_helloworld_dockerfile]
 # [END cloudrun_helloworld_dockerfile]

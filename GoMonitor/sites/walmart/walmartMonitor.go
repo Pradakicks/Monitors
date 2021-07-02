@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,8 +13,8 @@ import (
 
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
-	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 )
 
 type Config struct {
@@ -118,6 +119,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				}
 				m.Client.Transport = defaultTransport
 			} else {
+				fmt.Println("No Proxy")
 				m.Client.Transport = http.DefaultTransport
 			}
 
@@ -128,7 +130,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			fmt.Println(m.stop, "STOPPED STOPPED STOPPED")
 			i = false
 		}
-
 	}
 	return &m
 }
@@ -154,9 +155,20 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("dnt", "1")
 	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Walmart/2105142140 CFNetwork/1209 Darwin/20.2.0")
+
+	rand.Seed(time.Now().Unix())
+	n := rand.Int() % 3
+	switch n {
+	case 0:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
+	case 1:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
+	case 2:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	default:
+		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
+	}
 	req.Header.Add("content-type", "application/json")
-	req.Header.Add("x-px-authorization", " ")
 	req.Header.Add("sec-fetch-site", "cross-site")
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
@@ -171,7 +183,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode , m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price,  walmartOffer, watch.Milliseconds())
+		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode, m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price, walmartOffer, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -180,13 +192,13 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	if res.StatusCode != 200 {
-		if res.StatusCode == 412 {
+		if res.StatusCode == 412 || res.StatusCode == 444 {
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
-			m.useProxy = false
+			m.useProxy = !m.useProxy
 		}
 
 		return nil
@@ -203,7 +215,7 @@ func (m *Monitor) monitor() error {
 	walmartOffers, err := parser.QueryToMap("payload.sellers")
 	for key, _ := range walmartOffers {
 		if err != nil {
-		fmt.Println(err)
+			fmt.Println(err)
 		}
 		sell := fmt.Sprintf("payload.sellers.%s.sellerName", key)
 		sellerName, err := parser.QueryToString(sell)

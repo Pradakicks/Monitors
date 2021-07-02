@@ -11,8 +11,9 @@ const rp = require('request-promise').defaults({
 	gzip: true,
 });
 const port = 7243
-const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
-
+// const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
+const secondServer = `http://143.244.164.115`
+const thirdServer = `http://64.227.28.51`
 function SKUADD(clients, triggerText, replyText) {
 	try {
 		clients.on('message', async (message) => {
@@ -570,7 +571,6 @@ function massAdd (clients, triggerText, replyText){
 }
 async function getSku (skuName, proxyList) {
         try {
-                   console.log(skuName)
                     let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
                     console.log(proxy1)
                     let fetchProductPage = await rp.get({
@@ -598,10 +598,7 @@ async function getSku (skuName, proxyList) {
                 return sku
                 } catch (error) {
                     console.log(error)
-                    // skuBank[this.index].name = 'Restart'
-                    // skuBank[this.index]["error"] = error.message
-                    // skuBank[this.index].stop = true
-                  //  console.log(skuBank[this.index])
+					await delay(10000)
                     await getSku()
                 }
 }
@@ -611,7 +608,7 @@ async function startGoMonitor(currentBody, site){
 			// case "2341":
 			case "TARGET":
 			case "GAMESTOP":
-			case "BESTBUY":
+			// case "WALMART":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
@@ -620,6 +617,16 @@ async function startGoMonitor(currentBody, site){
 					}
 				}, (response) => console.log(response?.statusCode))
 				break
+				case "BESTBUY":
+					// case "WALMART":
+						rp.post({
+							url : `${thirdServer}:${port}/${site}`,
+							body : JSON.stringify(currentBody),
+							headers : {
+								"Content-Type": "application/json"
+							}
+						}, (response) => console.log(response?.statusCode))
+						break
 			default:
 				rp.post({
 					url : `http://localhost:${port}/${site}`,
@@ -765,11 +772,11 @@ async function mass (string , content, message, groupName){
 						// let monitor = new newEggMonitor(SKU.toString())
 						// monitor.task()
 							let currentBody = {
-									  site: "NewEgg",
+									site: "New Egg",
 									sku: SKU,
 									priceRangeMin: parseInt(pricerange.split(',')[0]),
 									priceRangeMax: parseInt(pricerange.split(',')[1]),
-									skuName: await getSku(g[i], await getProxies())
+									skuName: await getSku(SKU, await getProxies())
 							}
 							if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 							console.log("No Max Price Range Detected")
@@ -1222,11 +1229,8 @@ const item1 = {
 	userPass: lineSplit[3],
 };
 proxyList.push(item1);
-
-// console.log(line);
-// console.log(item1);
-// console.log('\n\n\n\n\n');
 });
+console.log(`Proxy list Length : ${proxyList.length}`)
 return proxyList;
 } catch (err) {
 console.error(err);

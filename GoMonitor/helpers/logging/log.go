@@ -26,19 +26,28 @@ func LogError(site string, sku string, Error error) {
 	payload, err := json.Marshal(itemErr)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	req, _ := http.NewRequest("POST", url, strings.NewReader(string(payload)))
-
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(payload)))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Set("Connection", "close")
 	req.Close = true
 
-	res, _ := http.DefaultClient.Do(req)
-
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer res.Body.Close()
-
+	defer func(){
 	message := fmt.Sprintf("Logger For %s Sku %s : Status : %d", site, sku, res.StatusCode)
-	fmt.Println(message)
+		fmt.Println(message)
+	}()
+	
 
 }
