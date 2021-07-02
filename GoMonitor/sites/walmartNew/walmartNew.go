@@ -117,10 +117,6 @@ func NewMonitor(query string, sku string) *Monitor {
 				Proxy: http.ProxyURL(proxyUrl),
 			}
 			m.Client.Transport = defaultTransport
-			jar, _ := cookiejar.New(nil)
-			m.Client = http.Client{
-				Jar: jar,
-			}
 			m.monitor()
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
@@ -130,16 +126,15 @@ func NewMonitor(query string, sku string) *Monitor {
 	}
 	return &m
 }
-func (m *Monitor) monitor() error {
-	watch := stopwatch.Start()
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
-		}
-	}()
+
+func (m *Monitor) getCookies() {
+	jar, _ := cookiejar.New(nil)
+				m.Client = http.Client{
+					Jar: jar,
+				}
+
 	req1, _ := http.NewRequest("GET", "https://www.walmart.com/checkout", nil)
 	fmt.Println(m.Client.Jar)
-
 	req1.Header.Add("authority", "www.walmart.com")
 	req1.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
 	req1.Header.Add("sec-ch-ua-mobile", "?0")
@@ -159,6 +154,16 @@ func (m *Monitor) monitor() error {
 	fmt.Println(res1.StatusCode)
 	fmt.Println(m.Client.Jar)
 	defer res1.Body.Close()
+}
+
+func (m *Monitor) monitor() error {
+	watch := stopwatch.Start()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
+		}
+	}()
+	
 
 	url := fmt.Sprintf("https://www.walmart.com/search/api/preso?%s", m.Query)
 
@@ -205,6 +210,7 @@ func (m *Monitor) monitor() error {
 			fmt.Println("Blocked by PX 1234")
 			fmt.Println("Blocked by PX 1234")
 			fmt.Println("Blocked by PX 1234")
+			m.getCookies()
 		}
 		return nil
 	}
