@@ -119,11 +119,6 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 					Proxy: http.ProxyURL(proxyUrl),
 				}
 				m.Client.Transport = defaultTransport
-				jar, _ := cookiejar.New(nil)
-				m.Client = http.Client{
-					Jar: jar,
-				}
-				m.getCookies()
 			} else {
 				fmt.Println("No Proxy")
 				m.Client.Transport = http.DefaultTransport
