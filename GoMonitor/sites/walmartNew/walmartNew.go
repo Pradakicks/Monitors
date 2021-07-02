@@ -92,6 +92,7 @@ func NewMonitor(query string, sku string) *Monitor {
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
+	fmt.Println(fmt.Sprintf("https://www.walmart.com/search/api/preso?%s", m.Query))
 	i := true
 	time.Sleep(15000 * (time.Millisecond))
 	go m.checkStop()
