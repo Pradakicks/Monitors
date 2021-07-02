@@ -257,19 +257,18 @@ func (m *Monitor) monitor() error {
 			fmt.Println(err)
 		}
 		newList = append(newList, pid.(string))
-		fmt.Println(len(m.products))
 		for _, v := range m.products {
 			if v == pid {
 				isPresent = true
 			}
 		}
-		fmt.Println(isPresent)
 		if !isPresent {
 			m.products = append(m.products, pid.(string))
 			go m.sendWebhook(pid.(string), offerId.(string), price.(float64), title.(string), image.(string), stockNum.(float64), sellerName.(string))
 
 		}
 	}
+	fmt.Println(len(m.products))
 
 	m.products = newList
 	return nil

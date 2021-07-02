@@ -1112,7 +1112,7 @@ async function checkPresentSkus(){
 				  sku: currentSku?.trim(),
 				  priceRangeMin: parseInt(pricerange?.split(',')[0]),
 				  priceRangeMax: parseInt(pricerange?.split(',')[1]),
-				  skuName : site == 'NEWEGG' ? await getSku(currentSku?.trim(), await getProxies()) : ''
+				  skuName : site == 'NEWEGG' ? await getSku(currentSku?.trim(), await getProxies()) : site == "WALMARTNEW" ? "prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new" : ""
 				  }
 				  if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
 					console.log("No Max Price Range Detected")
