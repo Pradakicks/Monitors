@@ -651,7 +651,7 @@ async function startGoMonitor(currentBody, site){
 					}
 				}, (response) => console.log(response?.statusCode))
 				break
-			// case "WALMART":
+			case "WALMART":
 			case "WALMARTNEW":
 						rp.post({
 							url : `${thirdServer}:${port}/${site}`,
