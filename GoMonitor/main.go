@@ -246,8 +246,8 @@ func main() {
 	DBWorker()
 	go func() {
 		for true {
-			time.Sleep(15000 * (time.Millisecond))
 			DBWorker()
+			time.Sleep(15000 * (time.Millisecond))
 		}
 	}()
 	handleRequests()
