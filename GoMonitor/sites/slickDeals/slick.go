@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
+	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bradhe/stopwatch"
@@ -92,10 +92,11 @@ func NewMonitor() *Monitor {
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
+	time.Sleep(15000 * (time.Millisecond))
 	go m.checkStop()
 	time.Sleep(3000 * (time.Millisecond))
 	i := true
-	for i == true {
+	for i {
 		if !m.stop {
 			currentProxy := m.getProxy(proxyList)
 			splittedProxy := strings.Split(currentProxy, ":")
@@ -404,35 +405,35 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := fmt.Sprintf("http://localhost:7243/DB")
+		url := "http://172.93.100.112:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
-		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
-		return nil
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+			return nil
 		}
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
-		return nil
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+			return nil
 
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
-		return nil
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+			return nil
 		}
 		var currentObject ItemInMonitorJson
 		err = json.Unmarshal(body, &currentObject)
 		if err != nil {
 			fmt.Println(err)
 			res.Body.Close()
-		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
-		return nil
+			go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
+			return nil
 		}
 		m.stop = currentObject.Stop
 		m.CurrentCompanies = currentObject.Companies

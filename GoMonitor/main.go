@@ -21,6 +21,7 @@ import (
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
+	WalmartNew "github.con/prada-monitors-go/sites/walmartNew"
 )
 
 type Monitor struct {
@@ -157,9 +158,21 @@ func gameStop(w http.ResponseWriter, r *http.Request) {
 	go GameStopMonitor.NewMonitor(currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func walmartNew(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Walmart New Monitor")
+	fmt.Println("Walmart New Monitor")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go WalmartNew.NewMonitor(currentMonitor.SkuName, currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
+
+
 func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Slick Deals Monitor")
+	fmt.Fprintf(w, "Deals Monitor")
 }
 
 func getDB(w http.ResponseWriter, r *http.Request) {
@@ -181,13 +194,10 @@ func getDB(w http.ResponseWriter, r *http.Request) {
 	var requestData DB
 	_ = json.NewDecoder(r.Body).Decode(&requestData)
 
-	fmt.Println(requestData)
-
 	requestedItems, err := parser.QueryToMap(fmt.Sprintf("%s.%s", requestData.Site, requestData.Sku))
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
-
 	fmt.Println(requestedItems)
 	j, err := json.Marshal(requestedItems)
 	if err != nil {
@@ -238,6 +248,7 @@ func handleRequests() {
 	router.HandleFunc("/SLICK", slickDeals).Methods("POST")
 	router.HandleFunc("/SLICKDEALS", slickDeals).Methods("POST")
 	router.HandleFunc("/GAMESTOP", gameStop).Methods("POST")
+	router.HandleFunc("/WALMARTNEW", walmartNew).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 }
 

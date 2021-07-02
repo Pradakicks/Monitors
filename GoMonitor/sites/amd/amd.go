@@ -87,10 +87,11 @@ func NewMonitor(sku string) *Monitor {
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
+	time.Sleep(15000 * (time.Millisecond))
 	go m.checkStop()
 	time.Sleep(3000 * (time.Millisecond))
 	i := true
-	for i == true {
+	for i {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
@@ -338,7 +339,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := fmt.Sprintf("http://localhost:7243/DB")
+		url := "http://172.93.100.112:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)

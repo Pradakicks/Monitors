@@ -2,6 +2,7 @@ const {MessageAttachment } = require('discord.js');
 const delay = require('delay');
 const fs = require('fs').promises;
 const config = require('./config.json')
+const os = require('os')
 //  var skuBank = []
 let pushEndpoint = "https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor"
 let discordIds = "https://monitors-9ad2c-default-rtdb.firebaseio.com/validatedUsers"
@@ -406,6 +407,40 @@ function SKUADD(clients, triggerText, replyText) {
 						}
 						console.log(currentBody)
 						startGoMonitor(currentBody, site.toUpperCase())
+					} else if (site.toUpperCase() == 'WALMART NEW' || site.toUpperCase() == 'WALMARTNEW'){
+						console.log(pricerange)
+							let currentBody = {
+								  	site: "Walmart New",
+									skuName: "prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await pushSku({
+							sku: SKU,
+							site: 'WALMARTNEW',
+							stop: false,
+							name: "",
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+							})
+							console.log(currentBody)
+							startGoMonitor(currentBody, site.toUpperCase())
 					}
 					message.channel.send(`${SKU} Added to ${site}`)
 					}
@@ -617,8 +652,8 @@ async function startGoMonitor(currentBody, site){
 					}
 				}, (response) => console.log(response?.statusCode))
 				break
-				case "BESTBUY":
-					// case "WALMART":
+				// case "BESTBUY":
+				 case "WALMART":
 						rp.post({
 							url : `${thirdServer}:${port}/${site}`,
 							body : JSON.stringify(currentBody),
@@ -998,6 +1033,39 @@ async function mass (string , content, message, groupName){
 							
 						console.log(currentBody)
 						startGoMonitor(currentBody, site.toUpperCase())
+					} else if (site.toUpperCase() == 'WALMART NEW' || site.toUpperCase() == 'WALMART NEW'){
+						console.log(pricerange)
+							let currentBody = {
+								  	site: "Walmart New",
+									sku: SKU,
+									priceRangeMin: parseInt(pricerange.split(',')[0]),
+									priceRangeMax: parseInt(pricerange.split(',')[1])
+							}
+						if(currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax){
+							console.log("No Max Price Range Detected")
+							currentBody.priceRangeMax = 100000
+
+						} if(currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin){
+							console.log("No Min Price Range Detected")
+							currentBody.priceRangeMin = 1
+
+						}
+							await pushSku({
+							sku: SKU,
+							site: 'WALMARTNEW',
+							stop: false,
+							name: "",
+							original : original,
+							companies : [
+								{
+								company : group,
+								webhook : currentCompany[caseSite],
+								color : currentCompany?.companyColor,
+								companyImage : currentCompany?.companyImage
+							}]
+							})
+							console.log(currentBody)
+							startGoMonitor(currentBody, site.toUpperCase())
 					}
 					}
 				await delay(30000)
@@ -1067,7 +1135,11 @@ async function checkPresentSkus(){
 
 	
 }
-checkPresentSkus()
+if(os.platform() == "win32" || os.platform() == "darwin"){
+	console.log("Development Environment")
+} else {
+	checkPresentSkus()
+}
 async function getSkuBank(){
 	let getbank = await rp.get({
 		url : `${pushEndpoint}.json`

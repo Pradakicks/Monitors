@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elgs/gojq"
 	"github.com/mattia-git/go-capmonster"
 )
 
@@ -29,13 +30,56 @@ func main() {
 	// for true {
 	// 	testNewEndpoint()
 	// }
-	// t := time.Now()
-	testing := time.Now().UTC().Format("2006-01-02T15:04:05Z")
-	fmt.Println(testing)
-	fmt.Printf("%T", time.Now().UTC().Format("2006-01-02T15:04:05Z"))
+	// // t := time.Now()
+	// testing := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+	// fmt.Println(testing)
+	// fmt.Printf("%T", time.Now().UTC().Format("2006-01-02T15:04:05Z"))
+	walmartNew()
 
 }
+func walmartNew() {
 
+	url := "https://www.walmart.com/search/api/preso?prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("cookie", `DL=33473%2C%2C%2Cip%2C33473%2C%2C; vtc=Wc-5IJNXcCxYa0fpnFPpUA; TS013ed49a=01538efd7c0085dc072f274bb98d7f3e1623d95bcf8e3b594f2372d8c231a637702fc3fb2b74547f5075075afdf87b2113f04fcc69; TBV=7; _pxvid=7b2febbe-cfa6-11eb-92a4-0242ac120006; _gcl_au=1.1.531143447.1624047166; tb_sw_supported=true; _abck=atl1wiqokoeos5bao5pb_1985; rtoken=MDgyNTUyMDE4uRiNaOR42Li%2FaQqALWZv76zZdbjFdpv5ZbM4tPC%2B9Q26rzIZioWwa%2BTTC3UrNVsPwN1Tj6LkmULy%2B5RaADQRnytPo%2BMX7cdXA2k236eEKBAJi2JuCsXAPdkY4Xm5jUwd3vnArV%2BPLBRPWrgOcepPVULGpf7b2szLnKaieZQxg3Q6RNLx7McyDpt8hausTZOD5tHuax%2F7D%2BZhJoOfnhZIntW2NMKflYKyBHvRLZAdMPUv8JNE4Vga0o2bvXxYMc66rdV%2BOICiFSl6u%2B9soUDxKafMtLuzRYP8NYebsNtHWW1Bg93LiWTdF79xRZco9YtD6OcrmFydbBOCpJADN4cwu3igOjU1YJOpqjBdmMA1VDRajP6UfkCSQSh%2B2g5%2FNSnYes4oLiLLLGugVIO1xvxqvQ%3D%3D; SPID=12b5b2a8bec816faf2bff9663eec6a47a5dc4501089f1cff694a9251488b20f6d5ea803d5ca906a2ce35ad635aac7370myacc; CID=ad1e2798-ac54-4d33-9d9e-3803bca9a057; hasCID=1; customer=%7B%22firstName%22%3A%22Adrian%22%2C%22lastNameInitial%22%3A%22T%22%2C%22rememberme%22%3Atrue%7D; type=REGISTERED; WMP=4; oneapp_customer=true; hasCRT=1; CRT=7ebca80e-4e13-4929-bb1a-971f899f3979; cart-item-count=2; akavpau_p1=1624067154~id=2336dded40d2219f0ba35f145236c033; dtCookie=v_4_srv_36_sn_95D12B925BE6A9867771F833AB58D813_perc_100000_ol_0_mul_1_app-3Aea7c4b59f27d43eb_1; TS01af1d9b=01538efd7c67c354031bd3b3b17ef4818fcf24b60a1ddded8384c72ef31c1b351459853c5756406d97121527a55efe60ae430ad970; athrvi=RVI~h13a77e56-h798aed6; s_sess_2=c32_v%3DS2H%2Cnull%3B%20prop32%3D; next-day=1625257800|true|false|1625313600|1625196691; location-data=33473%3ABoynton%20Beach%3AFL%3A%3A8%3A1|2bn%3B%3B4.67%2C1uk%3B%3B4.7%2C4fz%3B%3B5.94%2C25h%3B%3B6.14%2C12u%3B%3B6.55%2C185%3B%3B6.7%2C5dj%3B%3B7.45%2C4k7%3B%3B8.09%2C4fy%3B%3B8.1%2C1uu%3B%3B9.56||7|1|1ydz%3B16%3B10%3B10.02%2C1ye0%3B16%3B11%3B10.64%2C1yoh%3B16%3B12%3B11.97%2C1ye2%3B16%3B13%3B13.82%2C1y3g%3B16%3B14%3B25.06; TB_Latency_Tracker_100=1; TB_Navigation_Preload_01=1; TB_SFOU-100=1; TB_DC_Flap_Test=0; bstc=T3CzSCsGQaqSFbN8NCvOqY; mobileweb=0; xpa=; xpm=3%2B1625196691%2BWc-5IJNXcCxYa0fpnFPpUA~ad1e2798-ac54-4d33-9d9e-3803bca9a057%2B0; TS01b0be75=01538efd7c0435e2a4f7f69e52557ffcfd7a06d5c2ac584f56a484847cbd8ee0dfb8388f866a7f09fea9bbbd83fcd772d9de594619; _pxff_cfp=1; _pxff_rf=1; _pxff_fp=1; com.wm.reflector="reflectorid:0000000000000000000000@lastupd:1625196720434@firstcreate:1624209371202"; wm_ul_plus=INACTIVE|1625200320462; auth=MTAyOTYyMDE4ZqpjZpvXLIEFVV49dSkA1Osdbi056ZywkLZXImEGSIHdy6UDTAuZJN54E6AYzSBTVzO4qGnXmG%2Fddq4ev%2FU8zjAxll6p58K75cKoQBqK4VPSEKCrJp1xdiMCoIH%2BXg3plrvBbkT8GAVfcnvLIPG4VyzvWvooXNnTyYN6TgAaFqE%2F8JEXyYQfnL0x8Syn1jvflNStVt84BmpJSfY%2Ftlm0IQ88%2FbreJ29hxGEqOcjsqKqJ00UMGQyiYLY97sfSUmPHCgi%2BXQu9OjpsIDyPAwsWQtgnd7gB%2FP2NDJHTrVlH9mCz0JdwmDDvu09GW0LIhDQfYMoSKvTkX3uFCS5L7pVExj9HIKPkiN811ppJbEo6FUw3I5nr37Zcxc7kizq5mWWY8p8Y2F9P%2FHM64p%2BbUtABoQ%3D%3D; akavpau_p8=1625197323~id=accaf851d51f7a43ca45ceaad24e1f62; _px3=a6b70673ec1bb0011b628afceca6d9f67100028a3a5aebd569907b79cc4dd070:IkHPQ07MIw0fDsajd5vBzqh7QRU1GMBjq41a6Q2fn6vFUyAxXr1sFNPzXY2wcYDbOZtBAEPnzjQP3HMEDaWObQ==:1000:ktznwSuWcv8hkmCfdby/Vh/+rHhrUMH8iNYuEDc4h5G7Um7TWVcDEIPAVE2SQILqRbpV3RledF7sflrJjmcQcjZ84Pk/aojXr9yNt6Y48M4YduhQhACD6GydVDH8PvHmOv6GBid5IxoRJdnEHynwoK9ecS6vqkINoy9Z3jescRSn5W/pOB7bbRTVFtgxky1iBtQ0CYhmgpnUX9xl82/qMg==; _uetsid=ff7404b0dae511ebb8b479e0d3604eca; _uetvid=8be1d8a0d07111eb887acdc793251c4f; _pxde=4f0d8d06dfc435f14cb4ae4bd080038957cd801cbb1204a661a568bd685cf03d:eyJ0aW1lc3RhbXAiOjE2MjUxOTY3MzIwNjIsImZfa2IiOjAsImlwY19pZCI6W119`)
+	req.Header.Add("authority", "www.walmart.com")
+	req.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
+	req.Header.Add("sec-ch-ua-mobile", "?0")
+	req.Header.Add("dnt", "1")
+	req.Header.Add("upgrade-insecure-requests", "1")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Add("service-worker-navigation-preload", "true")
+	req.Header.Add("sec-fetch-site", "none")
+	req.Header.Add("sec-fetch-mode", "navigate")
+	req.Header.Add("sec-fetch-user", "?1")
+	req.Header.Add("sec-fetch-dest", "document")
+	req.Header.Add("accept-language", "en-US,en;q=0.9")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res.StatusCode)
+	parser, err := gojq.NewStringQuery(string(body))
+	if err != nil {
+		fmt.Println(err)
+	}
+	// fmt.Println(parser.Data)
+	// for key, _ := range parser.Data.(map[string]interface{}) {
+	// 	fmt.Println(key)
+	// }
+	products, err := parser.Query("items")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for key, _ := range products.([]interface {}) {
+		fmt.Println(parser.Query(fmt.Sprintf("items.[%d].id", key)))
+	}
+	fmt.Println(len(products.([]interface {})))
+}
 func testingDB() {
 	fmt.Println("Sending request")
 	url := "http://localhost:7243/DB"

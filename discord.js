@@ -41,8 +41,8 @@ msg.repl
 });
 
 
-console.log(os.release())
-if(os.platform() == "win32"){
+console.log(os.platform())
+if(os.platform() == "win32" || os.platform() == "darwin"){
 	console.log("Development Environment")
 	client.login(development)
 } else {

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
+	"net/http/cookiejar"
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
@@ -85,17 +85,18 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 	m.monitorProduct.stockNumber = 10
 	m.Config.priceRangeMax = priceRangeMax
 	m.Config.priceRangeMin = priceRangeMin
-
+	m.useProxy = true
 	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
+	time.Sleep(15000 * (time.Millisecond))
 	go m.checkStop()
 	time.Sleep(3000 * (time.Millisecond))
 
 	i := true
-	for i == true {
+	for i {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -121,6 +122,11 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 			} else {
 				fmt.Println("No Proxy")
 				m.Client.Transport = http.DefaultTransport
+				jar, _ := cookiejar.New(nil)
+				m.Client = http.Client{
+					Jar: jar,
+				}
+				m.getCookies()
 			}
 
 			m.monitor()
@@ -150,28 +156,22 @@ func (m *Monitor) monitor() error {
 		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
 		return nil
 	}
+	// req.Header.Add("cookie", `vtc=Vfo2bC9cKIoO5EMKBoV7Cs; TS01b0be75=01538efd7cce98dab74ecc0161aba8abd8d31116a1500fbccd7e68e83c0b6c1f4d3fa8338c433194cae117a5aabe34e5a1e0780d89; TS013ed49a=01538efd7c0deff8b24f3a182d57ce08b06f181c86da1f7161cf403d14a43fa7b56bab4b52bd3cc8df3a1065d376fa4278a8489b5e; TS011baee6=01c5a4e2f993fd028656da8dedad4caf75a0670e3d75c5aa42a7f0d3fd4223f91b69f79b2ec688a8f3eaf669e6d9f5e079288f4f61; akavpau_p1=1624067190~id%3Dbb8d8093dad3913c14ff9dcad2b2f5b5`)
+	req.Header.Add("authority", "www.walmart.com")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("accept", "application/json")
+	req.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
+	req.Header.Add("sec-ch-ua-mobile", "?0")
 	req.Header.Add("dnt", "1")
-	req.Header.Add("accept-language", "en")
-
-	rand.Seed(time.Now().Unix())
-	n := rand.Int() % 3
-	switch n {
-	case 0:
-		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
-	case 1:
-		req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
-	case 2:
-		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
-	default:
-		req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0")
-	}
-	req.Header.Add("content-type", "application/json")
-	req.Header.Add("sec-fetch-site", "cross-site")
-	req.Header.Add("sec-fetch-mode", "cors")
-	req.Header.Add("sec-fetch-dest", "empty")
+	req.Header.Add("upgrade-insecure-requests", "1")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Add("service-worker-navigation-preload", "true")
+	req.Header.Add("sec-fetch-site", "none")
+	req.Header.Add("sec-fetch-mode", "navigate")
+	req.Header.Add("sec-fetch-user", "?1")
+	req.Header.Add("sec-fetch-dest", "document")
+	req.Header.Add("accept-language", "en-US,en;q=0.9")
 	req.Header.Set("Connection", "close")
 	req.Close = true
 	res, err := m.Client.Do(req)
@@ -326,6 +326,29 @@ func (m *Monitor) sendWebhook() error {
 	}
 	return nil
 }
+func (m *Monitor) getCookies() {
+	req1, _ := http.NewRequest("GET", "https://www.walmart.com/checkout", nil)
+	fmt.Println(m.Client.Jar)
+	req1.Header.Add("authority", "www.walmart.com")
+	req1.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
+	req1.Header.Add("sec-ch-ua-mobile", "?0")
+	req1.Header.Add("upgrade-insecure-requests", "1")
+	req1.Header.Add("dnt", "1")
+	req1.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	req1.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req1.Header.Add("service-worker-navigation-preload", "true")
+	req1.Header.Add("sec-fetch-site", "same-origin")
+	req1.Header.Add("sec-fetch-mode", "navigate")
+	req1.Header.Add("sec-fetch-user", "?1")
+	req1.Header.Add("sec-fetch-dest", "document")
+	req1.Header.Add("referer", "https://www.walmart.com/pac?id=818d2a49-28d8-4eb2-9c90-b4f52b0fd0d6&quantity=1&cv=137")
+	req1.Header.Add("accept-language", "en-US,en;q=0.9")
+
+	res1, _ := m.Client.Do(req1)
+	fmt.Println(res1.StatusCode)
+	fmt.Println(m.Client.Jar)
+	defer res1.Body.Close()
+}
 func webHookSend(c Company, site string, sku string, name string, price int, offerId string, time string, image string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
 		"content": null,
@@ -410,7 +433,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := fmt.Sprintf("http://localhost:7243/DB")
+		url := "http://172.93.100.112:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
