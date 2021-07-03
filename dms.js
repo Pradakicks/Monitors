@@ -1335,10 +1335,13 @@ async function walmartScraper (clients, triggerText, replyText) {
 				if(isValidated){
 				console.log("Walmart Scraper Initiated")
 				const SKU = message.content.split('/')[5]
-				message.channel.send(`${message.author} Walmart Scraper for ${SKU} Initiated`)
+				let currentMessage
+				message.channel.send(`${message.author} Walmart Scraper for ${SKU} Initiated`).then(msg => {
+					currentMessage = msg
+				})
 				let data = await getTerraSku(SKU)
 				if(data == "Error") {
-					message.channel.send(`${message.author} Error Grabbing Data for ${SKU}`)
+					currentMessage.edit(`${message.author} Error Grabbing Data for ${SKU}`)
 					return
 				}
 				try {
@@ -1435,10 +1438,10 @@ async function walmartScraper (clients, triggerText, replyText) {
 					)
 				.setFooter('Prada#4873')
 				.setTimestamp()
-				message.channel.send(currentEmbed)
+				currentMessage.edit(currentEmbed)
 				} catch (error) {
 					console.log(error)
-					message.channel.send(`${message.author} Error Grabbing Data for ${SKU} BOJ`)
+					currentMessage.edit(`${message.author} Error Grabbing Data for ${SKU} BOJ`)
 
 				}
 				
