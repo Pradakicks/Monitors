@@ -1358,7 +1358,18 @@ async function walmartScraper (clients, triggerText, replyText) {
 				
 				console.log(ImageUrl, walmartSellerOffer)
 				let offerObj
-				Object.keys(data.payload.offers).forEach(e =>{
+				if(!walmartSellerOffer){
+					currentMessage.edit(`${message.author} ${SKU} is not sold by Walmart`)
+					offerObj = {
+						offerId : "N/A",
+						availabilityStatus : "Not Sold By Walmart",
+						price : "N/A",
+						image : ImageUrl,
+						sku : SKU,
+						productName : productName
+					}
+				} else {
+					Object.keys(data.payload.offers).forEach(e =>{
 					let currentOffer = data.payload.offers[e]
 					if (currentOffer.sellerId == walmartSellerOffer)  offerObj = {
 						offerId : currentOffer.id,
@@ -1369,44 +1380,46 @@ async function walmartScraper (clients, triggerText, replyText) {
 						productName : productName
 					}
 				})
+				}
+				
 				var dt = new Date();
-				let body = {
-					"content": null,
-					"embeds": [
-					  {
-						"title": "Walmart Scraper",
-						"color": currentCompany.companyColor,
-						"fields": [
-						  {
-							"name": "Offer Id",
-							"value": offerObj.offerId
-						  },
-						  {
-							"name": "Availability",
-							"value": offerObj.availabilityStatus,
-							"inline": true
-						  },
-						  {
-							"name": "Walmart's Price",
-							"value": offerObj.price,
-							"inline": true
-						  },
-						  {
-							"name": "Links",
-							"value": `[Product](https://www.walmart.com/ip/prada/${offerObj.sku}) | [ATC](https://affil.walmart.com/cart/buynow?items=${offerObj.sku}) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)`
-						  }
-						],
-						"footer": {
-						  "text": "Prada#4873"
-						},
-						"timestamp": dt.toISOString(),
-						"thumbnail": {
-						  "url": offerObj.image
-						}
-					  }
-					],
-					"avatar_url": currentCompany.companyImage
-				  }
+				// let body = {
+				// 	"content": null,
+				// 	"embeds": [
+				// 	  {
+				// 		"title": "Walmart Scraper",
+				// 		"color": currentCompany.companyColor,
+				// 		"fields": [
+				// 		  {
+				// 			"name": "Offer Id",
+				// 			"value": offerObj.offerId
+				// 		  },
+				// 		  {
+				// 			"name": "Availability",
+				// 			"value": offerObj.availabilityStatus,
+				// 			"inline": true
+				// 		  },
+				// 		  {
+				// 			"name": "Walmart's Price",
+				// 			"value": offerObj.price,
+				// 			"inline": true
+				// 		  },
+				// 		  {
+				// 			"name": "Links",
+				// 			"value": `[Product](https://www.walmart.com/ip/prada/${offerObj.sku}) | [ATC](https://affil.walmart.com/cart/buynow?items=${offerObj.sku}) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)`
+				// 		  }
+				// 		],
+				// 		"footer": {
+				// 		  "text": "Prada#4873"
+				// 		},
+				// 		"timestamp": dt.toISOString(),
+				// 		"thumbnail": {
+				// 		  "url": offerObj.image
+				// 		}
+				// 	  }
+				// 	],
+				// 	"avatar_url": currentCompany.companyImage
+				//   }
 				const currentEmbed = new MessageEmbed()
 				.setColor(currentCompany.companyColorV2)
 				.setTitle(offerObj.productName)
