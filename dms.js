@@ -1369,9 +1369,9 @@ async function walmartScraper (clients, triggerText, replyText) {
 					Object.keys(data.payload.offers).forEach(e =>{
 					let currentOffer = data.payload.offers[e]
 					if (currentOffer.sellerId == walmartSellerOffer)  offerObj = {
-						offerId : currentOffer.id,
-						availabilityStatus : currentOffer.productAvailability.availabilityStatus,
-						price : currentOffer.pricesInfo.priceMap.CURRENT.price,
+						offerId : currentOffer.id ? currentOffer.id : "N/A",
+						availabilityStatus : currentOffer?.productAvailability?.availabilityStatus ? currentOffer.productAvailability.availabilityStatus : "N/A",
+						price : currentOffer?.pricesInfo?.priceMap?.CURRENT?.price ? currentOffer.pricesInfo.priceMap.CURRENT.price : "No Price Found",
 						image : ImageUrl,
 						sku : SKU,
 						productName : productName
