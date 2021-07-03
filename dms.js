@@ -1451,7 +1451,8 @@ async function walmartScraper (clients, triggerText, replyText) {
 					)
 				.setFooter('Prada#4873')
 				.setTimestamp()
-				currentMessage.edit(currentEmbed)
+				message.channel.send(currentEmbed)
+				currentMessage.delete()
 				} catch (error) {
 					console.log(error)
 					currentMessage.edit(`${message.author} Error Grabbing Data for ${SKU} BOJ`)
