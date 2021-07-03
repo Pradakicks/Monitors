@@ -1335,10 +1335,7 @@ async function walmartScraper (clients, triggerText, replyText) {
 				if(isValidated){
 				console.log("Walmart Scraper Initiated")
 				const SKU = message.content.split('/')[5]
-				let currentMessage
-				message.channel.send(`${message.author} Walmart Scraper for ${SKU} Initiated`).then(msg => {
-					currentMessage = msg
-				})
+				let currentMessage = message.channel.send(`${message.author} Walmart Scraper for ${SKU} Initiated`)
 				let data = await getTerraSku(SKU)
 				if(data == "Error") {
 					currentMessage.edit(`${message.author} Error Grabbing Data for ${SKU}`)
