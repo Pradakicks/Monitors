@@ -1342,9 +1342,12 @@ async function walmartScraper (clients, triggerText, replyText) {
 					return
 				}
 				try {
-					let ImageOffer = data.payload.selected.defaultImage
+				let ImageOffer = data.payload.selected.defaultImage
+				let selectedProduct = data.payload.selected.product
+				let productName = data.payload.products[selectedProduct].productAttributes.productName
 				let ImageUrl = data.payload.images[ImageOffer].assetSizeUrls.DEFAULT
 				let walmartSellerOffer
+
 				Object.keys(data.payload.sellers).map(e =>{
 					let currentSeller = data?.payload?.sellers[e]
 					if (currentSeller?.sellerName == "Walmart.com") walmartSellerOffer = currentSeller?.sellerId
@@ -1359,7 +1362,8 @@ async function walmartScraper (clients, triggerText, replyText) {
 						availabilityStatus : currentOffer.productAvailability.availabilityStatus,
 						price : currentOffer.pricesInfo.priceMap.CURRENT.price,
 						image : ImageUrl,
-						sku : SKU
+						sku : SKU,
+						productName : productName
 					}
 				})
 				var dt = new Date();
@@ -1401,14 +1405,18 @@ async function walmartScraper (clients, triggerText, replyText) {
 					"avatar_url": currentCompany.companyImage
 				  }
 				const currentEmbed = new MessageEmbed()
-				.setColor(currentCompany.companyColor)
-				.setTitle("Walmart Scraper")
+				.setColor(currentCompany.companyColorV2)
+				.setTitle(offerObj.productName)
 				.setURL(`https://www.walmart.com/ip/prada/${offerObj.sku}`)
 				.setThumbnail(offerObj.image)
 				.addFields(
 					{
 						name: "Offer Id",
 						value: offerObj.offerId
+					  },
+					  {
+						name: "PID",
+						value: offerObj.sku
 					  },
 					  {
 						name: "Availability",

@@ -31,7 +31,8 @@
         "ACADEMY" : "https://discord.com/api/webhooks/838637042119213067/V7WQ7z-9u32rNh5SO4YyxS5kibcHadXW4FxjVJTosO5cSGRoSqv4CY5g3GrAcIcwZhkF",
         "GAMESTOP" : "https://discord.com/api/webhooks/844572421390729299/-2gkbUud7p77IrrwjllUZyeNWwbneE9Moom9NJMdK83NYyt1EABt-c7emIsplmt9yHEG",
         "companyImage" : "https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png",
-        "companyColor" : "507758"
+        "companyColor" : "507758",
+        "companyColorV2" : "#cfd4e5"
         },
     "Arial" : {
         "TARGET" : "https://discord.com/api/webhooks/843879199584682019/3XuuxL7kqdYa7q32XhZ8uQ3Eipk3TCWcqaF2iKk3CGwZkph27F6rpOaJAb7O2tpT-DCG",
