@@ -1464,7 +1464,8 @@ async function getTerraSku (SKU) {
 			"service-worker-navigation-preload": "true",
 			"upgrade-insecure-requests": "1",
 			"user-agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
-		}
+		},
+		proxy : "http://CloudsNYadrianzsGUqR7R:VwfvIFQR@154.28.145.201:2400"
 	})
 	console.log(terra.statusCode)
 	if(terra.statusCode != 200 && terra.statusCode != 201){
