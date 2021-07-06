@@ -652,8 +652,7 @@ async function startGoMonitor(currentBody, site){
 					}
 				}, (response) => console.log(response?.statusCode))
 				break
-			case "WALMART":
-			case "WALMARTNEW":
+			case "1234":
 						rp.post({
 							url : `${thirdServer}:${port}/${site}`,
 							body : JSON.stringify(currentBody),
@@ -1368,6 +1367,7 @@ async function walmartScraper (clients, triggerText, replyText) {
 				} else {
 					Object.keys(data.payload.offers).forEach(e =>{
 					let currentOffer = data.payload.offers[e]
+					console.log(currentOffer?.pricesInfo)
 					if (currentOffer.sellerId == walmartSellerOffer)  offerObj = {
 						offerId : currentOffer.id ? currentOffer.id : "N/A",
 						availabilityStatus : currentOffer?.productAvailability?.availabilityStatus ? currentOffer.productAvailability.availabilityStatus : "N/A",
