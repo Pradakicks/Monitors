@@ -17,7 +17,6 @@
     "discord": "^0.8.2",
     "discord.js": "^12.5.1",
     "fs": "0.0.1-security",
-    "puppeteer": "^10.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "tough-cookie": "^4.0.0"

@@ -37,10 +37,10 @@ COPY . ./
 
 # Expose port 8080 on the container and start the application
 
-EXPOSE 7243
+EXPOSE 3030
 
 # Run the web service on container startup.
-CMD [ "npm", "run", "docker-production" ]
+CMD [ "node", "discord" ]
 
 # [END run_helloworld_dockerfile]
 # [END cloudrun_helloworld_dockerfile]

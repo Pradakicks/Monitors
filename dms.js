@@ -1501,7 +1501,6 @@ async function getTerraSku (SKU) {
 		return "Error"
 	}
 }
-
 async function sendWebhook(body, webhook) {
 	try {
 		let sent = await rp.post({
