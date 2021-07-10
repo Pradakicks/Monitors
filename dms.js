@@ -572,6 +572,7 @@ function checkBank (clients, triggerText, replyText){
 				let attachment = new MessageAttachment(`monitorBank-${message.author.username}.txt`);
 				message.channel.send(attachment)
 				message.author.send('Attachment Successfully Fetched and Sent')
+				message.author.send(`You have ${bankArr.length} products running`)
 				await delay(2500)
 				await fs.unlink(`monitorBank-${message.author.username}.txt`, err =>{
 					if(err) console.log('Error doing the unthinkable')
