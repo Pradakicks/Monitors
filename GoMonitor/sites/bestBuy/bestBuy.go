@@ -151,7 +151,7 @@ func NewMonitor(sku string) *Monitor {
 			}
 			m.Client.Transport = defaultTransport
 			m.monitor()
-			time.Sleep(500 * (time.Millisecond))
+			time.Sleep(150 * (time.Millisecond))
 		} else {
 			fmt.Println(m.Config.sku, "STOPPED STOPPED STOPPED")
 			i = false

@@ -644,6 +644,7 @@ async function startGoMonitor(currentBody, site){
 			// case "2341":
 			case "TARGET":
 			case "GAMESTOP":
+			case "BESTBUY":
 				rp.post({
 					url : `${secondServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
