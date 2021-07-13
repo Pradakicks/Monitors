@@ -1,6 +1,7 @@
 package WalmartMonitor
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"net/http/cookiejar"
+
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
@@ -293,6 +295,7 @@ func (m *Monitor) monitor() error {
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()
+		go m.sendRestockNotification(m.monitorProduct.offerId, m.Config.sku, m.monitorProduct.name)
 	}
 	if m.Availability == true && monitorAvailability == false {
 		fmt.Println("Item Out Of Stock")
@@ -470,4 +473,44 @@ func (m *Monitor) checkStop() error {
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
+}
+func (m *Monitor) sendRestockNotification(oid string, sku string, title string) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Restock Notification : Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
+		}
+	}()
+
+	url := "http://159.203.179.167:3030/"
+
+	t := time.Now().UTC().UnixNano()
+
+	var jsonData = []byte(fmt.Sprintf(`
+		"site": "Walmart",
+		"offerId" : "%s",
+		"sku" : "%s",
+		"title" : "%s",
+		"time" : %d
+	`, oid, sku, title, t))
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+		if err != nil {
+			fmt.Println(err)
+		}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+	
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res)
+	fmt.Println(string(body))
+
 }
