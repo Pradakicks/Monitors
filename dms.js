@@ -928,7 +928,7 @@ async function mass (string , content, message, groupName){
 							console.log(currentBody)
 							startGoMonitor(currentBody, site.toUpperCase())
 
-						await delay(30000)
+						await delay(10000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						await pushSku({
 							sku: SKU,
@@ -1068,7 +1068,7 @@ async function mass (string , content, message, groupName){
 							startGoMonitor(currentBody, site.toUpperCase())
 					}
 					}
-					await delay(2000)
+					await delay(10000)
 				}
 				
 			}
@@ -1126,7 +1126,8 @@ async function checkPresentSkus(){
 				}
 				console.log(currentBody)
 				startGoMonitor(currentBody, site)
-				await delay(15000)
+				if (site.toUpperCase() == "WALMART") await delay(15000)
+				await delay(2000)
 			}
 		}
 		
