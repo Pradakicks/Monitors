@@ -1124,7 +1124,7 @@ async function checkPresentSkus(){
 					currentBody.priceRangeMin = 1
 	
 				}
-				console.log(currentBody)
+				console.log(currentBody, i, skus.length)
 				startGoMonitor(currentBody, site)
 				if (site.toUpperCase() == "WALMART") await delay(15000)
 				await delay(2000)
