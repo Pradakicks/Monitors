@@ -718,8 +718,7 @@ async function mass (string , content, message, groupName){
 					SKU = g[i].split(' ')[0]
 					}
 				
-					console.log(g[i])
-					console.log(site.toUpperCase())
+					console.log(`Site : ${site.toUpperCase()} : SKU : ${SKU} : Pos : ${i}`)
 					let skuBank = await getSkuBank()
 					let caseSite = site.toUpperCase()
 					let currentCompany = config[group]
@@ -929,7 +928,7 @@ async function mass (string , content, message, groupName){
 							console.log(currentBody)
 							startGoMonitor(currentBody, site.toUpperCase())
 
-						await delay(30000)
+						await delay(10000)
 					} else if (site.toUpperCase() == 'BESTBUY') {
 						await pushSku({
 							sku: SKU,
@@ -1069,7 +1068,7 @@ async function mass (string , content, message, groupName){
 							startGoMonitor(currentBody, site.toUpperCase())
 					}
 					}
-				await delay(30000)
+					await delay(10000)
 				}
 				
 			}
