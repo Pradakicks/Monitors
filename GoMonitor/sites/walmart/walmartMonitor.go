@@ -163,16 +163,14 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
-	req.Header.Add("sec-ch-ua-mobile", "?0")
 	req.Header.Add("dnt", "1")
-	req.Header.Add("upgrade-insecure-requests", "1")
+	req.Header.Add("sec-ch-ua-mobile", "?0")
 	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
-	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
-	req.Header.Add("service-worker-navigation-preload", "true")
-	req.Header.Add("sec-fetch-site", "none")
-	req.Header.Add("sec-fetch-mode", "navigate")
-	req.Header.Add("sec-fetch-user", "?1")
-	req.Header.Add("sec-fetch-dest", "document")
+	req.Header.Add("accept", "*/*")
+	req.Header.Add("sec-fetch-site", "same-origin")
+	req.Header.Add("sec-fetch-mode", "cors")
+	req.Header.Add("sec-fetch-dest", "empty")
+	req.Header.Add("referrer", fmt.Sprintf("https://www.walmart.com/ip/prada/%s", m.Config.sku))
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
 	req.Header.Set("Connection", "close")
 	req.Close = true
@@ -208,7 +206,12 @@ func (m *Monitor) monitor() error {
 		m.useProxy = true
 	}
 
-	monitorAvailability = false
+	if strings.Contains(string(body), "Verify your identity"){
+		fmt.Println("Captcha Detected")
+		m.useProxy = !m.useProxy
+		return nil
+	}
+ 	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
 		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
@@ -486,14 +489,14 @@ func (m *Monitor) sendRestockNotification(oid string, sku string, title string) 
 
 	t := time.Now().UTC().UnixNano()
 
-	var jsonData = []byte(fmt.Sprintf(`
+	var jsonData = []byte(fmt.Sprintf(`{
 		"site": "Walmart",
 		"offerId" : "%s",
 		"sku" : "%s",
 		"title" : "%s",
 		"time" : %d
-	`, oid, sku, title, t))
-
+	}`, oid, sku, title, t))
+	fmt.Println(string(jsonData))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 		if err != nil {
 			fmt.Println(err)
