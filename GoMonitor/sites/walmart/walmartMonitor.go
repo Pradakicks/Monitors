@@ -487,7 +487,7 @@ func (m *Monitor) sendRestockNotification(oid string, sku string, title string) 
 
 	url := "http://159.203.179.167:3030/"
 
-	t := time.Now().UTC().UnixNano()
+	t := (time.Now().UTC().UnixNano() / 1e6)
 
 	var jsonData = []byte(fmt.Sprintf(`{
 		"site": "Walmart",
@@ -515,5 +515,4 @@ func (m *Monitor) sendRestockNotification(oid string, sku string, title string) 
 	}
 	fmt.Println(res)
 	fmt.Println(string(body))
-
 }
