@@ -196,7 +196,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Walmart New - Status Code : %d Milliseconds elapsed: %v\n", res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Walmart New - Status Code : %d Cache : %s : Milliseconds elapsed: %v\n", res.StatusCode, res.Header["Cache-Status"], watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -264,6 +264,7 @@ func (m *Monitor) monitor() error {
 		}
 		if !isPresent {
 			m.products = append(m.products, pid.(string))
+			// fmt.Println(pid.(string), offerId.(string), price.(float64), title.(string), image.(string), stockNum.(float64), sellerName.(string))
 			go m.sendWebhook(pid.(string), offerId.(string), price.(float64), title.(string), image.(string), stockNum.(float64), sellerName.(string))
 
 		}

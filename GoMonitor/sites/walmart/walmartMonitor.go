@@ -171,7 +171,9 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-mode", "cors")
 	req.Header.Add("sec-fetch-dest", "empty")
 	req.Header.Add("referrer", fmt.Sprintf("https://www.walmart.com/ip/prada/%s", m.Config.sku))
+	req.Header.Add("Referer", fmt.Sprintf("https://www.walmart.com/ip/prada/%s", m.Config.sku))
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
+	req.Header.Add("service-worker-navigation-preload", "true")
 	req.Header.Set("Connection", "close")
 	req.Close = true
 	res, err := m.Client.Do(req)
