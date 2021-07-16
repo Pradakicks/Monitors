@@ -13,8 +13,8 @@ const rp = require('request-promise').defaults({
 });
 const port = 7243
 // const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
-const secondServer = `http://143.244.164.115`
-const thirdServer = `http://64.227.28.51`
+let secondServer = `http://143.244.164.115`
+let thirdServer = `http://64.227.28.51`
 
 function SKUADD(clients, triggerText, replyText) {
 	try {
@@ -1138,6 +1138,7 @@ async function checkPresentSkus(){
 }
 if(os.platform() == "win32" || os.platform() == "darwin"){
 	console.log("Development Environment")
+	secondServer = 'http://localhost'
 } else {
 	checkPresentSkus()
 }
@@ -1312,7 +1313,6 @@ console.log(err)
 }))
 }
 }
-
 
 // Scraper 
 

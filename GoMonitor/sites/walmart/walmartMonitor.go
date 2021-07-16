@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"net/http/cookiejar"
 
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
@@ -123,12 +122,12 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *Monitor {
 				m.Client.Transport = defaultTransport
 			} else {
 				fmt.Println("No Proxy")
-				m.Client.Transport = http.DefaultTransport
-				jar, _ := cookiejar.New(nil)
-				m.Client = http.Client{
-					Jar: jar,
-				}
-				m.getCookies()
+				// m.Client.Transport = http.DefaultTransport
+				// jar, _ := cookiejar.New(nil)
+				// m.Client = http.Client{
+				// 	Jar: jar,
+				// }
+				// m.getCookies()
 			}
 
 			m.monitor()
@@ -159,24 +158,26 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	// req.Header.Add("cookie", `vtc=Vfo2bC9cKIoO5EMKBoV7Cs; TS01b0be75=01538efd7cce98dab74ecc0161aba8abd8d31116a1500fbccd7e68e83c0b6c1f4d3fa8338c433194cae117a5aabe34e5a1e0780d89; TS013ed49a=01538efd7c0deff8b24f3a182d57ce08b06f181c86da1f7161cf403d14a43fa7b56bab4b52bd3cc8df3a1065d376fa4278a8489b5e; TS011baee6=01c5a4e2f993fd028656da8dedad4caf75a0670e3d75c5aa42a7f0d3fd4223f91b69f79b2ec688a8f3eaf669e6d9f5e079288f4f61; akavpau_p1=1624067190~id%3Dbb8d8093dad3913c14ff9dcad2b2f5b5`)
-	req.Header.Add("authority", "www.walmart.com")
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("sec-ch-ua", `" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"`)
-	req.Header.Add("dnt", "1")
-	req.Header.Add("sec-ch-ua-mobile", "?0")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
-	req.Header.Add("accept", "*/*")
-	req.Header.Add("sec-fetch-site", "same-origin")
-	req.Header.Add("sec-fetch-mode", "cors")
-	req.Header.Add("sec-fetch-dest", "empty")
-	req.Header.Add("referrer", fmt.Sprintf("https://www.walmart.com/ip/prada/%s", m.Config.sku))
-	req.Header.Add("Referer", fmt.Sprintf("https://www.walmart.com/ip/prada/%s", m.Config.sku))
+	req.Header.Add("pragma", "no-cache")
+	req.Header.Add("DNT", "1")
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
+	req.Header.Add("sec-ch-ua-mobile", "?0")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36")
+	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Add("cache-control", "no-cache")
+	req.Header.Add("upgrade-insecure-requests", "1")
+	req.Header.Add("Referer", "https://www.walmart.com/terra-firma/item/431403391")
 	req.Header.Add("service-worker-navigation-preload", "true")
 	req.Header.Set("Connection", "close")
 	req.Close = true
-	res, err := m.Client.Do(req)
+	var res *http.Response
+	if !m.useProxy {
+		res, err = http.DefaultClient.Do(req)
+	} else {
+		res, err = m.Client.Do(req)
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
@@ -185,7 +186,7 @@ func (m *Monitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Walmart - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", res.StatusCode, m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price, walmartOffer, watch.Milliseconds())
+		fmt.Printf("Walmart  %t - Status Code : %d : %s %s %d %s:  Milliseconds elapsed: %v\n", m.useProxy, res.StatusCode, m.Config.sku, m.monitorProduct.offerId, m.monitorProduct.price, walmartOffer, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -200,6 +201,7 @@ func (m *Monitor) monitor() error {
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
+			time.Sleep(5 * time.Second)
 			m.useProxy = !m.useProxy
 		}
 
@@ -354,7 +356,7 @@ func (m *Monitor) getCookies() {
 
 	res1, _ := m.Client.Do(req1)
 	fmt.Println(res1.StatusCode)
-	fmt.Println(m.Client.Jar)
+	// fmt.Println(m.Client.Jar)
 	defer res1.Body.Close()
 }
 func webHookSend(c Company, site string, sku string, name string, price int, offerId string, time string, image string) {

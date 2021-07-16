@@ -260,7 +260,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(currentAvailability)
 	}
 	m.monitorProduct.stockNumber = int(realBody.Data.Product.Fulfillment.ShippingOptions.AvailableToPromiseQuantity)
-	if m.Availability == false && m.currentAvailability == true {
+	if !m.Availability && m.currentAvailability {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()
 		if m.monitorProduct.image == "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png" {
@@ -268,10 +268,10 @@ func (m *Monitor) monitor() error {
 			go m.sendWebhook()
 		}
 	}
-	if m.Availability == true && m.currentAvailability == false {
+	if m.Availability && !m.currentAvailability {
 		fmt.Println("Item Out Of Stock")
 	}
-	m.Availability = m.currentAvailability
+	 m.Availability = m.currentAvailability
 	return nil
 }
 

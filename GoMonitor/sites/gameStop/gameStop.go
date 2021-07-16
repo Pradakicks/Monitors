@@ -167,22 +167,37 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 
-	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
+	monitorAvailability, err := parser.QueryToString("product.availability.messages.[0]")
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.name, err = parser.QueryToString("gtmData.productInfo.name")
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.sku, err = parser.QueryToString("gtmData.productInfo.sku")
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.productId, err = parser.QueryToString("gtmData.productInfo.productID")
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.price, err = parser.QueryToString("gtmData.price.sellingPrice")
 	//m.monitorProduct.link, err = parser.QueryToString("__mccEvents.[0].[1].[0].url")
+	if err != nil {
+		fmt.Println(err)
+	}
 	m.monitorProduct.image, err = parser.QueryToString("product.images.large.[0].url")
 
 	//	fmt.Println(m.monitorProduct.link, m.monitorProduct.image)
 	if err != nil {
 		fmt.Println(err)
 	}
-	if m.Availability == "Not Available" && monitorAvailability == "Available" {
+	if m.Availability != "In Stock" && monitorAvailability == "In Stock" {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-	} else if m.Availability == "Available" && monitorAvailability == "Not Available" {
+	} else if m.Availability == "In Stock" && monitorAvailability != "In Stock" {
 		fmt.Println("Item Out Of Stock")
 	}
 	m.Availability = monitorAvailability
