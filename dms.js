@@ -666,7 +666,7 @@ async function startGoMonitor(currentBody, site){
 						break
 			default:
 				rp.post({
-					url : `http://${firstServer}:${port}/${site}`,
+					url : `${firstServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
 					headers : {
 						"Content-Type": "application/json"
