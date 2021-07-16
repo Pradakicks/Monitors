@@ -1,6 +1,7 @@
-package AcademyMonitor
+package ShopifyProduct
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,7 +12,11 @@ import (
 	"time"
 
 	"github.com/bradhe/stopwatch"
+
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	Types "github.con/prada-monitors-go/helpers/types"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Config struct {
@@ -28,12 +33,16 @@ type Config struct {
 type Monitor struct {
 	Config              Config
 	monitorProduct      Product
-	Availability        string
+	Availability        bool
 	currentAvailability string
 	Client              http.Client
 	file                *os.File
+	products            []int64
 	stop                bool
 	CurrentCompanies    []Company
+	collection          *mongo.Collection
+	zerosArray          []string
+	prod                Types.ShopifyNewProduct
 }
 type Product struct {
 	name        string
@@ -62,54 +71,8 @@ type Company struct {
 	Color        string `json:"color"`
 	CompanyImage string `json:"companyImage"`
 }
-type AcademyResponse struct {
-	Online []struct {
-		Specialorder      string `json:"SPECIALORDER"`
-		AddToCart         string `json:"addToCart"`
-		AvailableQuantity string `json:"availableQuantity"`
-		DeliveryMessage   struct {
-			OnlineDeliveryMessage struct {
-				AdditionalInfoKey   string `json:"additionalInfoKey"`
-				AdditionalInfoValue string `json:"additionalInfoValue"`
-				Key                 string `json:"key"`
-				ShowTick            string `json:"showTick"`
-				Value               string `json:"value"`
-			} `json:"onlineDeliveryMessage"`
-			StoreDeliveryMessage struct {
-				Key          string `json:"key"`
-				ShowTick     string `json:"showTick"`
-				StoreInvType string `json:"storeInvType"`
-				Value        string `json:"value"`
-			} `json:"storeDeliveryMessage"`
-		} `json:"deliveryMessage"`
-		InventoryStatus string `json:"inventoryStatus"`
-		SkuID           string `json:"skuId"`
-	} `json:"online"`
-	ProductID string `json:"productId"`
-}
 
-type ProductDetails struct {
-	Productinfo []struct {
-		Attributes []struct {
-			Name     string `json:"name"`
-			UniqueID string `json:"uniqueID"`
-			Usage    string `json:"usage"`
-			Values   string `json:"values"`
-		} `json:"attributes"`
-		DefaultSkuID string  `json:"defaultSkuId"`
-		FullImage    string  `json:"fullImage"`
-		ID           string  `json:"id"`
-		ImageURL     string  `json:"imageURL"`
-		Name         string  `json:"name"`
-		PriceUSD     float64 `json:"priceUSD"`
-		ProductPrice struct {
-			ListPrice string `json:"listPrice"`
-		} `json:"productPrice"`
-		UpdatedSeoURL string `json:"updatedSeoURL"`
-	} `json:"productinfo"`
-}
-
-func NewMonitor(sku string) *Monitor {
+func NewMonitor(sku string, skuName string, collection *mongo.Collection) *Monitor {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
@@ -117,27 +80,36 @@ func NewMonitor(sku string) *Monitor {
 	}()
 	fmt.Println("TESTING")
 	m := Monitor{}
-	m.Availability = "OUT_OF_STOCK_ONLINE"
+	// m.Availability = "OUT_OF_STOCK_ONLINE"
+	m.collection = collection
+	m.Config.skuName = skuName
 	// var err error
 	//	m.Client = http.Client{Timeout: 10 * time.Second}
-	m.Config.site = "Academy"
+	m.Config.site = "Shopify Product"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 10 * time.Second}
-	m.Config.discord = "https://discord.com/api/webhooks/838637042119213067/V7WQ7z-9u32rNh5SO4YyxS5kibcHadXW4FxjVJTosO5cSGRoSqv4CY5g3GrAcIcwZhkF"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
-	m.getProductDetails()
 
 	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
-	time.Sleep(15000 * (time.Millisecond))
-	go m.checkStop()
-	time.Sleep(3000 * (time.Millisecond))
+	// time.Sleep(15000 * (time.Millisecond))
+	// go m.checkStop()
+	// time.Sleep(3000 * (time.Millisecond))
+	var product Types.ShopifyNewProduct
+	filter := bson.M{"handle": skuName}
+	err := collection.FindOne(context.TODO(), filter).Decode(&product)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	m.prod = product
+	fmt.Println(m.prod.Handle)
 	i := true
 	for i {
 		defer func() {
@@ -154,7 +126,6 @@ func NewMonitor(sku string) *Monitor {
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
-
 				return nil
 			}
 			defaultTransport := &http.Transport{
@@ -173,12 +144,17 @@ func NewMonitor(sku string) *Monitor {
 
 func (m *Monitor) monitor() error {
 	watch := stopwatch.Start()
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
-	url := fmt.Sprintf("https://www.academy.com/api/inventory/v2?productId=%s&bopisEnabled=true&isSTSEnabled=true", m.Config.sku)
+	t := time.Now().UTC().UnixNano()
+	var url string
+	switch m.Config.sku {
+	case "ShopNiceKicks":
+		url = fmt.Sprintf("https://%s.com/products/%s.js?limit=%d", m.Config.sku, m.Config.skuName, t)
+		break
+	default:
+		url = fmt.Sprintf("https://www.%s.com/products/%s.js?limit=%d", m.Config.sku, m.Config.skuName, t)
+
+	}
+	// fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -202,9 +178,11 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 	defer res.Body.Close()
+	var currentAvailability bool
+
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Academy - Status Code : %d : %s : %s :  Milliseconds elapsed: %v \n", res.StatusCode, m.Availability, m.Config.sku, watch.Milliseconds())
+		fmt.Printf("Shopify Product - Status Code : %d Cache: %s ,Availability : %t Current : : %t Milliseconds elapsed: %v\n", res.StatusCode, res.Header["X-Cache"], m.Availability, currentAvailability, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -215,24 +193,31 @@ func (m *Monitor) monitor() error {
 	if res.StatusCode != 200 {
 		return nil
 	}
-	var realBody AcademyResponse
-	err = json.Unmarshal([]byte(body), &realBody)
+
+	var jsonResponse Types.ShopifyProductJS
+
+	err = json.Unmarshal([]byte(body), &jsonResponse)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	var monitorAvailability string
-	monitorAvailability = realBody.Online[0].DeliveryMessage.OnlineDeliveryMessage.Key
-	m.monitorProduct.stockNumber = realBody.Online[0].AvailableQuantity
-	m.monitorProduct.productId = realBody.Online[0].SkuID
-	if m.Availability == "OUT_OF_STOCK_ONLINE" && monitorAvailability == "IN_STOCK_ONLINE" {
-		fmt.Println("Item in Stock")
-		m.sendWebhook()
+	currentAvailability = jsonResponse.Available
+
+	if !m.Availability && currentAvailability {
+		fmt.Println("Item In Stock")
+		link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, jsonResponse.Handle)
+		var testCompany Company
+		testCompany.Webhook = "https://webhooks.aycd.io/webhooks/api/v1/send/8028/d1464662-73f6-4971-83c3-609e923d170e"
+		testCompany.Color = "1752220"
+		testCompany.CompanyImage = "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"
+		testCompany.Company = "Testing"
+		t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+		go m.webHookSend(testCompany, m.Config.sku, jsonResponse.Title, m.prod.Variants[0].Price, link, t, jsonResponse.FeaturedImage)
 	}
-	if m.Availability == "IN_STOCK_ONLINE" && monitorAvailability == "OUT_OF_STOCK_ONLINE" {
-		fmt.Println("Item Out Of Stock")
+	if m.Availability && !currentAvailability {
+		fmt.Println("Out of Stock")
 	}
-	m.Availability = monitorAvailability
+	m.Availability = currentAvailability
 	return nil
 }
 
@@ -249,7 +234,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook() error {
+func (m *Monitor) sendWebhook(sku string, name string, price string, link string, image string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -271,18 +256,19 @@ func (m *Monitor) sendWebhook() error {
 
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
-		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.link, m.monitorProduct.stockNumber, m.monitorProduct.productId, t, m.monitorProduct.image)
+		go m.webHookSend(comp, m.Config.sku, name, price, link, t, image)
 	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	return nil
 }
-func webHookSend(c Company, site string, sku string, name string, price int, link string, stockNum string, pid string, time string, image string) {
+
+func (m *Monitor) webHookSend(c Company, site string, name string, price string, link string, time string, image string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
 		"content": null,
 		"embeds": [
 		  {
 			"title": "%s Monitor",
-			"url": "https://www.academy.com/%s",
+			"url": "%s",
 			"color": %s,
 			"fields": [
 			  {
@@ -290,27 +276,13 @@ func webHookSend(c Company, site string, sku string, name string, price int, lin
 				"value": "%s"
 			  },
 			  {
-				"name": "Product Availability",
-				"value": "In Stock",
-				"inline": true
-			  },
-			  {
 				"name": "Price",
-				"value": "%d",
-				"inline": true
-			  },
-			  {
-				"name": "Product ID",
 				"value": "%s",
 				"inline": true
 			  },
 			  {
-				"name": "Stock Number",
-				"value": "%s"
-			  },
-			  {
 				"name": "Links",
-				"value": "[Product](https://www.academy.com/%s) | [Cart](https://www.academy.com/shop/cart)"
+				"value": "[In Development](%s)"
 			  }
 			],
 			"footer": {
@@ -323,7 +295,7 @@ func webHookSend(c Company, site string, sku string, name string, price int, lin
 		  }
 		],
 		"avatar_url": "%s"
-	  }`, site, link, c.Color, name, price, pid, stockNum, link, time, image, c.CompanyImage))
+	  }`, site, link, c.Color, name, price, link, time, image, c.CompanyImage))
 	req, err := http.NewRequest("POST", c.Webhook, payload)
 	if err != nil {
 		fmt.Println(err)
@@ -345,57 +317,6 @@ func webHookSend(c Company, site string, sku string, name string, price int, lin
 	defer res.Body.Close()
 	fmt.Println(res)
 	fmt.Println(payload)
-	return
-}
-func (m *Monitor) getProductDetails() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
-		}
-	}()
-
-	url := fmt.Sprintf("https://www.academy.com/api/productinfo/v2?productIds=%s&summary=true&dbFallback=true", m.Config.sku)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		fmt.Println(err)
-
-		return
-	}
-	req.Header.Add("authority", "www.academy.com")
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("accept", "application/json, text/plain, */*")
-	req.Header.Add("dnt", "1")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
-	req.Header.Add("sec-fetch-site", "same-origin")
-	req.Header.Add("sec-fetch-mode", "cors")
-	req.Header.Add("sec-fetch-dest", "empty")
-	req.Header.Add("accept-language", "en-US,en;q=0.9")
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-
-		return
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-
-		return
-	}
-	var productBody ProductDetails
-	err = json.Unmarshal([]byte(body), &productBody)
-	if err != nil {
-		fmt.Println(err)
-
-		return
-	}
-	m.monitorProduct.price = int(productBody.Productinfo[0].PriceUSD)
-	m.monitorProduct.link = productBody.Productinfo[0].UpdatedSeoURL
-	m.monitorProduct.name = productBody.Productinfo[0].Name
-	m.monitorProduct.image = productBody.Productinfo[0].FullImage
 }
 
 func (m *Monitor) checkStop() error {

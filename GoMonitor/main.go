@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
 	"net/http"
+	"time"
 
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	"github.com/gorilla/mux"
+	helper "github.con/prada-monitors-go/helpers/mongo"
+	Types "github.con/prada-monitors-go/helpers/types"
 	TargetMonitor "github.con/prada-monitors-go/sites"
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
 	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
@@ -18,10 +22,13 @@ import (
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
 	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
+	Shopify "github.con/prada-monitors-go/sites/shopify"
+	ShopifyProduct "github.con/prada-monitors-go/sites/shopifyProduct"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 	WalmartNew "github.con/prada-monitors-go/sites/walmartNew"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Monitor struct {
@@ -57,6 +64,8 @@ type Company struct {
 }
 
 var DBString string
+
+var Collection = helper.ConnectDB()
 
 func target(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL)
@@ -168,8 +177,26 @@ func walmartNew(w http.ResponseWriter, r *http.Request) {
 	go WalmartNew.NewMonitor(currentMonitor.SkuName, currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
-
-
+func shopify(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Shopify Monitor")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go Shopify.NewMonitor(currentMonitor.Sku, Collection)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
+func shopifyProduct(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Shopify Monitor")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go ShopifyProduct.NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, Collection)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Deals Monitor")
@@ -177,7 +204,7 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 
 func getDB(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Request Sent")
-	
+
 	watch := stopwatch.Start()
 
 	defer func() {
@@ -231,6 +258,44 @@ func DBWorker() {
 	DBString = string(body)
 }
 
+func handleShopifyProducts() {
+	fmt.Println("Handling Products")
+	cur, err := Collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+		var product Types.ShopifyNewProduct
+		err := cur.Decode(&product) // decode similar to deserialize process.
+		if err != nil {
+			fmt.Println(err)
+		}
+		// fmt.Println(product)
+		go func(){
+			url := "http://http://104.249.128.207:7243/SHOPIFYPRODUCT"
+
+			var jsonData = []byte(fmt.Sprintf(`{
+				"site": "%s",
+				"skuName": "%s",
+				"sku": "%s",
+				"priceRangeMin": 1,
+				"priceRangeMax": 100000
+			  }`, product.Store, product.Handle, product.Store))
+	
+			req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+			req.Header.Add("Content-Type", "application/json")
+			res, _ := http.DefaultClient.Do(req)
+			defer res.Body.Close()
+			body, _ := ioutil.ReadAll(res.Body)
+			fmt.Println(string(body))
+			// add item our array
+		}()
+	
+		
+	}
+
+}
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
@@ -249,6 +314,8 @@ func handleRequests() {
 	router.HandleFunc("/SLICKDEALS", slickDeals).Methods("POST")
 	router.HandleFunc("/GAMESTOP", gameStop).Methods("POST")
 	router.HandleFunc("/WALMARTNEW", walmartNew).Methods("POST")
+	router.HandleFunc("/SHOPIFY", shopify).Methods("POST")
+	router.HandleFunc("/SHOPIFYPRODUCT", shopifyProduct).Methods("POST")
 	log.Fatal(http.ListenAndServe(":7243", router))
 }
 
@@ -256,10 +323,15 @@ func main() {
 	fmt.Println("Initiating Server")
 	DBWorker()
 	go func() {
+		time.Sleep(1000 * time.Millisecond)
+	//	handleShopifyProducts()
+	}()
+	go func() {
 		for true {
 			DBWorker()
 			time.Sleep(15000 * (time.Millisecond))
 		}
 	}()
 	handleRequests()
+
 }

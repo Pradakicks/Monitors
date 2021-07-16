@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
@@ -210,12 +209,12 @@ func (m *Monitor) monitor() error {
 		m.useProxy = true
 	}
 
-	if strings.Contains(string(body), "Verify your identity"){
+	if strings.Contains(string(body), "Verify your identity") {
 		fmt.Println("Captcha Detected")
 		m.useProxy = !m.useProxy
 		return nil
 	}
- 	monitorAvailability = false
+	monitorAvailability = false
 	parser, err := gojq.NewStringQuery(string(body))
 	if err != nil {
 		go MonitorLogger.LogError(m.Config.site, m.Config.sku, err)
@@ -443,7 +442,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := "http://172.93.100.112:7243/DB"
+		url := "http://104.249.128.207:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
@@ -502,9 +501,9 @@ func (m *Monitor) sendRestockNotification(oid string, sku string, title string) 
 	}`, oid, sku, title, t))
 	fmt.Println(string(jsonData))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-		if err != nil {
-			fmt.Println(err)
-		}
+	if err != nil {
+		fmt.Println(err)
+	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := http.DefaultClient.Do(req)
@@ -512,7 +511,7 @@ func (m *Monitor) sendRestockNotification(oid string, sku string, title string) 
 		fmt.Println(err)
 	}
 	defer res.Body.Close()
-	
+
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)

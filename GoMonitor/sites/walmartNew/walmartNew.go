@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"strings"
 	"time"
-	"net/http/cookiejar"
+
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
@@ -130,9 +131,9 @@ func NewMonitor(query string, sku string) *Monitor {
 
 func (m *Monitor) getCookies() {
 	jar, _ := cookiejar.New(nil)
-				m.Client = http.Client{
-					Jar: jar,
-				}
+	m.Client = http.Client{
+		Jar: jar,
+	}
 
 	req1, _ := http.NewRequest("GET", "https://www.walmart.com/checkout", nil)
 	fmt.Println(m.Client.Jar)
@@ -164,7 +165,6 @@ func (m *Monitor) monitor() error {
 			fmt.Printf("Recovering from panic in printAllOperations error is: %v \n", r)
 		}
 	}()
-	
 
 	url := fmt.Sprintf("https://www.walmart.com/search/api/preso?%s", m.Query)
 
@@ -405,7 +405,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := "http://172.93.100.112:7243/DB"
+		url := "http://104.249.128.207:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)

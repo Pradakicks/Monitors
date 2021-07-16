@@ -13,6 +13,7 @@ const rp = require('request-promise').defaults({
 });
 const port = 7243
 // const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
+let firstServer = `http://104.249.128.207`
 let secondServer = `http://143.244.164.115`
 let thirdServer = `http://64.227.28.51`
 
@@ -665,7 +666,7 @@ async function startGoMonitor(currentBody, site){
 						break
 			default:
 				rp.post({
-					url : `http://localhost:${port}/${site}`,
+					url : `http://${firstServer}:${port}/${site}`,
 					body : JSON.stringify(currentBody),
 					headers : {
 						"Content-Type": "application/json"

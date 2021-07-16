@@ -3,7 +3,9 @@ module github.con/prada-monitors-go
 go 1.16
 
 require (
+	github.com/Danny-Dasilva/CycleTLS/cycletls v0.0.0-20210606180957-6c6fec740097 // indirect
 	github.com/PuerkitoBio/goquery v1.6.1 // indirect
+	github.com/andersfylling/snowflake v1.3.0 // indirect
 	github.com/bradhe/stopwatch v0.0.0-20190618212248-a58cccc508ea // indirect
 	github.com/elgs/gojq v0.0.0-20201120033525-b5293fef2759 // indirect
 	github.com/elgs/gosplitargs v0.0.0-20161028071935-a491c5eeb3c8 // indirect
@@ -17,10 +19,11 @@ require (
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
 	github.com/mattia-git/go-capmonster v0.0.0-20210410140216-2fc1b3384941 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
+	github.com/nickname32/discordhook v1.0.2
 	github.com/pbnjay/strptime v0.0.0-20140226051138-5c05b0d668c9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/refraction-networking/utls v0.0.0-20201210053706-2179f286686b // indirect
-	github.com/stretchr/testify v1.5.0 // indirect
 	github.com/tebeka/strftime v0.1.3 // indirect
 	github.com/x04/cclient v0.0.0-20210301002814-36407623a930 // indirect
+	go.mongodb.org/mongo-driver v1.5.4
 )

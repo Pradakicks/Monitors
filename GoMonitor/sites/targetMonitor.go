@@ -271,7 +271,7 @@ func (m *Monitor) monitor() error {
 	if m.Availability && !m.currentAvailability {
 		fmt.Println("Item Out Of Stock")
 	}
-	 m.Availability = m.currentAvailability
+	m.Availability = m.currentAvailability
 	return nil
 }
 
@@ -438,7 +438,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := "http://172.93.100.112:7243/DB"
+		url := "http://104.249.128.207:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
