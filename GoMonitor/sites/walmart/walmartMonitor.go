@@ -201,7 +201,7 @@ func (m *Monitor) monitor() error {
 			fmt.Println("Blocked by PX")
 			fmt.Println("Blocked by PX")
 			time.Sleep(5 * time.Second)
-			m.useProxy = !m.useProxy
+			// m.useProxy = !m.useProxy
 		}
 
 		return nil
@@ -211,7 +211,8 @@ func (m *Monitor) monitor() error {
 
 	if strings.Contains(string(body), "Verify your identity") {
 		fmt.Println("Captcha Detected")
-		m.useProxy = !m.useProxy
+		// m.useProxy = !m.useProxy
+		time.Sleep(5 * time.Second)
 		return nil
 	}
 	monitorAvailability = false
