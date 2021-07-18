@@ -47,7 +47,7 @@ client.on("message", (msg) => {
 		.setColor('#24223a')
 		.setTitle('Pricing')
 		.setDescription('*Our pricing system is based off how many members you have.*\n\n1-99 Members - **$100/m**\n\n100 - 199 Members - **$200/m**\n\n200 - 249 Members - **$250/m**\n\n250 - 299 Members - **$300/m**\n\n300 - 349 Members - **$350/m**\n\n350 - 399 Members - **$400/m**\n\n400+ Members - **$500/m**\n\n*Prices vary and are subject to change. All payments are made in USD.*')
-		.setFooter('Ping Monitors - pingmonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png')
+		.setFooter('Fiber Monitors - fibermonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png')
 		msg.channel.send(pricingEmbed);
 	}
   });
@@ -74,7 +74,7 @@ client.on("message", (msg) => {
 		*Without brackets and replace SITE and SKU.*
 		*If you have any issues feel to ask questions in tickets.*
 		`)
-		.setFooter('Ping Monitors - pingmonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png')
+		.setFooter('Fiber Monitors - fibermonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png')
 		msg.channel.send(pricingEmbed);
 	}
   });
@@ -132,7 +132,7 @@ client.on("message", (msg) => {
 			"inline": true
 		  }
 		)
-		.setFooter('Ping Monitors - pingmonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png');
+		.setFooter('Fiber Monitors - fibermonitors.com', 'https://media.discordapp.net/attachments/865335845309644800/865335918609432616/PingMonitors-removebg-preview.png');
 		msg.channel.send(sitelistEmbed);
 	}
   });
