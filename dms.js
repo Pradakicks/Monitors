@@ -54,6 +54,28 @@ function SKUADD(clients, triggerText, replyText) {
             let skuBank = await getSkuBank();
             let caseSite = site.toUpperCase();
             let currentCompany = config.groups[group];
+			  let currentObj = {
+				sku: SKU,
+				site: site.toUpperCase(),
+				stop: false,
+				name: '',
+				original: original,
+				companies: [
+				  {
+					company: group,
+					webhook: currentCompany[caseSite],
+					color: currentCompany?.companyColor,
+					companyImage: currentCompany?.companyImage,
+				  },
+				],
+			  };
+			  let currentBody = {
+				site: site.toUpperCase(),
+				sku: SKU,
+				priceRangeMin: parseInt(pricerange.split(',')[0]),
+				priceRangeMax: parseInt(pricerange.split(',')[1]),
+			  };
+
             if (skuBank[caseSite]) {
               if (skuBank[caseSite][SKU]) {
                 let skuWebhookArray = skuBank[caseSite][SKU]?.companies;
@@ -77,39 +99,18 @@ function SKUADD(clients, triggerText, replyText) {
                     color: currentCompany?.companyColor,
                     companyImage: currentCompany?.companyImage,
                   });
-                  console.log(arr);
+                  skuBank[caseSite][SKU].companies = arr
                   await updateSku(
                     site,
                     SKU,
-                    { companies: arr },
-                    `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}/.json`
+                    skuBank[caseSite][SKU]
                   );
                 }
                 console.log('Duplicate Found', isPresent);
                 isContinue = false;
               }
             }
-            let currentObj = {
-              sku: SKU,
-              site: site.toUpperCase(),
-              stop: false,
-              name: '',
-              original: original,
-              companies: [
-                {
-                  company: group,
-                  webhook: currentCompany[caseSite],
-                  color: currentCompany?.companyColor,
-                  companyImage: currentCompany?.companyImage,
-                },
-              ],
-            };
-            let currentBody = {
-              site: site.toUpperCase(),
-              sku: SKU,
-              priceRangeMin: parseInt(pricerange.split(',')[0]),
-              priceRangeMax: parseInt(pricerange.split(',')[1]),
-            };
+        
             if (
               currentBody.priceRangeMax == NaN ||
               !currentBody.priceRangeMax
@@ -124,6 +125,7 @@ function SKUADD(clients, triggerText, replyText) {
               console.log('No Min Price Range Detected');
               currentBody.priceRangeMin = 1;
             }
+
             if (isContinue) {
               switch (site.toUpperCase()) {
                 case 'TARGET':
@@ -137,9 +139,9 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'SLICK':
                 case 'SLICKDEAL':
                 case 'BIGLOTS':
-                case 'BIGLOTS':
+                case 'HOMEDEPOT':
                   await pushSku(currentObj);
-                  console.log(currentBody);
+                //   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                   break;
                 case 'NEWEGG':
@@ -167,12 +169,14 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'TARGETNEW':
                   await pushSku(currentObj);
                   console.log(kw);
-                  let currentBody = {
+                  console.log({
                     endpoint: SKU,
                     keywords: kw,
-                  };
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
+                  });
+                  startGoMonitor({
+                    endpoint: SKU,
+                    keywords: kw,
+                  }, site.toUpperCase());
                 default:
               }
               message.channel.send(`${SKU} Added to ${site}`);
@@ -230,11 +234,11 @@ function deleteSku(clients, triggerText, replyText) {
                   console.log(currentBody.companies);
                   currentBody.companies.splice(i, 1);
                   console.log(currentBody.companies);
+                  skuBank[caseSite][SKU].companies = arr
                   await updateSku(
-                    caseSite,
+                    site,
                     SKU,
-                    currentBody,
-                    `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`
+                    skuBank[caseSite][SKU]
                   );
                 }
                 message.channel.send(
@@ -245,12 +249,11 @@ function deleteSku(clients, triggerText, replyText) {
               currentBody.stop = true;
               console.log(currentBody);
               if (group == currentBody.companies[0].company) {
-                await updateSku(
-                  caseSite,
-                  SKU,
-                  currentBody,
-                  `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}.json`
-                );
+                  await updateSku(
+                    site,
+                    SKU,
+                    currentBody
+                  );
                 await delay(10000);
                 await deleteSkuEnd(site, SKU);
                 message.channel.send(
@@ -401,6 +404,7 @@ async function startGoMonitor(currentBody, site) {
     console.log(`Error Starting Go Monitor ${error}`);
   }
 }
+
 async function mass(string, content, message, groupName) {
   //	const SKU = content.split(' ')[2];
   //	console.log(site)
@@ -470,11 +474,11 @@ async function mass(string, content, message, groupName) {
                 companyImage: currentCompany?.companyImage,
               });
               console.log(arr);
+              skuBank[caseSite][SKU].companies = arr
               await updateSku(
                 site,
                 SKU,
-                { companies: arr },
-                `${pushEndpoint}/${caseSite.toUpperCase()}/${SKU}/.json`
+                skuBank[caseSite][SKU]
               );
             }
             console.log('Duplicate Found', isPresent);
@@ -544,7 +548,7 @@ async function mass(string, content, message, groupName) {
 // Fire Base Sku Bank ----------------------------------------------
 async function checkPresentSkus() {
   let skuBank = await rp.get({
-    url: `${pushEndpoint}.json`,
+    url: `${firstServer}:${port}/DB`,
   });
   skuBank = JSON.parse(skuBank?.body);
   let sites = Object.keys(skuBank);
@@ -602,20 +606,21 @@ async function checkPresentSkus() {
 if (os.platform() == 'win32' || os.platform() == 'darwin') {
   console.log('Development Environment');
   secondServer = 'http://localhost';
+  firstServer = 'http://localhost';
 } else {
   checkPresentSkus();
 }
 async function getSkuBank() {
   let getbank = await rp.get({
-    url: `${pushEndpoint}.json`,
+    url: `${firstServer}:${port}/DB`,
   });
   return JSON.parse(getbank?.body);
 }
 async function pushSku(body) {
   try {
     console.log('PUSHING ', body);
-    let pushSku = await rp.patch({
-      url: `${pushEndpoint}/${body.site}/${body.sku}.json`,
+    let pushSku = await rp.post({
+      url: `${firstServer}:${port}/UPDATESKU`,
       body: JSON.stringify(body),
     });
     console.log(pushSku?.statusCode);
@@ -626,22 +631,21 @@ async function pushSku(body) {
 async function deleteSkuEnd(site, sku, group) {
   try {
     console.log(`Deleting ${sku}/${site}`);
-    let deleteSku = await rp.delete({
-      url: `${pushEndpoint}/${site.toUpperCase()}/${encodeURIComponent(
-        sku
-      )}.json`,
+    let deleteSku = await rp.post({
+      url: `${firstServer}:${port}/DELETESKU`,
+      body: JSON.stringify({site : site, sku : sku})
     });
     console.log(deleteSku?.statusCode);
   } catch (error) {
     console.log(error);
   }
 }
-async function updateSku(site, sku, newBody, url) {
+async function updateSku(site, sku, newBody) {
   try {
     // No need for site and sku // Only reason I kept it here is for console logs
     console.log(`Updating Sku ${sku}/${site}`);
-    let updateSku = await rp.patch({
-      url: url,
+    let updateSku = await rp.post({
+      url: `${firstServer}:${port}/UPDATESKU`,
       body: JSON.stringify(newBody),
     });
     console.log(updateSku?.statusCode);
@@ -652,7 +656,7 @@ async function updateSku(site, sku, newBody, url) {
 async function getValidatedIds() {
   try {
     let getIds = await rp.get({
-      url: `${discordIds}/.json`,
+      url: `${firstServer}:${port}/DISCORDIDS`,
     });
     console.log(getIds?.statusCode);
     return getIds?.body;
@@ -673,8 +677,8 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     });
     if (!isPresent) currentIds.push(`${author}-${name}`);
     else return false;
-    let updateIds = await rp.patch({
-      url: `${discordIds}/.json`,
+    let updateIds = await rp.post({
+      url: `${firstServer}:${port}/DISCORDIDS`,
       body: JSON.stringify({ ids: currentIds }),
     });
     console.log(updateIds?.statusCode);
@@ -688,7 +692,6 @@ async function validateUser(clients, triggerText, replyText) {
   try {
     clients.on('message', async (message) => {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
-        // message.author.send(replyText);
         let content = message.content.split('!validate')[1];
         let apikey = content?.split('apikey-')[1].split('%}')[0];
         if (apikey == undefined) {
@@ -991,7 +994,7 @@ async function getProxies() {
     // read contents of the file
     let proxyList = [];
     // const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
-	let fetchProxies = await rp.get("https://monitors-9ad2c-default-rtdb.firebaseio.com/proxy.json")
+	let fetchProxies = await rp.get(`${firstServer}:${port}/proxy.json`)
 	let parsed = JSON.parse(fetchProxies.body)
 	parsed.forEach(line =>{
 		const lineSplit = line.split(':');

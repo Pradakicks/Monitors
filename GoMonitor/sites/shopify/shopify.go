@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/andersfylling/snowflake"
 	"github.com/bradhe/stopwatch"
 	"github.com/nickname32/discordhook"
 	"github.com/pkg/errors"
 
+	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -81,7 +80,6 @@ type Company struct {
 type ShopifyJson struct {
 	Products []Types.ShopifyNewProduct
 }
-
 type ProductsItem struct {
 	ID          int64
 	UpdatedTime string
@@ -258,6 +256,8 @@ func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
+	start := time.Now()
+
 	watch := stopwatch.Start()
 	t := time.Now().UTC().UnixNano()
 	var url string
@@ -299,6 +299,7 @@ func (m *Monitor) monitor() error {
 	req.Header.Add("sec-fetch-dest", "empty")
 	req.Header.Set("Connection", "close")
 	req.Close = true
+	// res, err := http.DefaultClient.Do(req)
 	res, err := m.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
@@ -306,6 +307,8 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Time Elapsed Request : ", elapsed)
 	defer res.Body.Close()
 	var newList []ProductsItem
 	defer func() {
@@ -320,6 +323,7 @@ func (m *Monitor) monitor() error {
 	}
 
 	if res.StatusCode != 200 {
+		time.Sleep(10 * time.Second)
 		return nil
 	}
 
@@ -331,7 +335,8 @@ func (m *Monitor) monitor() error {
 		fmt.Println(errors.Cause(err))
 		return nil
 	}
-
+	elapsed = time.Since(start)
+	fmt.Println("Time Elapsed BODY : ", elapsed)
 	// fmt.Println("Length of Products in ResponseWriter", len(jsonResponse.Products))
 	for _, value := range jsonResponse.Products {
 		var isPresent bool
@@ -339,23 +344,10 @@ func (m *Monitor) monitor() error {
 		var containsNegativeKeywords bool
 		value.Store = m.Config.sku
 
-		// var currentProduct ProductsItem = ProductsItem{ID: value.ID, UpdatedTime: value.UpdatedAt, Variants: value.Variants}
 		for _, v := range m.products {
-
-			// if v.ID == 6840826757303 && value.ID == 6840826757303 {
-			// 	fmt.Println("tejst", v.UpdatedTime, value.UpdatedAt)
-			// 	fmt.Println(v.UpdatedTime == value.UpdatedAt)
-			// 	fmt.Println(v.UpdatedTime != value.UpdatedAt)
-			// 	fmt.Println(v.ID, value.ID, v.Store, value.Store)
-			// }
 			if v.Handle == value.Handle && v.Store == value.Store {
 				isPresent = true
 				newList = append(newList, ProductsItem{ID: value.ID, UpdatedTime: value.UpdatedAt, Variants: value.Variants, Store: value.Store, Handle: value.Handle})
-
-				// if v.ID == 6840826757303 {
-				// 	fmt.Println("testing", v.UpdatedTime, value.UpdatedAt)
-				// }
-
 				if v.UpdatedTime != value.UpdatedAt { // This monitor all changes in a product
 					fmt.Println("Restock!", v.UpdatedTime, value.UpdatedAt)
 					go func(value Types.ShopifyNewProduct) {
@@ -409,7 +401,9 @@ func (m *Monitor) monitor() error {
 							go m.webHookSend(testCompany, m.Config.sku, value.Title, price, link, t, image, restockVariants)
 						}
 					}(value)
-
+					continue
+				} else {
+					continue
 				}
 
 			}
@@ -422,6 +416,7 @@ func (m *Monitor) monitor() error {
 				continue
 			}
 		}
+		
 		for _, val := range m.NegKeywords {
 			if strings.Contains(value.Title, val) || strings.Contains(value.Handle, val) {
 				containsNegativeKeywords = true
@@ -457,13 +452,12 @@ func (m *Monitor) monitor() error {
 					}
 					go m.webHookSend(testCompany, m.Config.sku, value.Title, price, link, t, image, value.Variants)
 				}
-
 			}(value)
-
 		}
 
 	}
-
+	elapsed = time.Since(start)
+	fmt.Println("Time Elapsed Loop : ", elapsed)
 	// fmt.Println("New List", len(newList), len(m.products))
 	m.products = newList
 	return nil
@@ -511,23 +505,6 @@ func (m *Monitor) sendWebhook(sku string, name string, price string, link string
 }
 
 func (m *Monitor) webHookSend(c Company, site string, name string, price string, link string, currentTime time.Time, image string, restockedVariants []Types.Variant) {
-	s := strings.Split("https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW", "/")
-	// s[4] =
-	fmt.Println(s)
-	Int, err := strconv.Atoi(s[5])
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(errors.Cause(err))
-
-		return
-	}
-	wa, err := discordhook.NewWebhookAPI(snowflake.NewSnowflake(uint64(Int)), s[6], true, nil)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(errors.Cause(err))
-
-		return
-	}
 	Color, err := strconv.Atoi(c.Color)
 	if err != nil {
 		fmt.Println(err)
@@ -569,7 +546,7 @@ func (m *Monitor) webHookSend(c Company, site string, name string, price string,
 		Name:  "Links",
 		Value: "[In Development](" + link + ")",
 	})
-	msg, err := wa.Execute(nil, &discordhook.WebhookExecuteParams{
+	var discordParams discordhook.WebhookExecuteParams = discordhook.WebhookExecuteParams{
 		Content: "",
 		Embeds: []*discordhook.Embed{
 			{
@@ -589,49 +566,8 @@ func (m *Monitor) webHookSend(c Company, site string, name string, price string,
 				},
 			},
 		},
-	}, nil, "")
-	if err != nil {
-		fmt.Println("Error with webhook", err)
-		if strings.Contains(err.Error(), "You are being") {
-			fmt.Println("Retrying IN ", strings.Split(err.Error(), `retry_after": `)[1])
-			x := rand.Intn(100-1) + 1
-			time.Sleep(time.Duration(x) * time.Second)
-			msg1, err1 := wa.Execute(nil, &discordhook.WebhookExecuteParams{
-				Content: "",
-				Embeds: []*discordhook.Embed{
-					{
-						Title:  site + " Monitor",
-						URL:    link,
-						Color:  Color,
-						Fields: currentFields,
-						Footer: &discordhook.EmbedFooter{
-							Text: "Prada#4873",
-						},
-						Timestamp: &currentTime,
-						Thumbnail: &discordhook.EmbedThumbnail{
-							URL: image,
-						},
-						Provider: &discordhook.EmbedProvider{
-							URL: c.CompanyImage,
-						},
-					},
-				},
-			}, nil, "")
-			if err1 != nil {
-				fmt.Println(err1)
-			} else {
-				fmt.Println(msg1.ID)
-			}
-		} else {
-			fmt.Println(link, Color, site, image, c.CompanyImage)
-			for _, v := range currentFields {
-				fmt.Println(v.Name, v.Value)
-			}
-
-		}
-		return
 	}
-	fmt.Println(msg.ID)
+	go Webhook.SendWebhook("https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW", &discordParams)
 }
 
 func (m *Monitor) checkStop() error {

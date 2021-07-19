@@ -5,11 +5,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	Types "github.con/prada-monitors-go/helpers/types"
 )
 
 func Get() []string {
 	var proxyList = make([]string, 0)
-	url := "https://monitors-9ad2c-default-rtdb.firebaseio.com/proxy.json"
+	url := "http://localhost:7243/PROXY"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -24,14 +25,14 @@ func Get() []string {
 		log.Fatal(err)
 		res.Body.Close()
 	}
-	var proxies []string
+	var proxies Types.ProxyResponseType
 	err = json.Unmarshal(body, &proxies)
 	if err != nil {
 		log.Fatal(err)
 		res.Body.Close()
 	}
 	//	fmt.Println(proxies)
-	for _, proxy := range proxies {
+	for _, proxy := range proxies.Proxies {
 		//	fmt.Println(proxy)
 		proxyList = append(proxyList, proxy)
 	}

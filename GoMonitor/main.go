@@ -8,11 +8,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bradhe/stopwatch"
 	"github.com/elgs/gojq"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	helper "github.con/prada-monitors-go/helpers/mongo"
 	Types "github.con/prada-monitors-go/helpers/types"
 	TargetMonitor "github.con/prada-monitors-go/sites"
@@ -21,6 +23,7 @@ import (
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
 	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
+	HomeDepot "github.con/prada-monitors-go/sites/homedepot"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	Shopify "github.con/prada-monitors-go/sites/shopify"
 	ShopifyProduct "github.con/prada-monitors-go/sites/shopifyProduct"
@@ -57,15 +60,36 @@ type ItemInMonitorJson struct {
 	Companies []Company
 }
 type Company struct {
-	Company      string `json:"company"`
-	Webhook      string `json:"webhook"`
-	Color        string `json:"color"`
-	CompanyImage string `json:"companyImage"`
+	Company      string `json:"company,omitempty"`
+	Webhook      string `json:"webhook,omitempty"`
+	Color        string `json:"color,omitempty"`
+	CompanyImage string `json:"companyImage,omitempty"`
+}
+type SiteInDB struct {
+	Products []Product
+}
+type Product struct {
+	Companies []Company
+	Name     string `json:"name,omitempty"`
+	Original string `json:"original,omitempty"`
+	Site     string `json:"site,omitempty"`
+	Sku      string `json:"sku,omitempty"`
+	Stop     bool   `json:"stop,omitempty"`
+}
+type ItemInCollection struct {
+	Type string `json:"type"`
+	Site map[string]interface{} `json:"sites"`
+}
+
+type DiscordIdsDB struct {
+	Ids []string `json:"ids,omitempty"`
+	Type 	   string   `json:"type,omitempty"`
 }
 
 var DBString string
-
 var Collection = helper.ConnectDB()
+var MainCollection = helper.ConnectDBMain()
+var workerRunning bool = false
 
 func target(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL)
@@ -167,6 +191,16 @@ func gameStop(w http.ResponseWriter, r *http.Request) {
 	go GameStopMonitor.NewMonitor(currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
+func homeDepot(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Home Depot Monitor")
+	fmt.Println("Home Depot")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go HomeDepot.NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 func walmartNew(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Walmart New Monitor")
@@ -201,7 +235,6 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Deals Monitor")
 }
-
 func getDB(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Request Sent")
 
@@ -233,31 +266,117 @@ func getDB(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, string(j))
 }
+func getEntireDB(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Request Sent")
 
-func DBWorker() {
+	watch := stopwatch.Start()
 
-	url := fmt.Sprintf("https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor/.json")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request Took : %v\n", watch.Milliseconds())
+	}()
 
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	// fmt.Println(body)
-	DBString = string(body)
+	fmt.Fprintf(w, DBString)
 }
+func DBWorker() {
+	if !workerRunning {
+		fmt.Println("Beginning Worker")
+		workerRunning = true
+		defer func() {
+			fmt.Println("Finished Worker")
+			workerRunning = false
+		}()
+		cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"sites"})
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer cur.Close(context.TODO())
+		for cur.Next(context.TODO()) {
+			elements , err := cur.Current.Elements()
+			if err != nil {
+				fmt.Println(err)
+			}
+			for _, v := range elements {
+				if strings.Contains(v.String(), "initialized") {
+					// fmt.Println(v.String())
+					parser, err := gojq.NewStringQuery(v.String())
+					if err != nil {
+						fmt.Println("DBWORKER")
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						return
+					}
+					data, _ := parser.Query("site")
+					jsonString, err := json.Marshal(data)
+					if err != nil {
+						fmt.Println("DBWORKER")
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						fmt.Println(err.Error())
+						return
+					}
+					// fmt.Println(string(jsonString))
+					DBString = string(jsonString)
+					
+					continue
+				}
+			}
+		}
+	} else {
+		fmt.Println("Worker Already Running")
+		time.Sleep(time.Second * 3)
+		DBWorker()
+	}
+}
+func getProxies(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println("Request For Proxies")
+	watch := stopwatch.Start()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Proxies Took : %v\n", watch.Milliseconds())
+	}()
+	cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"proxy"})
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+			elements , err := cur.Current.Elements()
+			if err != nil {
+				fmt.Println(err)
+				fmt.Fprintf(w, err.Error())
+			}
+			for _, v := range elements {
+			if strings.Contains(v.String(), "proxies"){
+				w.Header().Set("Content-Type", "application/json")
+				var jsonMap map[string]interface{}
+				json.Unmarshal([]byte(v.String()), &jsonMap)
+				for k, values := range jsonMap {
+					if k == "proxies" {
+						var proxyList = make([]string, 0)
+						for _, proxies := range values.(map[string]interface{}){
+							proxyList = append(proxyList, proxies.(string))
+						}
+						
+						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
+							Proxies: proxyList,
+						}
+						re , err := json.Marshal(currentResponse)
+						if err != nil {
+							fmt.Println(err)
+							fmt.Fprintf(w, err.Error())
+						}
+						w.Write(re)
+					}
+				}
+				}
+			}
+	}
+}
 func handleShopifyProducts() {
 	fmt.Println("Handling Products")
 	cur, err := Collection.Find(context.TODO(), bson.M{})
@@ -294,14 +413,257 @@ func handleShopifyProducts() {
 	
 		
 	}
-
 }
+func updateSku(w http.ResponseWriter, r *http.Request) {
+	watch := stopwatch.Start()
+	var product Product
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Updating Site %s Sku : %s Took : %v\n", product.Site, product.Sku, watch.Milliseconds())
+	}()
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewDecoder(r.Body).Decode(&product)
+	fmt.Println(product)
+	testUpdate(product)
+	fmt.Fprintf(w, "Updated Product")
+}
+func testUpdate(currentProduct Product) {
+	if !workerRunning { 
+		// DBWorker()
+		fmt.Println("Beginning Worker")
+		workerRunning = true
+		defer func() {
+			fmt.Println("Finished Worker")
+			workerRunning = false
+			go DBWorker()
+		}()
+		obj := make(map[string]interface{})
+		err := json.Unmarshal([]byte(DBString), &obj)
+		fmt.Println("Test Update " , err)
+		site := currentProduct.Site
+		product := currentProduct.Sku
+		newChange := currentProduct
+		fmt.Println(newChange)
+		fmt.Println(site, product, newChange)
+		var sitePresent bool = false
+		var productPresent bool = false
+		// fmt.Println(obj) // <-- map[key1:value1]
+		for k, _ := range obj {
+			if k == "_id" {
+				delete(obj, k)
+			}
+			if k == site {
+				sitePresent = true
+				for keys, _ := range obj[k].(map[string]interface{}) {
+					if keys == product {
+						productPresent = true
+						fmt.Println(obj[k].(map[string]interface{})[product])
+						obj[k].(map[string]interface{})[product] = newChange
+						fmt.Println(obj[k].(map[string]interface{})[product])
+					}
+				}
+
+			} 
+		
+		}	
+
+		if !sitePresent {
+			fmt.Println("Adding New Site", site, product)
+			obj[site] = map[string]interface{}{}
+			obj[site].(map[string]interface{})[product] = newChange
+		} else if !productPresent {
+			fmt.Println("Adding New Product", site, product)
+			obj[site].(map[string]interface{})[product] = newChange
+		}
+		filter := bson.M{"type": "sites"}
+		replacedResult := MainCollection.FindOneAndDelete(context.TODO(), filter)
+		if replacedResult.Err() != nil {
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Println(errors.Cause(replacedResult.Err()))
+		} else {
+				time.Sleep(150 * time.Millisecond)
+				results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
+					Type: "sites",
+					Site: obj,
+				})
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println(results)
+		}
+	
+
+	} else {
+		fmt.Println("Worker Already Running")
+		time.Sleep(3 * time.Second)
+		testUpdate(currentProduct)
+	}
+}
+func deleteSku(w http.ResponseWriter, r *http.Request) {
+	watch := stopwatch.Start()
+	var product Product
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Deleting Site %s Sku : %s Took : %v\n", product.Site, product.Sku, watch.Milliseconds())
+	}()
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewDecoder(r.Body).Decode(&product)
+	fmt.Println(product)
+	deleteSkuFunc(product.Site, product.Sku)
+	fmt.Fprintf(w, "Deleted Product")
+}
+func deleteSkuFunc(site string, sku string) {
+	if !workerRunning { 
+		// DBWorker()
+		fmt.Println("Beginning Worker")
+		workerRunning = true
+		defer func() {
+			fmt.Println("Finished Worker")
+			workerRunning = false
+			go DBWorker()
+		}()
+		obj := make(map[string]interface{})
+		err := json.Unmarshal([]byte(DBString), &obj)
+		fmt.Println("Delete Sku " , err)
+		fmt.Println("Deleting ", sku, " from ", site)
+		for k, _ := range obj {
+			if k == "_id" {
+				delete(obj, k)
+			}
+			if k == site {
+				fmt.Println(len(obj[k].(map[string]interface{})))
+				if len(obj[k].(map[string]interface{})) == 1 {
+					delete(obj, k)
+					continue
+				}
+				for keys, _ := range obj[k].(map[string]interface{}) {
+					if keys == sku {
+						delete(obj[k].(map[string]interface{}), keys)
+					}
+				}
+
+			} 
+		}	
+
+		filter := bson.M{"type": "sites"}
+		replacedResult := MainCollection.FindOneAndDelete(context.TODO(), filter)
+		if replacedResult.Err() != nil {
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Println(errors.Cause(replacedResult.Err()))
+		} else {
+				time.Sleep(150 * time.Millisecond)
+				results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
+					Type: "sites",
+					Site: obj,
+				})
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println(results)
+		}
+	
+
+	} else {
+		fmt.Println("Worker Already Running")
+		time.Sleep(3 * time.Second)
+		deleteSkuFunc(site, sku)
+	}
+}
+func getDiscordIds(w http.ResponseWriter, r *http.Request) {
+	watch := stopwatch.Start()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Getting Discord IDS Took : %v\n", watch.Milliseconds())
+	}()
+	byteSlice,err := json.Marshal(discordIds())
+		if err != nil {
+		fmt.Println(err)
+		fmt.Fprintf(w, err.Error())
+		}
+		w.Header().Set("Content-Type","application/json")
+		w.WriteHeader(200)
+		w.Write(byteSlice)
+		}
+func discordIds() []string {
+	var discordIdsArr []string
+		cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"discordids"})
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer cur.Close(context.TODO())
+		for cur.Next(context.TODO()) {
+			elements , err := cur.Current.Elements()
+			if err != nil {
+				fmt.Println(err)
+			}
+			for k, _ := range elements {
+				if elements[k].Key() == "ids" {
+					arr := strings.Split(strings.Split(strings.Split(elements[k].Value().String(), "[")[1], "]")[0], ",")
+					for _, v := range arr {
+						discordIdsArr = append(discordIdsArr, strings.ReplaceAll(v, `"`, ""))
+					}
+					fmt.Println(discordIdsArr)
+				}
+			}
+		}
+		return discordIdsArr
+}
+func addDiscordIds(w http.ResponseWriter, r *http.Request) {
+	watch := stopwatch.Start()
+	var ids DiscordIdsDB
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Adding Discord Ids Took : %v\n", watch.Milliseconds())
+	}()
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewDecoder(r.Body).Decode(&ids)
+	addDiscordId(ids.Ids)
+	fmt.Fprintf(w, "Added IDS")
+		}
+func addDiscordId(discordIds []string) {
+	if !workerRunning { 
+		fmt.Println("Beginning Worker")
+		workerRunning = true
+		defer func() {
+			fmt.Println("Finished Worker")
+			workerRunning = false
+			go DBWorker()
+		}()
+		filter := bson.M{"type": "discordids"}
+		replacedResult := MainCollection.FindOneAndDelete(context.TODO(), filter)
+		if replacedResult.Err() != nil {
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Printf("remove fail %v\n", replacedResult)
+			fmt.Println(errors.Cause(replacedResult.Err()))
+		} else {
+				time.Sleep(150 * time.Millisecond)
+				results, err := MainCollection.InsertOne(context.TODO(), DiscordIdsDB{
+					Type: "discordids",
+					Ids: discordIds,
+				})
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println(results)
+		}
+	
+	} else {
+		fmt.Println("Worker Already Running")
+		time.Sleep(3 * time.Second)
+		addDiscordId(discordIds)
+	}
+}
+
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/", getPage).Methods("GET")
-	router.HandleFunc("/DB", getDB).Methods("POST")
+	
 	router.HandleFunc("/TARGET", target).Methods("POST")
 	router.HandleFunc("/WALMART", walmart).Methods("POST")
 	router.HandleFunc("/NEWEGG", newegg).Methods("POST")
@@ -315,7 +677,20 @@ func handleRequests() {
 	router.HandleFunc("/GAMESTOP", gameStop).Methods("POST")
 	router.HandleFunc("/WALMARTNEW", walmartNew).Methods("POST")
 	router.HandleFunc("/SHOPIFY", shopify).Methods("POST")
+	router.HandleFunc("/HOMEDEPOT", homeDepot).Methods("POST")
 	router.HandleFunc("/SHOPIFYPRODUCT", shopifyProduct).Methods("POST")
+
+
+	// Helper Routes
+	router.HandleFunc("/", getPage).Methods("GET")
+	router.HandleFunc("/DB", getDB).Methods("POST") // Post
+	router.HandleFunc("/DB", getEntireDB).Methods("GET") // Get
+	router.HandleFunc("/PROXY", getProxies).Methods("GET")
+	router.HandleFunc("/UPDATESKU", updateSku).Methods("POST")
+	router.HandleFunc("/DELETESKU", deleteSku).Methods("POST")	
+	router.HandleFunc("/DISCORDIDS", getDiscordIds).Methods("GET")	
+	router.HandleFunc("/DISCORDIDS", addDiscordIds).Methods("POST")	
+
 	log.Fatal(http.ListenAndServe(":7243", router))
 }
 
@@ -327,7 +702,7 @@ func main() {
 	//	handleShopifyProducts()
 	}()
 	go func() {
-		for true {
+		for {
 			DBWorker()
 			time.Sleep(15000 * (time.Millisecond))
 		}
