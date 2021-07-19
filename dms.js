@@ -417,7 +417,7 @@ async function mass(string, content, message, groupName) {
   let isValidated = false;
   let group;
   if (message) {
-    parsed.ids.forEach((e) => {
+    parsed.forEach((e) => {
       let id = e?.split('-')[0];
       console.log(id, message.author.id);
       if (id == message.author.id) {
@@ -737,7 +737,8 @@ async function checkIfUserValidated(message) {
   };
   let validatedIds = await getValidatedIds();
   let parsed = JSON.parse(validatedIds);
-  parsed.ids.forEach((e) => {
+  console.log(parsed)
+  parsed.forEach((e) => {
     let id = e?.split('-')[0];
     console.log(id, message.author.id);
     if (id == message.author.id) {
