@@ -997,7 +997,8 @@ async function getProxies() {
     // const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
 	let fetchProxies = await rp.get(`${firstServer}:${port}/PROXY`)
 	let parsed = JSON.parse(fetchProxies.body)
-	parsed.forEach(line =>{
+  console.log(parsed)
+	parsed.proxies.forEach(line =>{
 		const lineSplit = line.split(':');
 		const item1 = {
 		  ip: lineSplit[0],
