@@ -83,7 +83,7 @@ func NewMonitor() *Monitor {
 	//	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 10 * time.Second}
-	m.Config.discord = "https://discord.com/api/webhooks/842460357607555075/pKynxp-r1_-VbWAcnhleC2vCKo357vCb29Y83jLG_NgPfiqY3WuUdjZILVWYpQ-SmAj5"
+	m.Config.discord = "https://discord.com/api/webhooks/867023999552847874/2c0B6eVzU1n1KSjSHqvrn2S_f8mPR8fvOcXnGj18EY9MydVToF4iTx_w57IVVMx2fqPI"
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
 
