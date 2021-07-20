@@ -92,7 +92,6 @@ func NewMonitor(sku string, skuName string, collection *mongo.Collection) *Monit
 	m.Client = http.Client{Timeout: 10 * time.Second}
 	m.monitorProduct.name = "Testing Product"
 	m.monitorProduct.stockNumber = ""
-
 	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
@@ -123,6 +122,7 @@ func NewMonitor(sku string, skuName string, collection *mongo.Collection) *Monit
 			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
 			//	fmt.Println(proxy, proxy.ip)
 			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
+			fmt.Println(prox1y)
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
@@ -206,13 +206,7 @@ func (m *Monitor) monitor() error {
 	if !m.Availability && currentAvailability {
 		fmt.Println("Item In Stock")
 		link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, jsonResponse.Handle)
-		var testCompany Company
-		testCompany.Webhook = "https://webhooks.aycd.io/webhooks/api/v1/send/8028/d1464662-73f6-4971-83c3-609e923d170e"
-		testCompany.Color = "1752220"
-		testCompany.CompanyImage = "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"
-		testCompany.Company = "Testing"
-		t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
-		go m.webHookSend(testCompany, m.Config.sku, jsonResponse.Title, m.prod.Variants[0].Price, link, t, jsonResponse.FeaturedImage)
+		go m.sendWebhook(m.Config.sku, jsonResponse.Title, m.prod.Variants[0].Price, link,jsonResponse.FeaturedImage)
 	}
 	if m.Availability && !currentAvailability {
 		fmt.Println("Out of Stock")
@@ -234,7 +228,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(sku string, name string, price string, link string, image string) error {
+func (m *Monitor) sendWebhook(site string, name string, price string, link string, image string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -256,7 +250,7 @@ func (m *Monitor) sendWebhook(sku string, name string, price string, link string
 
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
-		go m.webHookSend(comp, m.Config.sku, name, price, link, t, image)
+		go m.webHookSend(comp, site, name, price, link, t, image)
 	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	return nil

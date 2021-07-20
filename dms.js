@@ -75,13 +75,12 @@ function SKUADD(clients, triggerText, replyText) {
 				priceRangeMin: parseInt(pricerange.split(',')[0]),
 				priceRangeMax: parseInt(pricerange.split(',')[1]),
 			  };
-
             if (skuBank[caseSite]) {
               if (skuBank[caseSite][SKU]) {
                 let skuWebhookArray = skuBank[caseSite][SKU]?.companies;
                 let isPresent = false;
                 skuWebhookArray?.forEach((e) => {
-                  console.log(e.webhook, currentCompany[caseSite]);
+                  console.log(e.webhook, "CURRENT" , currentCompany[caseSite]);
                   if (e.webhook == currentCompany[caseSite]) isPresent = true;
                 });
 
@@ -140,6 +139,8 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'SLICKDEAL':
                 case 'BIGLOTS':
                 case 'HOMEDEPOT':
+                case 'SHOPIFY':
+                case 'SHOPIFYPRODUCT':
                   await pushSku(currentObj);
                 //   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
@@ -234,7 +235,7 @@ function deleteSku(clients, triggerText, replyText) {
                   console.log(currentBody.companies);
                   currentBody.companies.splice(i, 1);
                   console.log(currentBody.companies);
-                  skuBank[caseSite][SKU].companies = arr
+                  skuBank[caseSite][SKU].companies = currentBody.companies
                   await updateSku(
                     site,
                     SKU,
@@ -249,6 +250,8 @@ function deleteSku(clients, triggerText, replyText) {
               currentBody.stop = true;
               console.log(currentBody);
               if (group == currentBody.companies[0].company) {
+                console.log("Perm Delete")
+
                   await updateSku(
                     site,
                     SKU,
@@ -406,8 +409,6 @@ async function startGoMonitor(currentBody, site) {
 }
 
 async function mass(string, content, message, groupName) {
-  //	const SKU = content.split(' ')[2];
-  //	console.log(site)
   const site = content?.split(' ')[1]?.split('\n')[0].trim();
   console.log(content?.split(' ')[1]?.split('\n')[0].length);
   console.log(site.toUpperCase().length);
@@ -603,6 +604,7 @@ async function checkPresentSkus() {
     }
   });
 }
+
 if (os.platform() == 'win32' || os.platform() == 'darwin') {
   console.log('Development Environment');
   secondServer = 'http://localhost';
@@ -610,6 +612,7 @@ if (os.platform() == 'win32' || os.platform() == 'darwin') {
 } else {
   checkPresentSkus();
 }
+
 async function getSkuBank() {
   let getbank = await rp.get({
     url: `${firstServer}:${port}/DB`,
@@ -633,7 +636,7 @@ async function deleteSkuEnd(site, sku, group) {
     console.log(`Deleting ${sku}/${site}`);
     let deleteSku = await rp.post({
       url: `${firstServer}:${port}/DELETESKU`,
-      body: JSON.stringify({site : site, sku : sku})
+      body: JSON.stringify({site : site.toUpperCase(), sku : sku})
     });
     console.log(deleteSku?.statusCode);
   } catch (error) {
@@ -737,7 +740,7 @@ async function checkIfUserValidated(message) {
   };
   let validatedIds = await getValidatedIds();
   let parsed = JSON.parse(validatedIds);
-  console.log(parsed)
+  // console.log(parsed)
   parsed.forEach((e) => {
     let id = e?.split('-')[0];
     console.log(id, message.author.id);

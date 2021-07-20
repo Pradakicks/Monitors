@@ -280,10 +280,10 @@ func getEntireDB(w http.ResponseWriter, r *http.Request) {
 }
 func DBWorker() {
 	if !workerRunning {
-		fmt.Println("Beginning Worker")
+		 // fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
-			fmt.Println("Finished Worker")
+			// fmt.Println("Finished Worker")
 			workerRunning = false
 		}()
 		cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"sites"})
@@ -430,12 +430,12 @@ func updateSku(w http.ResponseWriter, r *http.Request) {
 func testUpdate(currentProduct Product) {
 	if !workerRunning { 
 		// DBWorker()
-		fmt.Println("Beginning Worker")
+		 // fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
-			fmt.Println("Finished Worker")
+			// fmt.Println("Finished Worker")
 			workerRunning = false
-			go DBWorker()
+			DBWorker()
 		}()
 		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(DBString), &obj)
@@ -443,8 +443,8 @@ func testUpdate(currentProduct Product) {
 		site := currentProduct.Site
 		product := currentProduct.Sku
 		newChange := currentProduct
-		fmt.Println(newChange)
-		fmt.Println(site, product, newChange)
+		// fmt.Println(newChange)
+		fmt.Println(site, product)
 		var sitePresent bool = false
 		var productPresent bool = false
 		// fmt.Println(obj) // <-- map[key1:value1]
@@ -457,9 +457,9 @@ func testUpdate(currentProduct Product) {
 				for keys, _ := range obj[k].(map[string]interface{}) {
 					if keys == product {
 						productPresent = true
-						fmt.Println(obj[k].(map[string]interface{})[product])
+						// fmt.Println(obj[k].(map[string]interface{})[product])
 						obj[k].(map[string]interface{})[product] = newChange
-						fmt.Println(obj[k].(map[string]interface{})[product])
+						// fmt.Println(obj[k].(map[string]interface{})[product])
 					}
 				}
 
@@ -517,12 +517,12 @@ func deleteSku(w http.ResponseWriter, r *http.Request) {
 func deleteSkuFunc(site string, sku string) {
 	if !workerRunning { 
 		// DBWorker()
-		fmt.Println("Beginning Worker")
+		 // fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
-			fmt.Println("Finished Worker")
+			// fmt.Println("Finished Worker")
 			workerRunning = false
-			go DBWorker()
+			DBWorker()
 		}()
 		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(DBString), &obj)
@@ -532,6 +532,7 @@ func deleteSkuFunc(site string, sku string) {
 			if k == "_id" {
 				delete(obj, k)
 			}
+			fmt.Println(k, site)
 			if k == site {
 				fmt.Println(len(obj[k].(map[string]interface{})))
 				if len(obj[k].(map[string]interface{})) == 1 {
@@ -606,7 +607,7 @@ func discordIds() []string {
 					for _, v := range arr {
 						discordIdsArr = append(discordIdsArr, strings.ReplaceAll(v, `"`, ""))
 					}
-					fmt.Println(discordIdsArr)
+					// fmt.Println(discordIdsArr)
 				}
 			}
 		}
@@ -626,12 +627,12 @@ func addDiscordIds(w http.ResponseWriter, r *http.Request) {
 		}
 func addDiscordId(discordIds []string) {
 	if !workerRunning { 
-		fmt.Println("Beginning Worker")
+		 // fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
-			fmt.Println("Finished Worker")
+			// fmt.Println("Finished Worker")
 			workerRunning = false
-			go DBWorker()
+			DBWorker()
 		}()
 		filter := bson.M{"type": "discordids"}
 		replacedResult := MainCollection.FindOneAndDelete(context.TODO(), filter)

@@ -256,7 +256,7 @@ func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 }
 
 func (m *Monitor) monitor() error {
-	start := time.Now()
+	// start := time.Now()
 
 	watch := stopwatch.Start()
 	t := time.Now().UTC().UnixNano()
@@ -273,6 +273,10 @@ func (m *Monitor) monitor() error {
 		break
 	case "deadstock":
 		baseUrl = fmt.Sprintf("https://www.%s.ca", m.Config.sku)
+		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
+		break
+	case "mountaindew":
+		baseUrl = fmt.Sprintf("https://store.%s.com", m.Config.sku)
 		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
 		break
 	default:
@@ -307,8 +311,8 @@ func (m *Monitor) monitor() error {
 
 		return nil
 	}
-	elapsed := time.Since(start)
-	fmt.Println("Time Elapsed Request : ", elapsed)
+	// elapsed := time.Since(start)
+	// fmt.Println("Time Elapsed Request : ", elapsed)
 	defer res.Body.Close()
 	var newList []ProductsItem
 	defer func() {
@@ -335,8 +339,8 @@ func (m *Monitor) monitor() error {
 		fmt.Println(errors.Cause(err))
 		return nil
 	}
-	elapsed = time.Since(start)
-	fmt.Println("Time Elapsed BODY : ", elapsed)
+	// elapsed = time.Since(start)
+	// fmt.Println("Time Elapsed BODY : ", elapsed)
 	// fmt.Println("Length of Products in ResponseWriter", len(jsonResponse.Products))
 	for _, value := range jsonResponse.Products {
 		var isPresent bool
@@ -440,7 +444,6 @@ func (m *Monitor) monitor() error {
 					testCompany.Color = "1752220"
 					testCompany.CompanyImage = "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"
 					testCompany.Company = "Testing"
-					t := time.Now().UTC()
 					var price string
 					var image string
 					if len(value.Variants) == 0 || len(value.Images) == 0 {
@@ -450,14 +453,14 @@ func (m *Monitor) monitor() error {
 						price = value.Variants[0].Price
 						image = value.Images[0].Src
 					}
-					go m.webHookSend(testCompany, m.Config.sku, value.Title, price, link, t, image, value.Variants)
+					go m.sendWebhook(m.Config.sku, value.Title, price, link, image, value.Variants)
 				}
 			}(value)
 		}
 
 	}
-	elapsed = time.Since(start)
-	fmt.Println("Time Elapsed Loop : ", elapsed)
+	// elapsed = time.Since(start)
+	// fmt.Println("Time Elapsed Loop : ", elapsed)
 	// fmt.Println("New List", len(newList), len(m.products))
 	m.products = newList
 	return nil
@@ -476,7 +479,7 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(sku string, name string, price string, link string, image string) error {
+func (m *Monitor) sendWebhook(site string, name string, price string, link string, image string, restockedVariants []Types.Variant) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
@@ -494,11 +497,12 @@ func (m *Monitor) sendWebhook(sku string, name string, price string, link string
 	fmt.Println("Testing Here : ", m.monitorProduct.name, "Here")
 	// now := time.Now()
 	// currentTime := strings.Split(now.String(), "-0400")[0]
-	// t := time.Now().UTC()
+	t := time.Now().UTC()
+
 
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
-		// go m.webHookSend(comp, m.Config.sku, name, price, link, t, image)
+		go m.webHookSend(comp, site, name, price, link, t, image, restockedVariants)
 	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
 	return nil
@@ -567,7 +571,7 @@ func (m *Monitor) webHookSend(c Company, site string, name string, price string,
 			},
 		},
 	}
-	go Webhook.SendWebhook("https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW", &discordParams)
+	go Webhook.SendWebhook(c.Webhook, &discordParams)
 }
 
 func (m *Monitor) checkStop() error {
