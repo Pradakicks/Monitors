@@ -662,7 +662,6 @@ func addDiscordId(discordIds []string) {
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
-
 	
 	router.HandleFunc("/TARGET", target).Methods("POST")
 	router.HandleFunc("/WALMART", walmart).Methods("POST")
