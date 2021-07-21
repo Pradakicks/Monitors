@@ -207,7 +207,7 @@ func walmartNew(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Walmart New Monitor")
 	var currentMonitor Monitor
 	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
+	// fmt.Println(currentMonitor)
 	go WalmartNew.NewMonitor(currentMonitor.SkuName, currentMonitor.Sku)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
@@ -298,7 +298,6 @@ func DBWorker() {
 			}
 			for _, v := range elements {
 				if strings.Contains(v.String(), "initialized") {
-					// fmt.Println(v.String())
 					parser, err := gojq.NewStringQuery(v.String())
 					if err != nil {
 						fmt.Println("DBWORKER")
@@ -423,7 +422,7 @@ func updateSku(w http.ResponseWriter, r *http.Request) {
 	}()
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewDecoder(r.Body).Decode(&product)
-	fmt.Println(product)
+	// fmt.Println(product)
 	testUpdate(product)
 	fmt.Fprintf(w, "Updated Product")
 }
@@ -439,15 +438,19 @@ func testUpdate(currentProduct Product) {
 		}()
 		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(DBString), &obj)
-		fmt.Println("Test Update " , err)
+			if err != nil {
+				fmt.Println("TESTING UDPDATE", err)
+				fmt.Println("TESTING UDPDATE", err)
+				fmt.Println("TESTING UDPDATE", err)
+				fmt.Println("TESTING UDPDATE", err)
+				return
+			}
 		site := currentProduct.Site
 		product := currentProduct.Sku
 		newChange := currentProduct
-		// fmt.Println(newChange)
-		fmt.Println(site, product)
+		// fmt.Println(site, product)
 		var sitePresent bool = false
 		var productPresent bool = false
-		// fmt.Println(obj) // <-- map[key1:value1]
 		for k, _ := range obj {
 			if k == "_id" {
 				delete(obj, k)
@@ -457,9 +460,7 @@ func testUpdate(currentProduct Product) {
 				for keys, _ := range obj[k].(map[string]interface{}) {
 					if keys == product {
 						productPresent = true
-						// fmt.Println(obj[k].(map[string]interface{})[product])
 						obj[k].(map[string]interface{})[product] = newChange
-						// fmt.Println(obj[k].(map[string]interface{})[product])
 					}
 				}
 
@@ -510,7 +511,7 @@ func deleteSku(w http.ResponseWriter, r *http.Request) {
 	}()
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewDecoder(r.Body).Decode(&product)
-	fmt.Println(product)
+	// fmt.Println(product)
 	deleteSkuFunc(product.Site, product.Sku)
 	fmt.Fprintf(w, "Deleted Product")
 }
@@ -534,7 +535,7 @@ func deleteSkuFunc(site string, sku string) {
 			}
 			fmt.Println(k, site)
 			if k == site {
-				fmt.Println(len(obj[k].(map[string]interface{})))
+				// fmt.Println(len(obj[k].(map[string]interface{})))
 				if len(obj[k].(map[string]interface{})) == 1 {
 					delete(obj, k)
 					continue

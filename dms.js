@@ -74,7 +74,8 @@ function SKUADD(clients, triggerText, replyText) {
 				sku: SKU,
 				priceRangeMin: parseInt(pricerange.split(',')[0]),
 				priceRangeMax: parseInt(pricerange.split(',')[1]),
-			  };
+			  };  
+        // console.log("SKU BANK", skuBank[caseSite], SKU)
             if (skuBank[caseSite]) {
               if (skuBank[caseSite][SKU]) {
                 let skuWebhookArray = skuBank[caseSite][SKU]?.companies;
@@ -129,7 +130,6 @@ function SKUADD(clients, triggerText, replyText) {
               switch (site.toUpperCase()) {
                 case 'TARGET':
                 case 'GAMESTOP':
-                case 'WALMART':
                 case 'BESTBUY':
                 case 'BIGLOTS':
                 case 'ACADEMY':
@@ -142,7 +142,6 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'SHOPIFY':
                 case 'SHOPIFYPRODUCT':
                   await pushSku(currentObj);
-                //   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                   break;
                 case 'NEWEGG':
@@ -161,11 +160,12 @@ function SKUADD(clients, triggerText, replyText) {
                   break;
                 case 'WALMARTNEW':
                 case 'WALMART NEW':
-                  console.log(pricerange);
-                  currentBody['skuName'] =
-                    'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
+                  currentBody['skuName'] = 'prg=desktop&facet=retailer:Walmart.com&sort=new';
                   await pushSku(currentObj);
-                  console.log(currentBody);
+                  await startGoMonitor(currentBody, site.toUpperCase());
+                  currentBody['skuName'] = 'prg=desktop&facet=retailer%3AWalmart.com&soft_sort=false&sort=new';
+                  await startGoMonitor(currentBody, site.toUpperCase());
+                  currentBody['skuName'] = 'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
                   startGoMonitor(currentBody, site.toUpperCase());
                 case 'TARGETNEW':
                   await pushSku(currentObj);
@@ -490,7 +490,6 @@ async function mass(string, content, message, groupName) {
 			switch (site.toUpperCase()) {
                 case 'TARGET':
                 case 'GAMESTOP':
-                case 'WALMART':
                 case 'BESTBUY':
                 case 'BIGLOTS':
                 case 'ACADEMY':
