@@ -391,7 +391,7 @@ func handleShopifyProducts() {
 		}
 		// fmt.Println(product)
 		go func(){
-			url := "http://http://104.249.128.207:7243/SHOPIFYPRODUCT"
+			url := "http://104.249.128.207:7243/SHOPIFYPRODUCT"
 
 			var jsonData = []byte(fmt.Sprintf(`{
 				"site": "%s",

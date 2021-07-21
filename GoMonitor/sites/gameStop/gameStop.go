@@ -167,7 +167,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 
-	monitorAvailability, err := parser.QueryToString("product.availability.messages.[0]")
+	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -194,10 +194,10 @@ func (m *Monitor) monitor() error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if m.Availability != "In Stock" && monitorAvailability == "In Stock" {
+	if m.Availability != "Available" && monitorAvailability == "Available" {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-	} else if m.Availability == "In Stock" && monitorAvailability != "In Stock" {
+	} else if m.Availability == "Available" && monitorAvailability != "Available" {
 		fmt.Println("Item Out Of Stock")
 	}
 	m.Availability = monitorAvailability

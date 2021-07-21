@@ -14,9 +14,11 @@ const rp = require('request-promise').defaults({
 });
 const port = 7243;
 // const secondServer = `http://ec2-3-236-148-149.compute-1.amazonaws.com`
-let firstServer = `http://104.249.128.207`;
-let secondServer = `http://143.244.164.115`;
-let thirdServer = `http://64.227.28.51`;
+
+let firstServer = `http://104.249.128.37`; // 12 Core z 24GB
+let secondServer = `http://104.249.128.207`;
+
+// let thirdSfirstServererver = `http://64.227.28.51`;
 
 function SKUADD(clients, triggerText, replyText) {
   try {
@@ -364,10 +366,7 @@ function massAdd(clients, triggerText, replyText) {
 async function startGoMonitor(currentBody, site) {
   try {
     switch (site) {
-      case '2341':
-        // case "TARGET":
-        // case "GAMESTOP":
-        // case "BESTBUY":
+      case 'BESTBUY':{
         rp.post(
           {
             url: `${secondServer}:${port}/${site}`,
@@ -379,19 +378,8 @@ async function startGoMonitor(currentBody, site) {
           (response) => console.log(response?.statusCode)
         );
         break;
-      case '1234':
-        rp.post(
-          {
-            url: `${thirdServer}:${port}/${site}`,
-            body: JSON.stringify(currentBody),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-          (response) => console.log(response?.statusCode)
-        );
-        break;
-      default:
+      }
+      default:{
         rp.post(
           {
             url: `${firstServer}:${port}/${site}`,
@@ -402,6 +390,7 @@ async function startGoMonitor(currentBody, site) {
           },
           (response) => console.log(response?.statusCode)
         );
+      }
     }
   } catch (error) {
     console.log(`Error Starting Go Monitor ${error}`);
@@ -594,7 +583,7 @@ async function mass(string, content, message, groupName) {
 // Fire Base Sku Bank ----------------------------------------------
 async function checkPresentSkus() {
   let skuBank = await rp.get({
-    url: `${firstServer}:${port}/DB`,
+    url: `${secondServer}:${port}/DB`,
   });
   skuBank = JSON.parse(skuBank?.body);
   let sites = Object.keys(skuBank);
@@ -660,7 +649,7 @@ if (os.platform() == 'win32' || os.platform() == 'darwin') {
 
 async function getSkuBank() {
   let getbank = await rp.get({
-    url: `${firstServer}:${port}/DB`,
+    url: `${secondServer}:${port}/DB`,
   });
   return JSON.parse(getbank?.body);
 }
@@ -668,7 +657,7 @@ async function pushSku(body) {
   try {
     console.log('PUSHING ', body);
     let pushSku = await rp.post({
-      url: `${firstServer}:${port}/UPDATESKU`,
+      url: `${secondServer}:${port}/UPDATESKU`,
       body: JSON.stringify(body),
     });
     console.log(pushSku?.statusCode);
@@ -680,7 +669,7 @@ async function deleteSkuEnd(site, sku, group) {
   try {
     console.log(`Deleting ${sku}/${site}`);
     let deleteSku = await rp.post({
-      url: `${firstServer}:${port}/DELETESKU`,
+      url: `${secondServer}:${port}/DELETESKU`,
       body: JSON.stringify({site : site.toUpperCase(), sku : sku})
     });
     console.log(deleteSku?.statusCode);
@@ -693,7 +682,7 @@ async function updateSku(site, sku, newBody) {
     // No need for site and sku // Only reason I kept it here is for console logs
     console.log(`Updating Sku ${sku}/${site}`);
     let updateSku = await rp.post({
-      url: `${firstServer}:${port}/UPDATESKU`,
+      url: `${secondServer}:${port}/UPDATESKU`,
       body: JSON.stringify(newBody),
     });
     console.log(updateSku?.statusCode);
@@ -704,7 +693,7 @@ async function updateSku(site, sku, newBody) {
 async function getValidatedIds() {
   try {
     let getIds = await rp.get({
-      url: `${firstServer}:${port}/DISCORDIDS`,
+      url: `${secondServer}:${port}/DISCORDIDS`,
     });
     console.log(getIds?.statusCode);
     return getIds?.body;
@@ -726,7 +715,7 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     if (!isPresent) currentIds.push(`${author}-${name}`);
     else return false;
     let updateIds = await rp.post({
-      url: `${firstServer}:${port}/DISCORDIDS`,
+      url: `${secondServer}:${port}/DISCORDIDS`,
       body: JSON.stringify({ ids: currentIds }),
     });
     console.log(updateIds?.statusCode);
@@ -1043,7 +1032,7 @@ async function getProxies() {
     // read contents of the file
     let proxyList = [];
     // const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
-	let fetchProxies = await rp.get(`${firstServer}:${port}/PROXY`)
+	let fetchProxies = await rp.get(`${secondServer}:${port}/PROXY`)
 	let parsed = JSON.parse(fetchProxies.body)
   console.log(parsed)
 	parsed.proxies.forEach(line =>{
