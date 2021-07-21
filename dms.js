@@ -487,6 +487,44 @@ async function mass(string, content, message, groupName) {
           }
         }
         if (isContinue) {
+
+          let currentObj = {
+            sku: SKU,
+            site: site.toUpperCase(),
+            stop: false,
+            name: '',
+            original: original,
+            companies: [
+              {
+              company: group,
+              webhook: currentCompany[caseSite],
+              color: currentCompany?.companyColor,
+              companyImage: currentCompany?.companyImage,
+              },
+            ],
+            };
+          let currentBody = {
+            site: site.toUpperCase(),
+            sku: SKU,
+            priceRangeMin: parseInt(pricerange.split(',')[0]),
+            priceRangeMax: parseInt(pricerange.split(',')[1]),
+            };  
+            // console.log("SKU BANK", skuBank[caseSite], SKU)
+                if (
+                  currentBody.priceRangeMax == NaN ||
+                  !currentBody.priceRangeMax
+                ) {
+                  console.log('No Max Price Range Detected');
+                  currentBody.priceRangeMax = 100000;
+                }
+                if (
+                  currentBody.priceRangeMin == NaN ||
+                  !currentBody.priceRangeMin
+                ) {
+                  console.log('No Min Price Range Detected');
+                  currentBody.priceRangeMin = 1;
+                }
+
 			switch (site.toUpperCase()) {
                 case 'TARGET':
                 case 'GAMESTOP':
@@ -498,12 +536,13 @@ async function mass(string, content, message, groupName) {
                 case 'SLICK':
                 case 'SLICKDEAL':
                 case 'BIGLOTS':
-                case 'BIGLOTS':
-                  await pushSku(currentObj);
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
-                  break;
-                case 'NEWEGG':
+                case 'BIGLOTS': {
+                    await pushSku(currentObj);
+                    console.log(currentBody);
+                    startGoMonitor(currentBody, site.toUpperCase());
+                    break;
+                  }
+                case 'NEWEGG':{
                   await pushSku(currentObj);
                   currentBody['skuName'] = await getSku(
                     SKU,
@@ -511,21 +550,26 @@ async function mass(string, content, message, groupName) {
                   );
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
-                case 'WALMART':
+                  break
+                }
+                case 'WALMART': {
                   await pushSku(currentObj);
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                   await delay(10000);
                   break;
+                }
                 case 'WALMARTNEW':
-                case 'WALMART NEW':
+                case 'WALMART NEW':{
                   console.log(pricerange);
                   currentBody['skuName'] =
                     'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
                   await pushSku(currentObj);
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
-                case 'TARGETNEW':
+                  break
+                }
+                case 'TARGETNEW':{
                   await pushSku(currentObj);
                   console.log(kw);
                   let currentBody = {
@@ -534,6 +578,8 @@ async function mass(string, content, message, groupName) {
                   };
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
+                  break 
+                }
                 default:
               }
         }
