@@ -114,45 +114,57 @@ func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 	m.Keywords = append(m.Keywords, "yeezy")
 	m.Keywords = append(m.Keywords, "adidas")
 	m.Keywords = append(m.Keywords, "Nike")
-	// m.Keywords = append(m.Keywords, "New")
-	m.Keywords = append(m.Keywords, "Balance")
-	m.NegKeywords = append(m.NegKeywords, "Fleece")
-	m.NegKeywords = append(m.NegKeywords, "Tee")
-	m.NegKeywords = append(m.NegKeywords, "Accessories")
-	m.NegKeywords = append(m.NegKeywords, "Hat")
-	m.NegKeywords = append(m.NegKeywords, "Pant")
-	m.NegKeywords = append(m.NegKeywords, "Track Jacket")
-	m.NegKeywords = append(m.NegKeywords, "Ultraboost")
-	m.NegKeywords = append(m.NegKeywords, "Sock")
-	m.NegKeywords = append(m.NegKeywords, "Presto")
-	m.NegKeywords = append(m.NegKeywords, "Jeans")
-	m.NegKeywords = append(m.NegKeywords, "T-Shirt")
-	m.NegKeywords = append(m.NegKeywords, "Snapback")
-	m.NegKeywords = append(m.NegKeywords, "Leggings")
-	m.NegKeywords = append(m.NegKeywords, "Mesh Top")
-	m.NegKeywords = append(m.NegKeywords, "Max Aura")
-	m.NegKeywords = append(m.NegKeywords, "Leggings")
-	m.NegKeywords = append(m.NegKeywords, "Air Structure")
-	m.NegKeywords = append(m.NegKeywords, "Huarache")
-	m.NegKeywords = append(m.NegKeywords, "Cargo Short")
-	m.NegKeywords = append(m.NegKeywords, "Court Polo")
-	m.NegKeywords = append(m.NegKeywords, "Jacket")
-	m.NegKeywords = append(m.NegKeywords, "Dress")
-	m.NegKeywords = append(m.NegKeywords, "Short")
-	m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
-	m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
+	m.Keywords = append(m.Keywords, "Nike")
+	m.Keywords = append(m.Keywords, "New")
+	m.Keywords = append(m.Keywords, "Turke")
+	m.Keywords = append(m.Keywords, "sterone")
+	// m.Keywords = append(m.Keywords, "a")
+	// m.Keywords = append(m.Keywords, "d")
+	// m.Keywords = append(m.Keywords, "b")
+	// m.Keywords = append(m.Keywords, "d")
+	// m.Keywords = append(m.Keywords, "o")
+	// m.Keywords = append(m.Keywords, "g")
+	// m.Keywords = append(m.Keywords, "l")
+	// m.Keywords = append(m.Keywords, "p")
+	// m.Keywords = append(m.Keywords, "f")
+	// m.Keywords = append(m.Keywords, "n")
+	// m.NegKeywords = append(m.NegKeywords, "Fleece")
+	// m.NegKeywords = append(m.NegKeywords, "Tee")
+	// m.NegKeywords = append(m.NegKeywords, "Accessories")
+	// m.NegKeywords = append(m.NegKeywords, "Hat")
+	// m.NegKeywords = append(m.NegKeywords, "Pant")
+	// m.NegKeywords = append(m.NegKeywords, "Track Jacket")
+	// m.NegKeywords = append(m.NegKeywords, "Ultraboost")
+	// m.NegKeywords = append(m.NegKeywords, "Sock")
+	// m.NegKeywords = append(m.NegKeywords, "Presto")
+	// m.NegKeywords = append(m.NegKeywords, "Jeans")
+	// m.NegKeywords = append(m.NegKeywords, "T-Shirt")
+	// m.NegKeywords = append(m.NegKeywords, "Snapback")
+	// m.NegKeywords = append(m.NegKeywords, "Leggings")
+	// m.NegKeywords = append(m.NegKeywords, "Mesh Top")
+	// m.NegKeywords = append(m.NegKeywords, "Max Aura")
+	// m.NegKeywords = append(m.NegKeywords, "Leggings")
+	// m.NegKeywords = append(m.NegKeywords, "Air Structure")
+	// m.NegKeywords = append(m.NegKeywords, "Huarache")
+	// m.NegKeywords = append(m.NegKeywords, "Cargo Short")
+	// m.NegKeywords = append(m.NegKeywords, "Court Polo")
+	// m.NegKeywords = append(m.NegKeywords, "Jacket")
+	// m.NegKeywords = append(m.NegKeywords, "Dress")
+	// m.NegKeywords = append(m.NegKeywords, "Short")
+	// m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
+	// m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
-	// time.Sleep(15000 * (time.Millisecond))
-	// go m.checkStop()
-	// time.Sleep(3000 * (time.Millisecond))
+	time.Sleep(15000 * (time.Millisecond))
+	go m.checkStop()
+	time.Sleep(3000 * (time.Millisecond))
 
 	// Close the cursor once finished
 	/*A defer statement defers the execution of a function until the surrounding function returns.
 	simply, run cur.Close() process but after cur.Next() finished.*/
 	go func() {
-		for {
+		for !m.stop {
 			go func() {
 				cur, err := collection.Find(context.TODO(), bson.M{"store": m.Config.sku})
 
@@ -262,20 +274,20 @@ func (m *Monitor) monitor() error {
 	t := time.Now().UTC().UnixNano()
 	var url string
 	var baseUrl string
-	switch m.Config.sku {
-	case "ShopNiceKicks":
+	switch strings.ToUpper(m.Config.sku) {
+	case "SHOPNICEKICKS":
 		baseUrl = fmt.Sprintf("https://%s.com", m.Config.sku)
 		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
 		break
-	case "travisscott":
+	case "TRAVISSCOT":
 		baseUrl = fmt.Sprintf("https://shop.%s.com", m.Config.sku)
 		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
 		break
-	case "deadstock":
+	case "DEADSTOCK":
 		baseUrl = fmt.Sprintf("https://www.%s.ca", m.Config.sku)
 		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
 		break
-	case "mountaindew":
+	case "MOUNTAINDEW":
 		baseUrl = fmt.Sprintf("https://store.%s.com", m.Config.sku)
 		url = fmt.Sprintf("%s/products.json?limit=%d", baseUrl, t)
 		break
@@ -387,22 +399,18 @@ func (m *Monitor) monitor() error {
 							fmt.Println("Restocked Variants", len(restockVariants))
 
 							link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, value.Handle)
-							var testCompany Company
-							testCompany.Webhook = "https://webhooks.aycd.io/webhooks/api/v1/send/8028/d1464662-73f6-4971-83c3-609e923d170e"
-							testCompany.Color = "1752220"
-							testCompany.CompanyImage = "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"
-							testCompany.Company = "Testing"
+
 							t := time.Now().UTC()
 							var price string
 							var image string
 							if len(value.Variants) < 1 || len(value.Images) == 0 {
 								price = "N/A"
-								image = testCompany.CompanyImage
+								image = "https://cdn.discordapp.com/attachments/866714782554914857/866806869845737472/Prada_Solutions_transparent2x.png"
 							} else {
 								price = value.Variants[0].Price
 								image = value.Images[0].Src
 							}
-							go m.webHookSend(testCompany, m.Config.sku, value.Title, price, link, t, image, restockVariants)
+							go m.sendWebhook(m.Config.sku, value.Title, price, link, image, restockVariants)
 						}
 					}(value)
 					continue
@@ -439,16 +447,11 @@ func (m *Monitor) monitor() error {
 					fmt.Println("New Product ", value.ID, value.UpdatedAt, value.Store, value.Handle, len(value.Images), len(value.Variants))
 					fmt.Println(result)
 					link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, value.Handle)
-					var testCompany Company
-					testCompany.Webhook = "https://webhooks.aycd.io/webhooks/api/v1/send/8028/d1464662-73f6-4971-83c3-609e923d170e"
-					testCompany.Color = "1752220"
-					testCompany.CompanyImage = "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"
-					testCompany.Company = "Testing"
 					var price string
 					var image string
 					if len(value.Variants) == 0 || len(value.Images) == 0 {
 						price = "N/A"
-						image = testCompany.CompanyImage
+						image = "https://cdn.discordapp.com/attachments/866714782554914857/866806869845737472/Prada_Solutions_transparent2x.png"
 					} else {
 						price = value.Variants[0].Price
 						image = value.Images[0].Src
@@ -501,7 +504,7 @@ func (m *Monitor) sendWebhook(site string, name string, price string, link strin
 
 
 	for _, comp := range m.CurrentCompanies {
-		fmt.Println(comp.Company)
+		fmt.Println("Company ", comp.Company)
 		go m.webHookSend(comp, site, name, price, link, t, image, restockedVariants)
 	}
 	// payload := strings.NewReader("{\"content\":null,\"embeds\":[{\"title\":\"Target Monitor\",\"url\":\"https://discord.com/developers/docs/resources/channel#create-message\",\"color\":507758,\"fields\":[{\"name\":\"Product Name\",\"value\":\"%s\"},{\"name\":\"Product Availability\",\"value\":\"In Stock\\u0021\",\"inline\":true},{\"name\":\"Stock Number\",\"value\":\"%s\",\"inline\":true},{\"name\":\"Links\",\"value\":\"[Product](https://www.walmart.com/ip/prada/%s)\"}],\"footer\":{\"text\":\"Prada#4873\"},\"timestamp\":\"2021-04-01T18:40:00.000Z\",\"thumbnail\":{\"url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}}],\"avatar_url\":\"https://cdn.discordapp.com/attachments/815507198394105867/816741454922776576/pfp.png\"}")
