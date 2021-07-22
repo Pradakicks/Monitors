@@ -400,7 +400,6 @@ func (m *Monitor) monitor() error {
 
 							link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, value.Handle)
 
-							t := time.Now().UTC()
 							var price string
 							var image string
 							if len(value.Variants) < 1 || len(value.Images) == 0 {
