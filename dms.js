@@ -17,7 +17,7 @@ const port = 7243;
 
 let firstServer = `http://104.249.128.37`; // 12 Core z 24GB
 let secondServer = `http://104.249.128.207`;
-
+var proxyList = []
 // let thirdSfirstServererver = `http://64.227.28.51`;
 
 function SKUADD(clients, triggerText, replyText) {
@@ -152,7 +152,7 @@ function SKUADD(clients, triggerText, replyText) {
                   await pushSku(currentObj);
                   currentBody['skuName'] = await getSku(
                     SKU,
-                    await getProxies()
+                    proxyList
                   );
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
@@ -546,7 +546,7 @@ async function mass(string, content, message, groupName) {
                   await pushSku(currentObj);
                   currentBody['skuName'] = await getSku(
                     SKU,
-                    await getProxies()
+                    proxyList
                   );
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
@@ -628,7 +628,7 @@ async function checkPresentSkus() {
           priceRangeMax: parseInt(pricerange?.split(',')[1]),
           skuName:
             site == 'NEWEGG'
-              ? await getSku(currentSku?.trim(), await getProxies())
+              ? await getSku(currentSku?.trim(), proxyList)
               : site == 'WALMARTNEW'
               ? 'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new'
               : '',
@@ -1041,7 +1041,6 @@ function replaceWithTheCapitalLetter(values) {
 async function getProxies() {
   try {
     // read contents of the file
-    let proxyList = [];
     // const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
 	let fetchProxies = await rp.get(`${secondServer}:${port}/PROXY`)
 	let parsed = JSON.parse(fetchProxies.body)
