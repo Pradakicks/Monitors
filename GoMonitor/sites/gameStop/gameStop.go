@@ -168,7 +168,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 
-	monitorAvailability, err := parser.QueryToString("product.availability.buttonText")
+	monitorAvailability, err := parser.QueryToString("product.available")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -196,7 +196,7 @@ func (m *Monitor) monitor() error {
 		fmt.Println(err)
 	}
 	var currentAvailabilityBool bool = false
-	if monitorAvailability == "Available" || monitorAvailability == "Pre-Order" {
+	if monitorAvailability == "true" {
 		currentAvailabilityBool = true
 	} else {
 		currentAvailabilityBool = false
