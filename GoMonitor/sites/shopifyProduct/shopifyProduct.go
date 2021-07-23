@@ -271,7 +271,7 @@ func (m *Monitor) webHookSend(c Company, site string, name string, price int64, 
 		"content": null,
 		"embeds": [
 		  {
-			"title": "%s Monitor",
+			"title": "%s Product Monitor",
 			"url": "%s",
 			"color": %s,
 			"fields": [

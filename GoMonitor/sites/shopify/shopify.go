@@ -114,10 +114,10 @@ func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 	m.Keywords = append(m.Keywords, "yeezy")
 	m.Keywords = append(m.Keywords, "adidas")
 	m.Keywords = append(m.Keywords, "Nike")
-	m.Keywords = append(m.Keywords, "Nike")
 	m.Keywords = append(m.Keywords, "New")
 	m.Keywords = append(m.Keywords, "Turke")
 	m.Keywords = append(m.Keywords, "sterone")
+	m.Keywords = append(m.Keywords, "Turkesterone")
 	// m.Keywords = append(m.Keywords, "a")
 	// m.Keywords = append(m.Keywords, "d")
 	// m.Keywords = append(m.Keywords, "b")
@@ -434,6 +434,7 @@ func (m *Monitor) monitor() error {
 				continue
 			}
 		}
+		
 		if !isPresent && containsKeywords && !containsNegativeKeywords {
 			newList = append(newList, ProductsItem{ID: value.ID, UpdatedTime: value.UpdatedAt, Variants: value.Variants, Store: value.Store, Handle: value.Handle})
 			go func(value Types.ShopifyNewProduct) {
