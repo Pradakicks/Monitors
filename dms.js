@@ -992,7 +992,7 @@ async function getSku(skuName, proxyList) {
   } catch (error) {
     console.log(error);
     await delay(10000);
-    await getSku();
+    await getSku(skuName, proxyList);
   }
 }
 async function getTerraSku(SKU) {
