@@ -46,12 +46,10 @@ type KeyWordMonitor struct {
 	Endpoint string   `json:"endpoint"`
 	Keywords []string `json:"keywords"`
 }
-
 type DB struct {
 	Site string `json:"site"`
 	Sku  string `json:"sku"`
 }
-
 type ItemInMonitorJson struct {
 	Sku       string `json:"sku"`
 	Site      string `json:"site"`
@@ -80,7 +78,6 @@ type ItemInCollection struct {
 	Type string `json:"type"`
 	Site map[string]interface{} `json:"sites"`
 }
-
 type DiscordIdsDB struct {
 	Ids []string `json:"ids,omitempty"`
 	Type 	   string   `json:"type,omitempty"`
@@ -361,6 +358,49 @@ func getProxies(w http.ResponseWriter, r *http.Request) {
 							proxyList = append(proxyList, proxies.(string))
 						}
 						
+						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
+							Proxies: proxyList,
+						}
+						re , err := json.Marshal(currentResponse)
+						if err != nil {
+							fmt.Println(err)
+							fmt.Fprintf(w, err.Error())
+						}
+						w.Write(re)
+					}
+				}
+				}
+			}
+	}
+}
+func getShopifyProxies(w http.ResponseWriter, r *http.Request) {
+	watch := stopwatch.Start()
+	defer func() {
+		watch.Stop()
+		fmt.Printf("Request For Proxies Took : %v\n", watch.Milliseconds())
+	}()
+	cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"shopifyProxy"})
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+			elements , err := cur.Current.Elements()
+			if err != nil {
+				fmt.Println(err)
+				fmt.Fprintf(w, err.Error())
+			}
+			for _, v := range elements {
+			if strings.Contains(v.String(), "proxies"){
+				w.Header().Set("Content-Type", "application/json")
+				var jsonMap map[string]interface{}
+				json.Unmarshal([]byte(v.String()), &jsonMap)
+				for k, values := range jsonMap {
+					if k == "proxies" {
+						var proxyList = make([]string, 0)
+						for _, proxies := range values.(map[string]interface{}){
+							proxyList = append(proxyList, proxies.(string))
+						}
 						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
 							Proxies: proxyList,
 						}
@@ -660,7 +700,6 @@ func addDiscordId(discordIds []string) {
 		addDiscordId(discordIds)
 	}
 }
-
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
@@ -687,6 +726,7 @@ func handleRequests() {
 	router.HandleFunc("/DB", getDB).Methods("POST") // Post
 	router.HandleFunc("/DB", getEntireDB).Methods("GET") // Get
 	router.HandleFunc("/PROXY", getProxies).Methods("GET")
+	router.HandleFunc("/SHOPIFYPROXY", getShopifyProxies).Methods("GET")
 	router.HandleFunc("/UPDATESKU", updateSku).Methods("POST")
 	router.HandleFunc("/DELETESKU", deleteSku).Methods("POST")	
 	router.HandleFunc("/DISCORDIDS", getDiscordIds).Methods("GET")	
@@ -705,7 +745,7 @@ func main() {
 	go func() {
 		for {
 			DBWorker()
-			time.Sleep(15000 * (time.Millisecond))
+			time.Sleep(5000 * (time.Millisecond))
 		}
 	}()
 	handleRequests()

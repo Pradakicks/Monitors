@@ -78,37 +78,38 @@ func NewMonitor(sku string, skuName string, collection *mongo.Collection) *Monit
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", sku, sku, r)
 		}
 	}()
-	fmt.Println("TESTING")
+	fmt.Println("Shopify Product", sku, skuName)
 	m := Monitor{}
 	// m.Availability = "OUT_OF_STOCK_ONLINE"
 	m.collection = collection
 	m.Config.skuName = skuName
 	// var err error
 	//	m.Client = http.Client{Timeout: 10 * time.Second}
-	m.Config.site = "Shopify Product"
+	m.Config.site = "ShopifyProduct"
 	m.Config.startDelay = 3000
 	m.Config.sku = sku
 	// 	m.file, err = os.Create("./testing.txt")
 	m.Client = http.Client{Timeout: 10 * time.Second}
-	m.monitorProduct.name = "Testing Product"
+	m.monitorProduct.name = skuName
 	m.monitorProduct.stockNumber = ""
 	proxyList := FetchProxies.Get()
 
 	// fmt.Println(timeout)
 	//m.Availability = "OUT_OF_STOCK"
 	//fmt.Println(m)
-	// time.Sleep(15000 * (time.Millisecond))
-	// go m.checkStop()
-	// time.Sleep(3000 * (time.Millisecond))
+	time.Sleep(15000 * (time.Millisecond))
+	go m.checkStop()
+	time.Sleep(3000 * (time.Millisecond))
+
 	var product Types.ShopifyNewProduct
 	filter := bson.M{"handle": skuName}
 	err := collection.FindOne(context.TODO(), filter).Decode(&product)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+	} else {
+		m.prod = product
+		fmt.Println(m.prod.Handle)
 	}
-	m.prod = product
-	fmt.Println(m.prod.Handle)
 	i := true
 	for i {
 		defer func() {
@@ -122,7 +123,6 @@ func NewMonitor(sku string, skuName string, collection *mongo.Collection) *Monit
 			proxy := Proxy{splittedProxy[0], splittedProxy[1], splittedProxy[2], splittedProxy[3]}
 			//	fmt.Println(proxy, proxy.ip)
 			prox1y := fmt.Sprintf("http://%s:%s@%s:%s", proxy.userAuth, proxy.userPass, proxy.ip, proxy.port)
-			fmt.Println(prox1y)
 			proxyUrl, err := url.Parse(prox1y)
 			if err != nil {
 				fmt.Println(err)
@@ -182,7 +182,7 @@ func (m *Monitor) monitor() error {
 
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Shopify Product - Status Code : %d Cache: %s ,Availability : %t Current : : %t Milliseconds elapsed: %v\n", res.StatusCode, res.Header["X-Cache"], m.Availability, currentAvailability, watch.Milliseconds())
+		fmt.Printf("Shopify Product - Status Code : %d Cache: %s ,Availability : %t Current : %t Milliseconds elapsed: %v\n", res.StatusCode, res.Header["X-Cache"], m.Availability, currentAvailability, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -206,7 +206,17 @@ func (m *Monitor) monitor() error {
 	if !m.Availability && currentAvailability {
 		fmt.Println("Item In Stock")
 		link := fmt.Sprintf("https://www.%s.com/products/%s", m.Config.sku, jsonResponse.Handle)
-		go m.sendWebhook(m.Config.sku, jsonResponse.Title, m.prod.Variants[0].Price, link,jsonResponse.FeaturedImage)
+		var price int64
+		var image string
+		if len(jsonResponse.Variants) < 1 || len(jsonResponse.Images) == 0 {
+			price = 0000
+			image = "https://cdn.discordapp.com/attachments/866714782554914857/866806869845737472/Prada_Solutions_transparent2x.png"
+		} else {
+			price = jsonResponse.Variants[0].Price
+			image = jsonResponse.FeaturedImage
+		}
+		m.Availability = currentAvailability
+		go m.sendWebhook(m.Config.sku, jsonResponse.Title, price, link,image)
 	}
 	if m.Availability && !currentAvailability {
 		fmt.Println("Out of Stock")
@@ -228,22 +238,22 @@ func (m *Monitor) getProxy(proxyList []string) string {
 	return proxyList[m.Config.proxyCount]
 }
 
-func (m *Monitor) sendWebhook(site string, name string, price string, link string, image string) error {
+func (m *Monitor) sendWebhook(site string, name string, price int64, link string, image string) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Site : %s, Product : %s Recovering from panic in printAllOperations error is: %v \n", m.Config.site, m.Config.sku, r)
 		}
 	}()
-	for _, letter := range m.monitorProduct.name {
+	for _, letter := range name {
 		if string(letter) == `"` {
-			m.monitorProduct.name = strings.Replace(m.monitorProduct.name, `"`, "", -1)
+			name = strings.Replace(name, `"`, "", -1)
 		}
 	}
-	fmt.Println("Testing Here : ", m.monitorProduct.name, "Here")
-	if strings.HasSuffix(m.monitorProduct.name, "                       ") {
-		m.monitorProduct.name = strings.Replace(m.monitorProduct.name, "                       ", "", -1)
+	fmt.Println("Testing Here : ", name, "Here")
+	if strings.HasSuffix(name, "                       ") {
+		name = strings.Replace(name, "                       ", "", -1)
 	}
-	fmt.Println("Testing Here : ", m.monitorProduct.name, "Here")
+	fmt.Println("Testing Here : ", name, "Here")
 	// now := time.Now()
 	// currentTime := strings.Split(now.String(), "-0400")[0]
 	t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
@@ -256,7 +266,7 @@ func (m *Monitor) sendWebhook(site string, name string, price string, link strin
 	return nil
 }
 
-func (m *Monitor) webHookSend(c Company, site string, name string, price string, link string, time string, image string) {
+func (m *Monitor) webHookSend(c Company, site string, name string, price int64, link string, time string, image string) {
 	payload := strings.NewReader(fmt.Sprintf(`{
 		"content": null,
 		"embeds": [
@@ -271,7 +281,7 @@ func (m *Monitor) webHookSend(c Company, site string, name string, price string,
 			  },
 			  {
 				"name": "Price",
-				"value": "%s",
+				"value": "%d",
 				"inline": true
 			  },
 			  {
@@ -323,7 +333,8 @@ func (m *Monitor) checkStop() error {
 		getDBPayload := strings.NewReader(fmt.Sprintf(`{
 			"site" : "%s",
 			"sku" : "%s"
-		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
+		  }`, strings.ToUpper(m.Config.site), m.Config.skuName))
+		  fmt.Println("Contract", strings.ToUpper(m.Config.site), m.Config.skuName)
 		url := "http://104.249.128.207:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {

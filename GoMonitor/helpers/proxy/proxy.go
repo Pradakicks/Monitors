@@ -39,3 +39,32 @@ func Get() []string {
 	}
 	return proxyList
 }
+
+func GetShopify() []string {
+	var proxyList = make([]string, 0)
+	url := "http://localhost:7243/SHOPIFYPROXY"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Fatal(err)
+		res.Body.Close()
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+		res.Body.Close()
+	}
+	var proxies Types.ProxyResponseType
+	err = json.Unmarshal(body, &proxies)
+	if err != nil {
+		log.Fatal(err)
+		res.Body.Close()
+	}
+	for _, proxy := range proxies.Proxies {
+		proxyList = append(proxyList, proxy)
+	}
+	return proxyList
+}

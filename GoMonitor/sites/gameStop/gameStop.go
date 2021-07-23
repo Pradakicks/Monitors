@@ -30,6 +30,7 @@ type Monitor struct {
 	Config              Config
 	monitorProduct      Product
 	Availability        string
+	AvailabilityBool     bool
 	currentAvailability string
 	Client              http.Client
 	file                *os.File
@@ -167,7 +168,7 @@ func (m *Monitor) monitor() error {
 		return nil
 	}
 
-	monitorAvailability, err := parser.QueryToString("gtmData.productInfo.availability")
+	monitorAvailability, err := parser.QueryToString("product.availability.buttonText")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -194,13 +195,20 @@ func (m *Monitor) monitor() error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if m.Availability != "Available" && monitorAvailability == "Available" {
+	var currentAvailabilityBool bool = false
+	if monitorAvailability == "Available" || monitorAvailability == "Pre-Order" {
+		currentAvailabilityBool = true
+	} else {
+		currentAvailabilityBool = false
+	}
+
+	if !m.AvailabilityBool && currentAvailabilityBool {
 		fmt.Println("Item in Stock")
 		m.sendWebhook()
-	} else if m.Availability == "Available" && monitorAvailability != "Available" {
-		fmt.Println("Item Out Of Stock")
+	} else if m.AvailabilityBool && !currentAvailabilityBool {
+		fmt.Println("Item Out Of Stock", m.Config.sku)
 	}
-	m.Availability = monitorAvailability
+	m.AvailabilityBool = currentAvailabilityBool
 	return nil
 }
 

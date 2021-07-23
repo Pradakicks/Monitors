@@ -33,7 +33,7 @@ function SKUADD(clients, triggerText, replyText) {
         if (isValidated) {
           const site = content.split(' ')[1];
           let original = content.split(`${site} `)[1];
-          const SKU = content.split(' ')[2];
+          let SKU = content.split(' ')[2];
           if (content.includes('[') && site.toUpperCase() !== 'TARGETNEW') {
             pricerange = content.split('[')[1].split(']')[0];
           }
@@ -45,6 +45,8 @@ function SKUADD(clients, triggerText, replyText) {
               kw.push(e);
             });
           }
+          
+          
           console.log(site);
           console.log(SKU);
           console.log(content);
@@ -77,6 +79,7 @@ function SKUADD(clients, triggerText, replyText) {
 				priceRangeMin: parseInt(pricerange.split(',')[0]),
 				priceRangeMax: parseInt(pricerange.split(',')[1]),
 			  };  
+        
         // console.log("SKU BANK", skuBank[caseSite], SKU)
             if (skuBank[caseSite]) {
               if (skuBank[caseSite][SKU]) {
@@ -142,7 +145,6 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'BIGLOTS':
                 case 'HOMEDEPOT':
                 case 'SHOPIFY':
-                case 'SHOPIFYPRODUCT':
                   await pushSku(currentObj);
                   startGoMonitor(currentBody, site.toUpperCase());
                   break;
@@ -159,7 +161,16 @@ function SKUADD(clients, triggerText, replyText) {
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                   await delay(10000);
-                  break;
+                  break; 
+                case 'SHOPIFYPRODUCT':{
+                  currentBody['skuName'] = SKU.toUpperCase().split("_")[1]
+                  currentBody.sku = SKU.toUpperCase().split("_")[0]
+                  currentObj.sku = SKU.toUpperCase().split("_")[1]
+                  await pushSku(currentObj);
+                  console.log(currentBody);
+                  startGoMonitor(currentBody, site.toUpperCase());
+                  break
+                }
                 case 'WALMARTNEW':
                 case 'WALMART NEW':
                   currentBody['skuName'] = 'prg=desktop&facet=retailer:Walmart.com&sort=new';
@@ -1066,6 +1077,7 @@ async function sendWebhook(body, webhook) {
     return error?.statusCode;
   }
 }
+
 module.exports = {
   SKUADD,
   findCommand,

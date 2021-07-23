@@ -419,7 +419,7 @@ func (m *Monitor) monitor() error {
 
 			}
 		}
-
+ 
 		// Add Keywords
 		for _, val := range m.Keywords {
 			if strings.Contains(value.Title, val) || strings.Contains(value.Handle, val) {
