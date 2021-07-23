@@ -19,7 +19,7 @@ let firstServer = `http://104.249.128.37`; // 12 Core z 24GB
 let secondServer = `http://104.249.128.207`;
 var proxyList = []
 // let thirdSfirstServererver = `http://64.227.28.51`;
-
+getProxies()
 function SKUADD(clients, triggerText, replyText) {
   try {
     clients.on('message', async (message) => {
