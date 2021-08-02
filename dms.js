@@ -708,7 +708,7 @@ async function getValidatedIds() {
       url: `${secondServer}:${port}/DISCORDIDS`,
     });
     console.log(getIds?.statusCode);
-    return JSON.parse(getIds?.body);
+    return getIds?.body;
   } catch (error) {
     console.log(error);
   }
@@ -718,7 +718,7 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     let currentIds = [];
     let parsed = JSON.parse(discordIdsArr);
     var isPresent = false;
-    console.log(parsed);
+    console.log(parsed, author, discordIdsArr, name);
     parsed?.ids?.forEach((e) => {
       currentIds.push(e);
       let id = e?.split('-')[0];
