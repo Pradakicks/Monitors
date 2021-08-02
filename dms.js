@@ -145,6 +145,7 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'BIGLOTS':
                 case 'HOMEDEPOT':
                 case 'SHOPIFY':
+                case 'FANATICSNEWPRODUCTS':
                   await pushSku(currentObj);
                   startGoMonitor(currentBody, site.toUpperCase());
                   break;

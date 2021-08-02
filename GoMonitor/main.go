@@ -31,6 +31,7 @@ import (
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 	WalmartNew "github.con/prada-monitors-go/sites/walmartNew"
+	FanaticsMonitor "github.con/prada-monitors-go/sites/fanatics"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -86,6 +87,7 @@ type DiscordIdsDB struct {
 var DBString string
 var Collection = helper.ConnectDB()
 var MainCollection = helper.ConnectDBMain()
+var FanaticsCollection = helper.ConnectDBFanatics()
 var workerRunning bool = false
 
 func target(w http.ResponseWriter, r *http.Request) {
@@ -226,6 +228,15 @@ func shopifyProduct(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
 	fmt.Println(currentMonitor)
 	go ShopifyProduct.NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, Collection)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
+func fanaticsNewProducts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	var currentMonitor Monitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go FanaticsMonitor.NewMonitor(currentMonitor.Sku, FanaticsCollection)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
 func getPage(w http.ResponseWriter, r *http.Request) {
@@ -719,6 +730,7 @@ func handleRequests() {
 	router.HandleFunc("/SHOPIFY", shopify).Methods("POST")
 	router.HandleFunc("/HOMEDEPOT", homeDepot).Methods("POST")
 	router.HandleFunc("/SHOPIFYPRODUCT", shopifyProduct).Methods("POST")
+	router.HandleFunc("/FANATICSNEWPRODUCTS", fanaticsNewProducts).Methods("POST")
 
 
 	// Helper Routes

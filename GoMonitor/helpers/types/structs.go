@@ -255,15 +255,24 @@ func (m *Monitor) CheckStop() error {
 			res.Body.Close()
 			return nil
 		}
+		fmt.Println(string(body))
+
+		if strings.Contains(string(body), "Failed to ") {
+			time.Sleep(2000 * (time.Millisecond))
+			continue
+		}
+
 		var currentObject ItemInMonitorJson
+
 		err = json.Unmarshal(body, &currentObject)
+		
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println(errors.Cause(err))
-
 			res.Body.Close()
 			return nil
 		}
+		
 		m.Stop = currentObject.Stop
 		m.CurrentCompanies = currentObject.Companies
 		fmt.Println(m.CurrentCompanies)

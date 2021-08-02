@@ -302,7 +302,6 @@ func (m *Monitor) monitor() error {
 	if m.Availability == false && monitorAvailability == true {
 		fmt.Println("Item in Stock")
 		go m.sendWebhook()
-		go m.sendRestockNotification(m.monitorProduct.offerId, m.Config.sku, m.monitorProduct.name)
 	}
 	if m.Availability == true && monitorAvailability == false {
 		fmt.Println("Item Out Of Stock")
@@ -332,6 +331,9 @@ func (m *Monitor) sendWebhook() error {
 
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println(comp.Company)
+		if comp.Company == "Vibris" {
+			go m.sendRestockNotification(m.monitorProduct.offerId, m.Config.sku, m.monitorProduct.name)
+		}
 		go webHookSend(comp, m.Config.site, m.Config.sku, m.monitorProduct.name, m.monitorProduct.price, m.monitorProduct.offerId, t, m.Config.image)
 	}
 	return nil
