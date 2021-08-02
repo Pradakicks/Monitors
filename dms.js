@@ -708,7 +708,7 @@ async function getValidatedIds() {
       url: `${secondServer}:${port}/DISCORDIDS`,
     });
     console.log(getIds?.statusCode);
-    return getIds?.body;
+    return JSON.parse(getIds?.body);
   } catch (error) {
     console.log(error);
   }
@@ -726,6 +726,7 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     });
     if (!isPresent) currentIds.push(`${author}-${name}`);
     else return false;
+    console.log({ ids: currentIds })
     let updateIds = await rp.post({
       url: `${secondServer}:${port}/DISCORDIDS`,
       body: JSON.stringify({ ids: currentIds }),
