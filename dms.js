@@ -719,7 +719,7 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     let parsed = JSON.parse(discordIdsArr);
     var isPresent = false;
     // console.log(parsed, author, discordIdsArr, name);
-    parsed?.ids?.forEach((e) => {
+    parsed?.forEach((e) => {
       console.log(e)
       currentIds.push(e);
       let id = e?.split('-')[0];
