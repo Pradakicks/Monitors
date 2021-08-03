@@ -718,8 +718,9 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     let currentIds = [];
     let parsed = JSON.parse(discordIdsArr);
     var isPresent = false;
-    console.log(parsed, author, discordIdsArr, name);
+    // console.log(parsed, author, discordIdsArr, name);
     parsed?.ids?.forEach((e) => {
+      console.log(e)
       currentIds.push(e);
       let id = e?.split('-')[0];
       if (id == author) isPresent = true;
@@ -758,7 +759,7 @@ async function validateUser(clients, triggerText, replyText) {
               var update = await updateDiscordIdsDB(
                 message.author.id,
                 discordIdsDB,
-                config.groups[e]
+                e
               );
               if (update) message.reply(`${message.author} Validated`);
               else
