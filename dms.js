@@ -1000,8 +1000,8 @@ async function getSku(skuName, proxyList) {
 }
 async function getTerraSku(SKU) {
   try {
-	let proxies = await getProxies()
-	const proxy1 = proxies[Math.floor(Math.random() * proxies.length)]
+	// let proxies = await getProxies()
+	const proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
 	console.log(proxy1)
 	let terra = await rp.get({
       url: `https://www.walmart.com/terra-firma/item/${SKU}`,
