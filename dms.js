@@ -790,7 +790,7 @@ async function validateUser(clients, triggerText, replyText) {
     clients.on('message', async (message) => {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
         let content = message.content.split('!validate')[1];
-        let apikey = content?.split('apikey-')[1].split('%}')[0];
+        let apikey = content?.split('apikey-')[1]
         if (apikey == undefined) {
           message.reply('Please Submit Valid Api Key!');
         } else {
