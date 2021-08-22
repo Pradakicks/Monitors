@@ -280,7 +280,7 @@ function deleteSku(clients, triggerText, replyText) {
             } else {
               console.log('Current length');
               console.log(currentBody.companies.length);
-              message.channel.send(
+              let currentMessage = message.channel.send(
                 `Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`
               );
               if (currentBody.companies.length > 1) {
@@ -292,7 +292,7 @@ function deleteSku(clients, triggerText, replyText) {
                     skuBank[caseSite][SKU].companies = currentBody.companies;
                     await updateSku(site, SKU, skuBank[caseSite][SKU]);
                   }
-                  message.channel.send(
+                  currentMessage.edit(
                     `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
                   );
                 }
@@ -305,17 +305,17 @@ function deleteSku(clients, triggerText, replyText) {
                   await updateSku(site, SKU, currentBody);
                   await delay(10000);
                   await deleteSkuEnd(site, SKU);
-                  message.channel.send(
+                  currentMessage.edit(
                     `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
                   );
                 } else {
                   console.log(`${group} is not present for this sku`);
-                  message.channel.send(
+                  currentMessage.edit(
                     `${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(
                       site
                     )}`
                   );
-                  message.channel.send(
+                  currentMessage.edit(
                     `If this is an error please contact developer`
                   );
                 }
