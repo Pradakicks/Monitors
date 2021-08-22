@@ -657,8 +657,8 @@ async function checkPresentSkus() {
 
 if (os.platform() == 'win32' || os.platform() == 'darwin') {
   console.log('Development Environment');
-  secondServer = 'http://localhost';
-  firstServer = 'http://localhost';
+  // secondServer = 'http://localhost';
+  // firstServer = 'http://localhost';
 } else {
   checkPresentSkus();
 }
@@ -916,7 +916,7 @@ async function walmartScraper(clients, triggerText, replyText) {
             // 	"avatar_url": currentCompany.companyImage
             //   }
             const currentEmbed = new MessageEmbed()
-              .setColor(currentCompany.companyColorV2)
+              .setColor('#07bf6e')
               .setTitle(offerObj.productName)
               .setURL(`https://www.walmart.com/ip/prada/${offerObj.sku}`)
               .setThumbnail(offerObj.image)
@@ -944,8 +944,8 @@ async function walmartScraper(clients, triggerText, replyText) {
                   value: `[Product](https://www.walmart.com/ip/prada/${offerObj.sku}) | [ATC](https://affil.walmart.com/cart/buynow?items=${offerObj.sku}) | [Checkout](https://www.walmart.com/checkout/) | [Cart](https://www.walmart.com/cart)`,
                 }
               )
-              .setFooter('Prada#4873')
-              .setTimestamp();
+              // .setFooter('Prada#4873')
+              // .setTimestamp();
             message.channel.send(currentEmbed);
             currentMessage.delete();
           } catch (error) {
@@ -1008,7 +1008,7 @@ async function getTerraSku(SKU) {
 	const proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
 	console.log(proxy1)
 	let terra = await rp.get({
-      url: `https://www.walmart.com/terra-firma/item/${SKU}`,
+      url: `https://www.walmart.com/terra-firma/item/${SKU}?test=test`,
       headers: {
         accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1027,12 +1027,15 @@ async function getTerraSku(SKU) {
         'user-agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
       },
-      proxy: `http://${proxy1.userAuth}:${proxy1.userPass}@${proxy1.ip}:${proxy1.port}`,
+      // proxy: `http://${proxy1.userAuth}:${proxy1.userPass}@${proxy1.ip}:${proxy1.port}`,
     });
     console.log(`Terra Status Code : ${terra.statusCode}`);
     if (terra.statusCode != 200 && terra.statusCode != 201) {
       return 'Error';
     } else {
+      fs.writeFile("testing.html", terra.body, (err => {
+        console.log(err)
+      }))
       let parsed = JSON.parse(terra?.body);
       return parsed;
     }
