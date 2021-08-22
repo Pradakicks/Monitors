@@ -280,7 +280,7 @@ function deleteSku(clients, triggerText, replyText) {
             } else {
               console.log('Current length');
               console.log(currentBody.companies.length);
-              let currentMessage = message.channel.send(
+              let currentMessage = await message.channel.send(
                 `Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`
               );
               if (currentBody.companies.length > 1) {
