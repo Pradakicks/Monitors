@@ -13,6 +13,7 @@ import (
 
 	"github.com/bradhe/stopwatch"
 
+	Shopify "github.con/prada-monitors-go/sites/shopify"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -368,4 +369,15 @@ func (m *Monitor) checkStop() error {
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
+}
+
+func ShopifyProduct(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Shopify Monitor")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, Shopify.Collection)
+	json.NewEncoder(w).Encode(currentMonitor)
 }

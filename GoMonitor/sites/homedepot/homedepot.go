@@ -291,4 +291,14 @@ func (m *CurrentMonitor) webHookSend(c Types.Company, site string, name string, 
 	}
 	go Webhook.SendWebhook(c.Webhook, &discordParams)
 }
+func HomeDepot(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Home Depot Monitor")
+	fmt.Println("Home Depot")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
+}
 

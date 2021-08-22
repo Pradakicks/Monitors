@@ -22,16 +22,17 @@ import (
 	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
 	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
+	FanaticsMonitor "github.con/prada-monitors-go/sites/fanatics"
 	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 	HomeDepot "github.con/prada-monitors-go/sites/homedepot"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
+	RestirMonitor "github.con/prada-monitors-go/sites/restir"
 	Shopify "github.con/prada-monitors-go/sites/shopify"
 	ShopifyProduct "github.con/prada-monitors-go/sites/shopifyProduct"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
 	WalmartNew "github.con/prada-monitors-go/sites/walmartNew"
-	FanaticsMonitor "github.con/prada-monitors-go/sites/fanatics"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -43,10 +44,6 @@ type Monitor struct {
 	SkuName       string `json:"skuName"`
 }
 
-type KeyWordMonitor struct {
-	Endpoint string   `json:"endpoint"`
-	Keywords []string `json:"keywords"`
-}
 type DB struct {
 	Site string `json:"site"`
 	Sku  string `json:"sku"`
@@ -69,176 +66,25 @@ type SiteInDB struct {
 }
 type Product struct {
 	Companies []Company
-	Name     string `json:"name,omitempty"`
-	Original string `json:"original,omitempty"`
-	Site     string `json:"site,omitempty"`
-	Sku      string `json:"sku,omitempty"`
-	Stop     bool   `json:"stop,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Original  string `json:"original,omitempty"`
+	Site      string `json:"site,omitempty"`
+	Sku       string `json:"sku,omitempty"`
+	Stop      bool   `json:"stop,omitempty"`
 }
 type ItemInCollection struct {
-	Type string `json:"type"`
+	Type string                 `json:"type"`
 	Site map[string]interface{} `json:"sites"`
 }
 type DiscordIdsDB struct {
-	Ids []string `json:"ids,omitempty"`
-	Type 	   string   `json:"type,omitempty"`
+	Ids  []string `json:"ids,omitempty"`
+	Type string   `json:"type,omitempty"`
 }
 
 var DBString string
-var Collection = helper.ConnectDB()
 var MainCollection = helper.ConnectDBMain()
-var FanaticsCollection = helper.ConnectDBFanatics()
 var workerRunning bool = false
 
-func target(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Target Monitor")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go TargetMonitor.NewMonitor(currentMonitor.Sku, 1, 100000)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func walmart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Walmart Monitor")
-	fmt.Println("Walmart")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go WalmartMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func newegg(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "NewEgg Monitor")
-	fmt.Println("New Egg")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go NewEggMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func bigLots(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Big Lots Monitor")
-	fmt.Println("Big Lots")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go BigLotsMonitor.NewMonitor(currentMonitor.Sku, currentMonitor.PriceRangeMin, currentMonitor.PriceRangeMax)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func targetNew(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Target New Products")
-	fmt.Println("Big Lots")
-	var currentMonitor KeyWordMonitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go TargetNewTradingCards.NewMonitor(currentMonitor.Endpoint, currentMonitor.Keywords)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func academy(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Academy Monitor")
-	fmt.Println("Academy")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go AcademyMonitor.NewMonitor(currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func bestBuy(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Best Buy Monitor")
-	fmt.Println("Best Buy")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go BestBuyMonitor.NewMonitor(currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func amd(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Amd Monitor")
-	fmt.Println("Amd")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go AmdMonitor.NewMonitor(currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func slickDeals(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Slick Deals Monitor")
-	fmt.Println("Slick Deals")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go SlickDealsMonitor.NewMonitor()
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func gameStop(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Game Stop Monitor")
-	fmt.Println("Game Stop")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go GameStopMonitor.NewMonitor(currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func homeDepot(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Home Depot Monitor")
-	fmt.Println("Home Depot")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go HomeDepot.NewMonitor(currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func walmartNew(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Walmart New Monitor")
-	fmt.Println("Walmart New Monitor")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	// fmt.Println(currentMonitor)
-	go WalmartNew.NewMonitor(currentMonitor.SkuName, currentMonitor.Sku)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func shopify(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Shopify Monitor")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go Shopify.NewMonitor(currentMonitor.Sku, Collection)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func shopifyProduct(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "Shopify Monitor")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go ShopifyProduct.NewMonitor(currentMonitor.Sku, currentMonitor.SkuName, Collection)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
-func fanaticsNewProducts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL)
-	w.Header().Set("Content-Type", "application/json")
-	var currentMonitor Monitor
-	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
-	fmt.Println(currentMonitor)
-	go FanaticsMonitor.NewMonitor(currentMonitor.Sku, FanaticsCollection)
-	json.NewEncoder(w).Encode(currentMonitor)
-}
 func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Deals Monitor")
@@ -288,19 +134,19 @@ func getEntireDB(w http.ResponseWriter, r *http.Request) {
 }
 func DBWorker() {
 	if !workerRunning {
-		 // fmt.Println("Beginning Worker")
+		// fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
 			// fmt.Println("Finished Worker")
 			workerRunning = false
 		}()
-		cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"sites"})
+		cur, err := MainCollection.Find(context.TODO(), bson.M{"type": "sites"})
 		if err != nil {
 			fmt.Println(err)
 		}
 		defer cur.Close(context.TODO())
 		for cur.Next(context.TODO()) {
-			elements , err := cur.Current.Elements()
+			elements, err := cur.Current.Elements()
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -327,7 +173,7 @@ func DBWorker() {
 					}
 					// fmt.Println(string(jsonString))
 					DBString = string(jsonString)
-					
+
 					continue
 				}
 			}
@@ -345,34 +191,34 @@ func getProxies(w http.ResponseWriter, r *http.Request) {
 		watch.Stop()
 		fmt.Printf("Request For Proxies Took : %v\n", watch.Milliseconds())
 	}()
-	cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"proxy"})
+	cur, err := MainCollection.Find(context.TODO(), bson.M{"type": "proxy"})
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
-			elements , err := cur.Current.Elements()
-			if err != nil {
-				fmt.Println(err)
-				fmt.Fprintf(w, err.Error())
-			}
-			for _, v := range elements {
-			if strings.Contains(v.String(), "proxies"){
+		elements, err := cur.Current.Elements()
+		if err != nil {
+			fmt.Println(err)
+			fmt.Fprintf(w, err.Error())
+		}
+		for _, v := range elements {
+			if strings.Contains(v.String(), "proxies") {
 				w.Header().Set("Content-Type", "application/json")
 				var jsonMap map[string]interface{}
 				json.Unmarshal([]byte(v.String()), &jsonMap)
 				for k, values := range jsonMap {
 					if k == "proxies" {
 						var proxyList = make([]string, 0)
-						for _, proxies := range values.(map[string]interface{}){
+						for _, proxies := range values.(map[string]interface{}) {
 							proxyList = append(proxyList, proxies.(string))
 						}
-						
+
 						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
 							Proxies: proxyList,
 						}
-						re , err := json.Marshal(currentResponse)
+						re, err := json.Marshal(currentResponse)
 						if err != nil {
 							fmt.Println(err)
 							fmt.Fprintf(w, err.Error())
@@ -380,8 +226,8 @@ func getProxies(w http.ResponseWriter, r *http.Request) {
 						w.Write(re)
 					}
 				}
-				}
 			}
+		}
 	}
 }
 func getShopifyProxies(w http.ResponseWriter, r *http.Request) {
@@ -390,32 +236,32 @@ func getShopifyProxies(w http.ResponseWriter, r *http.Request) {
 		watch.Stop()
 		fmt.Printf("Request For Proxies Took : %v\n", watch.Milliseconds())
 	}()
-	cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"shopifyProxy"})
+	cur, err := MainCollection.Find(context.TODO(), bson.M{"type": "shopifyProxy"})
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
-			elements , err := cur.Current.Elements()
-			if err != nil {
-				fmt.Println(err)
-				fmt.Fprintf(w, err.Error())
-			}
-			for _, v := range elements {
-			if strings.Contains(v.String(), "proxies"){
+		elements, err := cur.Current.Elements()
+		if err != nil {
+			fmt.Println(err)
+			fmt.Fprintf(w, err.Error())
+		}
+		for _, v := range elements {
+			if strings.Contains(v.String(), "proxies") {
 				w.Header().Set("Content-Type", "application/json")
 				var jsonMap map[string]interface{}
 				json.Unmarshal([]byte(v.String()), &jsonMap)
 				for k, values := range jsonMap {
 					if k == "proxies" {
 						var proxyList = make([]string, 0)
-						for _, proxies := range values.(map[string]interface{}){
+						for _, proxies := range values.(map[string]interface{}) {
 							proxyList = append(proxyList, proxies.(string))
 						}
 						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
 							Proxies: proxyList,
 						}
-						re , err := json.Marshal(currentResponse)
+						re, err := json.Marshal(currentResponse)
 						if err != nil {
 							fmt.Println(err)
 							fmt.Fprintf(w, err.Error())
@@ -423,13 +269,13 @@ func getShopifyProxies(w http.ResponseWriter, r *http.Request) {
 						w.Write(re)
 					}
 				}
-				}
 			}
+		}
 	}
 }
 func handleShopifyProducts() {
 	fmt.Println("Handling Products")
-	cur, err := Collection.Find(context.TODO(), bson.M{})
+	cur, err := Shopify.Collection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -441,7 +287,7 @@ func handleShopifyProducts() {
 			fmt.Println(err)
 		}
 		// fmt.Println(product)
-		go func(){
+		go func() {
 			url := "http://104.249.128.207:7243/SHOPIFYPRODUCT"
 
 			var jsonData = []byte(fmt.Sprintf(`{
@@ -451,7 +297,7 @@ func handleShopifyProducts() {
 				"priceRangeMin": 1,
 				"priceRangeMax": 100000
 			  }`, product.Store, product.Handle, product.Store))
-	
+
 			req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 			req.Header.Add("Content-Type", "application/json")
 			res, _ := http.DefaultClient.Do(req)
@@ -460,8 +306,7 @@ func handleShopifyProducts() {
 			fmt.Println(string(body))
 			// add item our array
 		}()
-	
-		
+
 	}
 }
 func updateSku(w http.ResponseWriter, r *http.Request) {
@@ -478,9 +323,9 @@ func updateSku(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Updated Product")
 }
 func testUpdate(currentProduct Product) {
-	if !workerRunning { 
+	if !workerRunning {
 		// DBWorker()
-		 // fmt.Println("Beginning Worker")
+		// fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
 			// fmt.Println("Finished Worker")
@@ -489,13 +334,13 @@ func testUpdate(currentProduct Product) {
 		}()
 		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(DBString), &obj)
-			if err != nil {
-				fmt.Println("TESTING UDPDATE", err)
-				fmt.Println("TESTING UDPDATE", err)
-				fmt.Println("TESTING UDPDATE", err)
-				fmt.Println("TESTING UDPDATE", err)
-				return
-			}
+		if err != nil {
+			fmt.Println("TESTING UDPDATE", err)
+			fmt.Println("TESTING UDPDATE", err)
+			fmt.Println("TESTING UDPDATE", err)
+			fmt.Println("TESTING UDPDATE", err)
+			return
+		}
 		site := currentProduct.Site
 		product := currentProduct.Sku
 		newChange := currentProduct
@@ -515,9 +360,9 @@ func testUpdate(currentProduct Product) {
 					}
 				}
 
-			} 
-		
-		}	
+			}
+
+		}
 
 		if !sitePresent {
 			fmt.Println("Adding New Site", site, product)
@@ -535,17 +380,16 @@ func testUpdate(currentProduct Product) {
 			fmt.Printf("remove fail %v\n", replacedResult)
 			fmt.Println(errors.Cause(replacedResult.Err()))
 		} else {
-				time.Sleep(150 * time.Millisecond)
-				results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
-					Type: "sites",
-					Site: obj,
-				})
-				if err != nil {
-					fmt.Println(err)
-				}
-				fmt.Println(results)
+			time.Sleep(150 * time.Millisecond)
+			results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
+				Type: "sites",
+				Site: obj,
+			})
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(results)
 		}
-	
 
 	} else {
 		fmt.Println("Worker Already Running")
@@ -567,9 +411,9 @@ func deleteSku(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Deleted Product")
 }
 func deleteSkuFunc(site string, sku string) {
-	if !workerRunning { 
+	if !workerRunning {
 		// DBWorker()
-		 // fmt.Println("Beginning Worker")
+		// fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
 			// fmt.Println("Finished Worker")
@@ -578,7 +422,7 @@ func deleteSkuFunc(site string, sku string) {
 		}()
 		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(DBString), &obj)
-		fmt.Println("Delete Sku " , err)
+		fmt.Println("Delete Sku ", err)
 		fmt.Println("Deleting ", sku, " from ", site)
 		for k, _ := range obj {
 			if k == "_id" {
@@ -597,8 +441,8 @@ func deleteSkuFunc(site string, sku string) {
 					}
 				}
 
-			} 
-		}	
+			}
+		}
 
 		filter := bson.M{"type": "sites"}
 		replacedResult := MainCollection.FindOneAndDelete(context.TODO(), filter)
@@ -608,17 +452,16 @@ func deleteSkuFunc(site string, sku string) {
 			fmt.Printf("remove fail %v\n", replacedResult)
 			fmt.Println(errors.Cause(replacedResult.Err()))
 		} else {
-				time.Sleep(150 * time.Millisecond)
-				results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
-					Type: "sites",
-					Site: obj,
-				})
-				if err != nil {
-					fmt.Println(err)
-				}
-				fmt.Println(results)
+			time.Sleep(150 * time.Millisecond)
+			results, err := MainCollection.InsertOne(context.TODO(), ItemInCollection{
+				Type: "sites",
+				Site: obj,
+			})
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(results)
 		}
-	
 
 	} else {
 		fmt.Println("Worker Already Running")
@@ -632,38 +475,38 @@ func getDiscordIds(w http.ResponseWriter, r *http.Request) {
 		watch.Stop()
 		fmt.Printf("Request For Getting Discord IDS Took : %v\n", watch.Milliseconds())
 	}()
-	byteSlice,err := json.Marshal(discordIds())
-		if err != nil {
+	byteSlice, err := json.Marshal(discordIds())
+	if err != nil {
 		fmt.Println(err)
 		fmt.Fprintf(w, err.Error())
-		}
-		w.Header().Set("Content-Type","application/json")
-		w.WriteHeader(200)
-		w.Write(byteSlice)
-		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(byteSlice)
+}
 func discordIds() []string {
 	var discordIdsArr []string
-		cur, err := MainCollection.Find(context.TODO(), bson.M{"type":"discordids"})
+	cur, err := MainCollection.Find(context.TODO(), bson.M{"type": "discordids"})
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+		elements, err := cur.Current.Elements()
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer cur.Close(context.TODO())
-		for cur.Next(context.TODO()) {
-			elements , err := cur.Current.Elements()
-			if err != nil {
-				fmt.Println(err)
-			}
-			for k, _ := range elements {
-				if elements[k].Key() == "ids" {
-					arr := strings.Split(strings.Split(strings.Split(elements[k].Value().String(), "[")[1], "]")[0], ",")
-					for _, v := range arr {
-						discordIdsArr = append(discordIdsArr, strings.ReplaceAll(v, `"`, ""))
-					}
-					// fmt.Println(discordIdsArr)
+		for k, _ := range elements {
+			if elements[k].Key() == "ids" {
+				arr := strings.Split(strings.Split(strings.Split(elements[k].Value().String(), "[")[1], "]")[0], ",")
+				for _, v := range arr {
+					discordIdsArr = append(discordIdsArr, strings.ReplaceAll(v, `"`, ""))
 				}
+				// fmt.Println(discordIdsArr)
 			}
 		}
-		return discordIdsArr
+	}
+	return discordIdsArr
 }
 func addDiscordIds(w http.ResponseWriter, r *http.Request) {
 	watch := stopwatch.Start()
@@ -676,10 +519,10 @@ func addDiscordIds(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&ids)
 	addDiscordId(ids.Ids)
 	fmt.Fprintf(w, "Added IDS")
-		}
+}
 func addDiscordId(discordIds []string) {
-	if !workerRunning { 
-		 // fmt.Println("Beginning Worker")
+	if !workerRunning {
+		// fmt.Println("Beginning Worker")
 		workerRunning = true
 		defer func() {
 			// fmt.Println("Finished Worker")
@@ -694,55 +537,56 @@ func addDiscordId(discordIds []string) {
 			fmt.Printf("remove fail %v\n", replacedResult)
 			fmt.Println(errors.Cause(replacedResult.Err()))
 		} else {
-				time.Sleep(150 * time.Millisecond)
-				results, err := MainCollection.InsertOne(context.TODO(), DiscordIdsDB{
-					Type: "discordids",
-					Ids: discordIds,
-				})
-				if err != nil {
-					fmt.Println(err)
-				}
-				fmt.Println(results)
+			time.Sleep(150 * time.Millisecond)
+			results, err := MainCollection.InsertOne(context.TODO(), DiscordIdsDB{
+				Type: "discordids",
+				Ids:  discordIds,
+			})
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(results)
 		}
-	
+
 	} else {
 		fmt.Println("Worker Already Running")
 		time.Sleep(3 * time.Second)
 		addDiscordId(discordIds)
 	}
 }
+
 func handleRequests() {
 	fmt.Println("Server Started")
 	router := mux.NewRouter().StrictSlash(true)
-	
-	router.HandleFunc("/TARGET", target).Methods("POST")
-	router.HandleFunc("/WALMART", walmart).Methods("POST")
-	router.HandleFunc("/NEWEGG", newegg).Methods("POST")
-	router.HandleFunc("/BIGLOTS", bigLots).Methods("POST")
-	router.HandleFunc("/TARGETNEW", targetNew).Methods("POST")
-	router.HandleFunc("/ACADEMY", academy).Methods("POST")
-	router.HandleFunc("/BESTBUY", bestBuy).Methods("POST")
-	router.HandleFunc("/AMD", amd).Methods("POST")
-	router.HandleFunc("/SLICK", slickDeals).Methods("POST")
-	router.HandleFunc("/SLICKDEALS", slickDeals).Methods("POST")
-	router.HandleFunc("/GAMESTOP", gameStop).Methods("POST")
-	router.HandleFunc("/WALMARTNEW", walmartNew).Methods("POST")
-	router.HandleFunc("/SHOPIFY", shopify).Methods("POST")
-	router.HandleFunc("/HOMEDEPOT", homeDepot).Methods("POST")
-	router.HandleFunc("/SHOPIFYPRODUCT", shopifyProduct).Methods("POST")
-	router.HandleFunc("/FANATICSNEWPRODUCTS", fanaticsNewProducts).Methods("POST")
 
+	router.HandleFunc("/TARGET", TargetMonitor.Target).Methods("POST")
+	router.HandleFunc("/WALMART", WalmartMonitor.Walmart).Methods("POST")
+	router.HandleFunc("/NEWEGG", NewEggMonitor.Newegg).Methods("POST")
+	router.HandleFunc("/BIGLOTS", BigLotsMonitor.Biglots).Methods("POST")
+	router.HandleFunc("/TARGETNEW", TargetNewTradingCards.TargetNew).Methods("POST")
+	router.HandleFunc("/ACADEMY", AcademyMonitor.Academy).Methods("POST")
+	router.HandleFunc("/BESTBUY", BestBuyMonitor.BestBuy).Methods("POST")
+	router.HandleFunc("/AMD", AmdMonitor.Amd).Methods("POST")
+	router.HandleFunc("/SLICK", SlickDealsMonitor.SlickDeals).Methods("POST")
+	router.HandleFunc("/SLICKDEALS", SlickDealsMonitor.SlickDeals).Methods("POST")
+	router.HandleFunc("/GAMESTOP", GameStopMonitor.GameStop).Methods("POST")
+	router.HandleFunc("/WALMARTNEW", WalmartNew.WalmartNew).Methods("POST")
+	router.HandleFunc("/SHOPIFY", Shopify.Shopify).Methods("POST")
+	router.HandleFunc("/HOMEDEPOT", HomeDepot.HomeDepot).Methods("POST")
+	router.HandleFunc("/SHOPIFYPRODUCT", ShopifyProduct.ShopifyProduct).Methods("POST")
+	router.HandleFunc("/FANATICSNEWPRODUCTS", FanaticsMonitor.FanaticsNewProducts).Methods("POST")
+	router.HandleFunc("/RESTIR", RestirMonitor.Restir).Methods("POST")
 
 	// Helper Routes
 	router.HandleFunc("/", getPage).Methods("GET")
-	router.HandleFunc("/DB", getDB).Methods("POST") // Post
+	router.HandleFunc("/DB", getDB).Methods("POST")      // Post
 	router.HandleFunc("/DB", getEntireDB).Methods("GET") // Get
 	router.HandleFunc("/PROXY", getProxies).Methods("GET")
 	router.HandleFunc("/SHOPIFYPROXY", getShopifyProxies).Methods("GET")
 	router.HandleFunc("/UPDATESKU", updateSku).Methods("POST")
-	router.HandleFunc("/DELETESKU", deleteSku).Methods("POST")	
-	router.HandleFunc("/DISCORDIDS", getDiscordIds).Methods("GET")	
-	router.HandleFunc("/DISCORDIDS", addDiscordIds).Methods("POST")	
+	router.HandleFunc("/DELETESKU", deleteSku).Methods("POST")
+	router.HandleFunc("/DISCORDIDS", getDiscordIds).Methods("GET")
+	router.HandleFunc("/DISCORDIDS", addDiscordIds).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":7243", router))
 }
@@ -752,7 +596,7 @@ func main() {
 	DBWorker()
 	go func() {
 		time.Sleep(1000 * time.Millisecond)
-	//	handleShopifyProducts()
+		//	handleShopifyProducts()
 	}()
 	go func() {
 		for {

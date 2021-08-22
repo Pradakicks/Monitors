@@ -12,6 +12,7 @@ import (
 
 	"github.com/bradhe/stopwatch"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	Types "github.con/prada-monitors-go/helpers/types"
 )
 
 type Config struct {
@@ -442,4 +443,15 @@ func (m *Monitor) checkStop() error {
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
+}
+
+func Academy(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Academy Monitor")
+	fmt.Println("Academy")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Sku)
+	json.NewEncoder(w).Encode(currentMonitor)
 }

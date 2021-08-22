@@ -13,6 +13,7 @@ import (
 	"time"
 
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	Types "github.con/prada-monitors-go/helpers/types"
 )
 
 type Config struct {
@@ -439,4 +440,15 @@ func (m *Monitor) checkStop() error {
 		time.Sleep(5000 * (time.Millisecond))
 	}
 	return nil
+}
+
+func TargetNew(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Target New Products")
+	fmt.Println("Big Lots")
+	var currentMonitor Types.KeyWordMonitor
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Endpoint, currentMonitor.Keywords)
+	json.NewEncoder(w).Encode(currentMonitor)
 }

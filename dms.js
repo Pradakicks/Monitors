@@ -307,24 +307,28 @@ function checkBank(clients, triggerText, replyText) {
         const { group, isValidated } = await checkIfUserValidated(message);
         if (isValidated) {
           let skuBank = await getSkuBank();
+          let siteLimitObj = {}
           if (skuBank.length != 0) {
             let bankArr = [];
             let sites = Object.keys(skuBank);
             console.log(group);
             sites?.forEach((e) => {
               if (e != '-M_bpveXSTSxZkahEQkQ') {
+                siteLimitObj[e] = 0
                 let currentSkus = Object.keys(skuBank[e]);
                 currentSkus.forEach((sku) => {
                   skuBank[e][sku]?.companies?.forEach((company) => {
                     if (company.company == group) {
+                      siteLimitObj[e]++
                       bankArr.push(`${e}-${sku}-${group}`);
                     }
                   });
                 });
               }
             });
-            console.log(bankArr);
 
+            console.log(bankArr);
+            console.log(siteLimitObj)
             await fs.appendFile(
               `monitorBank-${message.author.username}.txt`,
               JSON.stringify(bankArr, null, 2),

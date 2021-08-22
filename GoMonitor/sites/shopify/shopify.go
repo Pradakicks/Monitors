@@ -17,6 +17,7 @@ import (
 	"github.com/pkg/errors"
 
 	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
+	helper "github.con/prada-monitors-go/helpers/mongo"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -87,6 +88,7 @@ type ProductsItem struct {
 	Store       string
 	Handle      string
 }
+var Collection = helper.ConnectDB()
 
 func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 	defer func() {
@@ -673,4 +675,16 @@ func (m *Monitor) restockedVariants(oldVariants []Types.Variant, newVariants []T
 	}
 
 	return returnArray
+}
+
+
+func Shopify(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Shopify Monitor")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Sku, Collection)
+	json.NewEncoder(w).Encode(currentMonitor)
 }

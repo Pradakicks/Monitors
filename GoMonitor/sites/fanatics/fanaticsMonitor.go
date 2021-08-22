@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
+	helper "github.con/prada-monitors-go/helpers/mongo"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
 )
@@ -135,6 +136,8 @@ type ProductIdentifier struct {
 	ProductID string `json:"productId,omitempty"`
 	URL string `json:"url,omitempty"`
 }
+
+var FanaticsCollection = helper.ConnectDBFanatics()
 
 func NewMonitor(sku string, collection *mongo.Collection) *CurrentMonitor {
 	defer func() {
@@ -426,4 +429,14 @@ func (m *CurrentMonitor) webHookSend(c Types.Company, sku string, site string, n
 		},
 	}
 	go Webhook.SendWebhook(c.Webhook, &discordParams)
+}
+
+func FanaticsNewProducts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL)
+	w.Header().Set("Content-Type", "application/json")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor(currentMonitor.Sku, FanaticsCollection)
+	json.NewEncoder(w).Encode(currentMonitor)
 }

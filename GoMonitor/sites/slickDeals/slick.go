@@ -13,6 +13,7 @@ import (
 
 	MonitorLogger "github.con/prada-monitors-go/helpers/logging"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
+	Types "github.con/prada-monitors-go/helpers/types"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bradhe/stopwatch"
@@ -467,4 +468,15 @@ func (m *Monitor) getRealLink(url string) string {
 	fmt.Println(url1)
 	fmt.Println(strings.Split(url1, "?")[0])
 	return strings.Split(url1, "?")[0]
+}
+
+func SlickDeals(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "Slick Deals Monitor")
+	fmt.Println("Slick Deals")
+	var currentMonitor Types.MonitorResponse
+	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
+	fmt.Println(currentMonitor)
+	go NewMonitor()
+	json.NewEncoder(w).Encode(currentMonitor)
 }
