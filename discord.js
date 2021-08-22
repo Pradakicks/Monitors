@@ -12,6 +12,7 @@ const {SKUADD , findCommand , deleteSku, checkBank, massAdd, validateUser, walma
 const fs = require('fs')
 
 client.once('ready', () => {
+
 	console.log(`Logged in as ${client.user.tag}!`);
 	console.log(bot_age);
 	console.log(prefix);
@@ -19,15 +20,15 @@ client.once('ready', () => {
 	console.log(bot_info.name);
 	console.log(bot_info.version);
 
-	findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
-	SKUADD(client, '!skuadd', 'Testing');
-	deleteSku(client, '!deleteSku', 'Deleted')
-	deleteSku(client, '!skudelete', 'Deleted')
-	deleteSku(client, '!skuremove', 'Deleted')
-	deleteSku(client, '!removesku', 'Deleted')
-	checkBank(client, '!checkBank', 'Returned')
-	massAdd(client, '!massAdd', 'Returned')
-	validateUser(client, '!validate', 'Returned')
+	// findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
+	// SKUADD(client, '!skuadd', 'Testing');
+	// deleteSku(client, '!deleteSku', 'Deleted')
+	// deleteSku(client, '!skudelete', 'Deleted')
+	// deleteSku(client, '!skuremove', 'Deleted')
+	// deleteSku(client, '!removesku', 'Deleted')
+	// checkBank(client, '!checkBank', 'Returned')
+	// massAdd(client, '!massAdd', 'Returned')
+	// validateUser(client, '!validate', 'Returned')
 	walmartScraper(client, '!walmart', 'Returned')
 	
 	client.users.fetch('202862796965150720').then((user) => {
@@ -58,18 +59,23 @@ client.on("message", (msg) => {
 		.setColor('#24223a')
 		.setTitle('Command List')
 		.setDescription(`\n
-		!validate [apikey] - *Validates User*
-		!skuadd [SITE] [SKU] - *Add product to site*
-		!deletesku [SITE] [SKU] - *Delete product from site*
-		!checkbank - *Returns running products*
+		**!validate [apikey]**
+		Validates User
 
-		!massAdd [site]
-		[SKU]
-		[SKU]
-		[SKU] 
-		*Ability to add multiple skus at a time *
+		**!skuadd [SITE] [SKU] **
+		Add product to site
 
-		!walmart [SKU] - *Scrapes Specific Walmart Product*
+		**!deletesku [SITE] [SKU]** 
+	 	Delete product from site
+
+		**!checkbank** 
+		Returns running products
+
+		**!massAdd [site] [SKU] [SKU] [SKU] **
+		Ability to add multiple skus at a time 
+
+		**!walmart [SKU]** 
+		Scrapes Specific Walmart Product
 
 		*Without brackets and replace SITE and SKU.*
 		*If you have any issues feel to ask questions in tickets.*
@@ -140,9 +146,9 @@ client.on("message", (msg) => {
 console.log(os.platform())
 if(os.platform() == "win32" || os.platform() == "darwin"){
 	console.log("Development Environment")
-	client.login(development)
+	client.login('ODczNzU0NTEwOTUzMTYwNzE0.YQ9BTA.gdh8LeuLt2l8DyX4Kbyv4Se4Km4')
 } else {
 	console.log("Production Environment")
-	client.login(token);
+	client.login('ODczNzU0NTEwOTUzMTYwNzE0.YQ9BTA.gdh8LeuLt2l8DyX4Kbyv4Se4Km4');
 
 }

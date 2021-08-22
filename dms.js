@@ -17,9 +17,9 @@ const port = 7243;
 
 let firstServer = `http://104.249.128.37`; // 12 Core z 24GB
 let secondServer = `http://104.249.128.207`;
-var proxyList = []
+var proxyList = [];
 // let thirdSfirstServererver = `http://64.227.28.51`;
-getProxies()
+getProxies();
 function SKUADD(clients, triggerText, replyText) {
   try {
     clients.on('message', async (message) => {
@@ -45,48 +45,78 @@ function SKUADD(clients, triggerText, replyText) {
               kw.push(e);
             });
           }
-          
-          
+
           console.log(site);
           console.log(SKU);
           console.log(content);
           console.log(original);
           console.log(pricerange);
-
           if (SKU.length > 1 && site.length > 1) {
             let isContinue = true;
             let skuBank = await getSkuBank();
             let caseSite = site.toUpperCase();
             let currentCompany = config.groups[group];
-			  let currentObj = {
-				sku: SKU,
-				site: site.toUpperCase(),
-				stop: false,
-				name: '',
-				original: original,
-				companies: [
-				  {
-					company: group,
-					webhook: currentCompany[caseSite],
-					color: currentCompany?.companyColor,
-					companyImage: currentCompany?.companyImage,
-				  },
-				],
-			  };
-			  let currentBody = {
-				site: site.toUpperCase(),
-				sku: SKU,
-				priceRangeMin: parseInt(pricerange.split(',')[0]),
-				priceRangeMax: parseInt(pricerange.split(',')[1]),
-			  };  
-        
-        // console.log("SKU BANK", skuBank[caseSite], SKU)
+
+            // Check Site Limit
+            let siteLimitObj = {};
+            let allSites = Object.keys(skuBank);
+            allSites?.forEach((e) => {
+              if (e != '-M_bpveXSTSxZkahEQkQ') {
+                siteLimitObj[e] = 0;
+                let currentSkus = Object.keys(skuBank[e]);
+                currentSkus.forEach((sku) => {
+                  skuBank[e][sku]?.companies?.forEach((company) => {
+                    if (company.company == group) {
+                      siteLimitObj[e]++;
+                    }
+                  });
+                });
+              }
+            });
+
+            console.log(siteLimitObj, group);
+            let shouldContinue = true;
+            Object.keys(siteLimitObj).forEach((e) => {
+              if (siteLimitObj[e] > config.groups[group][`${e}LIMIT`]) {
+                message.channel.send(`${e} Limit Reached`);
+                console.log(siteLimitObj[e], config.groups[group][`${e}LIMIT`]);
+                shouldContinue = false;
+                return;
+              }
+            });
+
+            if (!shouldContinue) return;
+            // ------------------------- ---------------- -------- ------------------------ --------------------
+
+            let currentObj = {
+              sku: SKU,
+              site: site.toUpperCase(),
+              stop: false,
+              name: '',
+              original: original,
+              companies: [
+                {
+                  company: group,
+                  webhook: currentCompany[caseSite],
+                  color: currentCompany?.companyColor,
+                  companyImage: currentCompany?.companyImage,
+                },
+              ],
+            };
+            let currentBody = {
+              site: site.toUpperCase(),
+              sku: SKU,
+              priceRangeMin: parseInt(pricerange.split(',')[0]),
+              priceRangeMax: parseInt(pricerange.split(',')[1]),
+            };
+
+            // console.log("SKU BANK", skuBank[caseSite], SKU)
             if (skuBank[caseSite]) {
               if (skuBank[caseSite][SKU]) {
                 let skuWebhookArray = skuBank[caseSite][SKU]?.companies;
                 let isPresent = false;
                 skuWebhookArray?.forEach((e) => {
-                  console.log(e.webhook, "CURRENT" , currentCompany[caseSite]);
+                  console.log(e.webhook, 'CURRENT', currentCompany[caseSite]);
                   if (e.webhook == currentCompany[caseSite]) isPresent = true;
                 });
 
@@ -104,18 +134,14 @@ function SKUADD(clients, triggerText, replyText) {
                     color: currentCompany?.companyColor,
                     companyImage: currentCompany?.companyImage,
                   });
-                  skuBank[caseSite][SKU].companies = arr
-                  await updateSku(
-                    site,
-                    SKU,
-                    skuBank[caseSite][SKU]
-                  );
+                  skuBank[caseSite][SKU].companies = arr;
+                  await updateSku(site, SKU, skuBank[caseSite][SKU]);
                 }
                 console.log('Duplicate Found', isPresent);
                 isContinue = false;
               }
             }
-        
+
             if (
               currentBody.priceRangeMax == NaN ||
               !currentBody.priceRangeMax
@@ -151,10 +177,7 @@ function SKUADD(clients, triggerText, replyText) {
                   break;
                 case 'NEWEGG':
                   await pushSku(currentObj);
-                  currentBody['skuName'] = await getSku(
-                    SKU,
-                    proxyList
-                  );
+                  currentBody['skuName'] = await getSku(SKU, proxyList);
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                 case 'WALMART':
@@ -162,24 +185,27 @@ function SKUADD(clients, triggerText, replyText) {
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
                   await delay(10000);
-                  break; 
-                case 'SHOPIFYPRODUCT':{
-                  currentBody['skuName'] = SKU.toUpperCase().split("_")[1]
-                  currentBody.sku = SKU.toUpperCase().split("_")[0]
-                  currentObj.sku = SKU.toUpperCase().split("_")[1]
+                  break;
+                case 'SHOPIFYPRODUCT': {
+                  currentBody['skuName'] = SKU.toUpperCase().split('_')[1];
+                  currentBody.sku = SKU.toUpperCase().split('_')[0];
+                  currentObj.sku = SKU.toUpperCase().split('_')[1];
                   await pushSku(currentObj);
                   console.log(currentBody);
                   startGoMonitor(currentBody, site.toUpperCase());
-                  break
+                  break;
                 }
                 case 'WALMARTNEW':
                 case 'WALMART NEW':
-                  currentBody['skuName'] = 'prg=desktop&facet=retailer:Walmart.com&sort=new';
+                  currentBody['skuName'] =
+                    'prg=desktop&facet=retailer:Walmart.com&sort=new';
                   await pushSku(currentObj);
                   await startGoMonitor(currentBody, site.toUpperCase());
-                  currentBody['skuName'] = 'prg=desktop&facet=retailer%3AWalmart.com&soft_sort=false&sort=new';
+                  currentBody['skuName'] =
+                    'prg=desktop&facet=retailer%3AWalmart.com&soft_sort=false&sort=new';
                   await startGoMonitor(currentBody, site.toUpperCase());
-                  currentBody['skuName'] = 'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
+                  currentBody['skuName'] =
+                    'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
                   startGoMonitor(currentBody, site.toUpperCase());
                 case 'TARGETNEW':
                   await pushSku(currentObj);
@@ -188,10 +214,13 @@ function SKUADD(clients, triggerText, replyText) {
                     endpoint: SKU,
                     keywords: kw,
                   });
-                  startGoMonitor({
-                    endpoint: SKU,
-                    keywords: kw,
-                  }, site.toUpperCase());
+                  startGoMonitor(
+                    {
+                      endpoint: SKU,
+                      keywords: kw,
+                    },
+                    site.toUpperCase()
+                  );
                 default:
               }
               message.channel.send(`${SKU} Added to ${site}`);
@@ -249,12 +278,8 @@ function deleteSku(clients, triggerText, replyText) {
                   console.log(currentBody.companies);
                   currentBody.companies.splice(i, 1);
                   console.log(currentBody.companies);
-                  skuBank[caseSite][SKU].companies = currentBody.companies
-                  await updateSku(
-                    site,
-                    SKU,
-                    skuBank[caseSite][SKU]
-                  );
+                  skuBank[caseSite][SKU].companies = currentBody.companies;
+                  await updateSku(site, SKU, skuBank[caseSite][SKU]);
                 }
                 message.channel.send(
                   `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
@@ -264,13 +289,9 @@ function deleteSku(clients, triggerText, replyText) {
               currentBody.stop = true;
               console.log(currentBody);
               if (group == currentBody.companies[0].company) {
-                console.log("Perm Delete")
+                console.log('Perm Delete');
 
-                  await updateSku(
-                    site,
-                    SKU,
-                    currentBody
-                  );
+                await updateSku(site, SKU, currentBody);
                 await delay(10000);
                 await deleteSkuEnd(site, SKU);
                 message.channel.send(
@@ -307,19 +328,19 @@ function checkBank(clients, triggerText, replyText) {
         const { group, isValidated } = await checkIfUserValidated(message);
         if (isValidated) {
           let skuBank = await getSkuBank();
-          let siteLimitObj = {}
+          let siteLimitObj = {};
           if (skuBank.length != 0) {
             let bankArr = [];
             let sites = Object.keys(skuBank);
             console.log(group);
             sites?.forEach((e) => {
               if (e != '-M_bpveXSTSxZkahEQkQ') {
-                siteLimitObj[e] = 0
+                siteLimitObj[e] = 0;
                 let currentSkus = Object.keys(skuBank[e]);
                 currentSkus.forEach((sku) => {
                   skuBank[e][sku]?.companies?.forEach((company) => {
                     if (company.company == group) {
-                      siteLimitObj[e]++
+                      siteLimitObj[e]++;
                       bankArr.push(`${e}-${sku}-${group}`);
                     }
                   });
@@ -328,7 +349,12 @@ function checkBank(clients, triggerText, replyText) {
             });
 
             console.log(bankArr);
-            console.log(siteLimitObj)
+            console.log(siteLimitObj);
+            Object.keys(siteLimitObj).forEach((e) => {
+              if (siteLimitObj[e] > config.groups[group][`${e}LIMIT`])
+                console.log('Site Limit Reached');
+              console.log(siteLimitObj[e], config.groups[group][`${e}LIMIT`]);
+            });
             await fs.appendFile(
               `monitorBank-${message.author.username}.txt`,
               JSON.stringify(bankArr, null, 2),
@@ -382,7 +408,7 @@ function massAdd(clients, triggerText, replyText) {
 async function startGoMonitor(currentBody, site) {
   try {
     switch (site) {
-      case 'BESTBUY':{
+      case 'BESTBUY': {
         rp.post(
           {
             url: `${secondServer}:${port}/${site}`,
@@ -395,7 +421,7 @@ async function startGoMonitor(currentBody, site) {
         );
         break;
       }
-      default:{
+      default: {
         rp.post(
           {
             url: `${firstServer}:${port}/${site}`,
@@ -456,6 +482,36 @@ async function mass(string, content, message, groupName) {
         let skuBank = await getSkuBank();
         let caseSite = site.toUpperCase();
         let currentCompany = config.groups[group];
+
+        // Check Site Limit
+        let siteLimitObj = {};
+        let allSites = Object.keys(skuBank);
+        allSites?.forEach((e) => {
+          if (e != '-M_bpveXSTSxZkahEQkQ') {
+            siteLimitObj[e] = 0;
+            let currentSkus = Object.keys(skuBank[e]);
+            currentSkus.forEach((sku) => {
+              skuBank[e][sku]?.companies?.forEach((company) => {
+                if (company.company == group) {
+                  siteLimitObj[e]++;
+                }
+              });
+            });
+          }
+        });
+        console.log(siteLimitObj, group);
+        let shouldContinue = true;
+        Object.keys(siteLimitObj).forEach((e) => {
+          if (siteLimitObj[e] > config.groups[group][`${e}LIMIT`]) {
+            message.channel.send(`${e} Limit Reached`);
+            console.log(siteLimitObj[e], config.groups[group][`${e}LIMIT`]);
+            shouldContinue = false;
+          }
+        });
+
+        if (!shouldContinue) continue;
+        // ------------------------- ---------------- -------- ------------------------ --------------------
+
         if (skuBank[caseSite]) {
           if (skuBank[caseSite][SKU]) {
             let skuWebhookArray = skuBank[caseSite][SKU]?.companies;
@@ -480,19 +536,14 @@ async function mass(string, content, message, groupName) {
                 companyImage: currentCompany?.companyImage,
               });
               console.log(arr);
-              skuBank[caseSite][SKU].companies = arr
-              await updateSku(
-                site,
-                SKU,
-                skuBank[caseSite][SKU]
-              );
+              skuBank[caseSite][SKU].companies = arr;
+              await updateSku(site, SKU, skuBank[caseSite][SKU]);
             }
             console.log('Duplicate Found', isPresent);
             isContinue = false;
           }
         }
         if (isContinue) {
-
           let currentObj = {
             sku: SKU,
             site: site.toUpperCase(),
@@ -501,97 +552,88 @@ async function mass(string, content, message, groupName) {
             original: original,
             companies: [
               {
-              company: group,
-              webhook: currentCompany[caseSite],
-              color: currentCompany?.companyColor,
-              companyImage: currentCompany?.companyImage,
+                company: group,
+                webhook: currentCompany[caseSite],
+                color: currentCompany?.companyColor,
+                companyImage: currentCompany?.companyImage,
               },
             ],
-            };
+          };
           let currentBody = {
             site: site.toUpperCase(),
             sku: SKU,
             priceRangeMin: parseInt(pricerange.split(',')[0]),
             priceRangeMax: parseInt(pricerange.split(',')[1]),
-            };  
-            // console.log("SKU BANK", skuBank[caseSite], SKU)
-                if (
-                  currentBody.priceRangeMax == NaN ||
-                  !currentBody.priceRangeMax
-                ) {
-                  console.log('No Max Price Range Detected');
-                  currentBody.priceRangeMax = 100000;
-                }
-                if (
-                  currentBody.priceRangeMin == NaN ||
-                  !currentBody.priceRangeMin
-                ) {
-                  console.log('No Min Price Range Detected');
-                  currentBody.priceRangeMin = 1;
-                }
+          };
+          // console.log("SKU BANK", skuBank[caseSite], SKU)
+          if (currentBody.priceRangeMax == NaN || !currentBody.priceRangeMax) {
+            console.log('No Max Price Range Detected');
+            currentBody.priceRangeMax = 100000;
+          }
+          if (currentBody.priceRangeMin == NaN || !currentBody.priceRangeMin) {
+            console.log('No Min Price Range Detected');
+            currentBody.priceRangeMin = 1;
+          }
 
-			switch (site.toUpperCase()) {
-                case 'TARGET':
-                case 'GAMESTOP':
-                case 'BESTBUY':
-                case 'BIGLOTS':
-                case 'ACADEMY':
-                case 'AMD':
-                case 'SLICKDEALS':
-                case 'SLICK':
-                case 'SLICKDEAL':
-                case 'BIGLOTS':
-                case 'BIGLOTS': {
-                    await pushSku(currentObj);
-                    console.log(currentBody);
-                    startGoMonitor(currentBody, site.toUpperCase());
-                    break;
-                  }
-                case 'NEWEGG':{
-                  await pushSku(currentObj);
-                  currentBody['skuName'] = await getSku(
-                    SKU,
-                    proxyList
-                  );
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
-                  break
-                }
-                case 'WALMART': {
-                  await pushSku(currentObj);
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
-                  await delay(10000);
-                  break;
-                }
-                case 'WALMARTNEW':
-                case 'WALMART NEW':{
-                  console.log(pricerange);
-                  currentBody['skuName'] =
-                    'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
-                  await pushSku(currentObj);
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
-                  break
-                }
-                case 'TARGETNEW':{
-                  await pushSku(currentObj);
-                  console.log(kw);
-                  let currentBody = {
-                    endpoint: SKU,
-                    keywords: kw,
-                  };
-                  console.log(currentBody);
-                  startGoMonitor(currentBody, site.toUpperCase());
-                  break 
-                }
-                default:
-              }
+          switch (site.toUpperCase()) {
+            case 'TARGET':
+            case 'GAMESTOP':
+            case 'BESTBUY':
+            case 'BIGLOTS':
+            case 'ACADEMY':
+            case 'AMD':
+            case 'SLICKDEALS':
+            case 'SLICK':
+            case 'SLICKDEAL':
+            case 'BIGLOTS':
+            case 'BIGLOTS': {
+              await pushSku(currentObj);
+              console.log(currentBody);
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+            case 'NEWEGG': {
+              await pushSku(currentObj);
+              currentBody['skuName'] = await getSku(SKU, proxyList);
+              console.log(currentBody);
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+            case 'WALMART': {
+              await pushSku(currentObj);
+              console.log(currentBody);
+              startGoMonitor(currentBody, site.toUpperCase());
+              await delay(10000);
+              break;
+            }
+            case 'WALMARTNEW':
+            case 'WALMART NEW': {
+              console.log(pricerange);
+              currentBody['skuName'] =
+                'prg=desktop&cat_id=0&facet=brand%3APanini%7C%7Cbrand%3ATopps%7C%7Cretailer%3AWalmart.com&grid=false&query=panini&soft_sort=false&sort=new';
+              await pushSku(currentObj);
+              console.log(currentBody);
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+            case 'TARGETNEW': {
+              await pushSku(currentObj);
+              console.log(kw);
+              let currentBody = {
+                endpoint: SKU,
+                keywords: kw,
+              };
+              console.log(currentBody);
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+            default:
+          }
         }
         await delay(7500);
       }
     }
-    message.channel.send('SKUS Added');
+    message.channel.send('Mass Add Sequence Completed!');
   } else {
     message.channel.send(`${message.author} is not a validated user`);
   }
@@ -686,7 +728,7 @@ async function deleteSkuEnd(site, sku, group) {
     console.log(`Deleting ${sku}/${site}`);
     let deleteSku = await rp.post({
       url: `${secondServer}:${port}/DELETESKU`,
-      body: JSON.stringify({site : site.toUpperCase(), sku : sku})
+      body: JSON.stringify({ site: site.toUpperCase(), sku: sku }),
     });
     console.log(deleteSku?.statusCode);
   } catch (error) {
@@ -724,14 +766,14 @@ async function updateDiscordIdsDB(author, discordIdsArr, name) {
     var isPresent = false;
     // console.log(parsed, author, discordIdsArr, name);
     parsed?.forEach((e) => {
-      console.log(e)
+      console.log(e);
       currentIds.push(e);
       let id = e?.split('-')[0];
       if (id == author) isPresent = true;
     });
     if (!isPresent) currentIds.push(`${author}-${name}`);
     else return false;
-    console.log({ ids: currentIds })
+    console.log({ ids: currentIds });
     let updateIds = await rp.post({
       url: `${secondServer}:${port}/DISCORDIDS`,
       body: JSON.stringify({ ids: currentIds }),
@@ -748,7 +790,7 @@ async function validateUser(clients, triggerText, replyText) {
     clients.on('message', async (message) => {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
         let content = message.content.split('!validate')[1];
-        let apikey = content?.split('apikey-')[1].split('%}')[0];
+        let apikey = content?.split('apikey-')[1]
         if (apikey == undefined) {
           message.reply('Please Submit Valid Api Key!');
         } else {
@@ -804,7 +846,6 @@ async function checkIfUserValidated(message) {
   return returnObj;
 }
 //-----------------------------------------------------------------
-
 
 // Scraper
 async function walmartScraper(clients, triggerText, replyText) {
@@ -1004,11 +1045,11 @@ async function getSku(skuName, proxyList) {
 }
 async function getTerraSku(SKU) {
   try {
-	// let proxies = await getProxies()
-	const proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)]
-	console.log(proxy1)
-	let terra = await rp.get({
-      url: `https://www.walmart.com/terra-firma/item/${SKU}?test=test`,
+    // let proxies = await getProxies()
+    const proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)];
+    console.log(proxy1);
+    let terra = await rp.get({
+      url: `https://www.walmart.com/terra-firma/item/${SKU}`,
       headers: {
         accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1052,19 +1093,19 @@ async function getProxies() {
   try {
     // read contents of the file
     // const data = await fs.readFile('./GoMonitor/cloud.txt', 'utf-8');
-	let fetchProxies = await rp.get(`${secondServer}:${port}/PROXY`)
-	let parsed = JSON.parse(fetchProxies.body)
-  console.log(parsed)
-	parsed.proxies.forEach(line =>{
-		const lineSplit = line.split(':');
-		const item1 = {
-		  ip: lineSplit[0],
-		  port: lineSplit[1],
-		  userAuth: lineSplit[2],
-		  userPass: lineSplit[3],
-		};
-		proxyList.push(item1);
-	})
+    let fetchProxies = await rp.get(`${secondServer}:${port}/PROXY`);
+    let parsed = JSON.parse(fetchProxies.body);
+    console.log(parsed);
+    parsed.proxies.forEach((line) => {
+      const lineSplit = line.split(':');
+      const item1 = {
+        ip: lineSplit[0],
+        port: lineSplit[1],
+        userAuth: lineSplit[2],
+        userPass: lineSplit[3],
+      };
+      proxyList.push(item1);
+    });
     console.log(`Proxy list Length : ${proxyList.length}`);
     return proxyList;
   } catch (err) {
