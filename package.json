@@ -1,34 +1,24 @@
 {
-  "name": "Monitor",
+  "name": "monitor",
   "version": "1.0.0",
+  "author": "",
   "description": "",
-  "main": "targetMTest.js",
+  "main": "discord.js",
   "scripts": {
-    "start": "node targetServer.js"
+    "discord": "node discord",
+    "docker-production": " cd GoMonitor && docker build -t go-monitors . && docker run --publish 7243:7243 go-monitors",
+    "production": "cd GoMonitor && npm run docker-production",
+    "production-build": "cd GoMonitor && go build && ./prada-monitors-go"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "cheerio": "^1.0.0-rc.5",
-    "cors": "^2.8.5",
-    "delay": "^4.4.0",
+    "delay": "^4.4.1",
     "discord": "^0.8.2",
     "discord.js": "^12.5.1",
-    "express": "^4.17.1",
     "fs": "0.0.1-security",
-    "mongoose": "^5.11.13",
-    "newrelic": "^7.1.0",
-    "node-fetch": "^2.6.1",
-    "path": "^0.12.7",
-    "playwright-chromium": "^1.9.1",
-    "puppeteer": "^8.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "tough-cookie": "^4.0.0",
-    "webhook-discord": "^3.7.7",
-    "zlib": "^1.0.5"
+    "tough-cookie": "^4.0.0"
   }
 }
