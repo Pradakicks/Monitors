@@ -267,6 +267,7 @@ function deleteSku(clients, triggerText, replyText) {
           let caseSite = site.toUpperCase();
   
           let currentBody = skuBank[caseSite][SKU];
+          // console.log(skuBank[caseSite]);
           const { group, isValidated } = await checkIfUserValidated(message);
   
           if (isValidated) {
@@ -491,7 +492,7 @@ async function mass(string, content, message, groupName) {
         let isContinue = true;
         let SKU;
         let pricerange = '';
-        SKU = g[i];
+        SKU = g[i].trim();
         let original = g[i];
         if (g[i].includes('[')) {
           pricerange = g[i].split('[')[1].split(']')[0];
@@ -857,7 +858,7 @@ async function checkIfUserValidated(message) {
   // console.log(parsed)
   parsed.forEach((e) => {
     let id = e?.split('-')[0];
-    console.log(id, message.author.id);
+    // console.log(id, message.author.id);
     if (id == message.author.id) {
       returnObj.isValidated = true;
       returnObj.group = e?.split('-')[1];
