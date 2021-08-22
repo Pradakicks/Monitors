@@ -19,29 +19,32 @@ client.once('ready', () => {
 	console.log(bot_info.name);
 	console.log(bot_info.version);
 
-	findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
+	// findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
 	// Add Skus
-	SKUADD(client, '!skuadd', 'Testing');
-	SKUADD(client, '!add', 'Testing');
-	SKUADD(client, '!a', 'Testing');
+	// SKUADD(client, '!skuadd', 'Testing');
+	// SKUADD(client, '!add', 'Testing');
+	// SKUADD(client, '!a', 'Testing');
+	// massAdd(client, '!skuadd', 'Testing');
+	massAdd(client, '!add', 'Testing');
+	// massAdd(client, '!a', 'Testing');
 	// Remove
-	deleteSku(client, '!deleteSku', 'Deleted')
+	// deleteSku(client, '!deleteSku', 'Deleted')
 	deleteSku(client, '!rm', 'Deleted')
 	deleteSku(client, '!remove', 'Deleted')
 	deleteSku(client, '!delete', 'Deleted')
-	deleteSku(client, '!skudelete', 'Deleted')
-	deleteSku(client, '!skuremove', 'Deleted')
-	deleteSku(client, '!removesku', 'Deleted')
+	// deleteSku(client, '!skudelete', 'Deleted')
+	// deleteSku(client, '!skuremove', 'Deleted')
+	// deleteSku(client, '!removesku', 'Deleted')
 
 	// Checking Bank
-	checkBank(client, '!checkBank', 'Returned')
+	// checkBank(client, '!checkBank', 'Returned')
 	checkBank(client, '!check', 'Returned')
 	checkBank(client, '!bank', 'Returned')
 	checkBank(client, '!running', 'Returned')
 	checkBank(client, '!list', 'Returned')
 
 	// Mass Add
-	massAdd(client, '!massAdd', 'Returned')
+	// massAdd(client, '!massAdd', 'Returned')
 	massAdd(client, '!madd', 'Returned')
 	massAdd(client, '!mass', 'Returned')
 
@@ -89,7 +92,7 @@ client.on("message", (msg) => {
 		**!list** 
 		Returns running products
 
-		**!massAdd [site] [SKU] [SKU] [SKU] **
+		**!add [site] [SKU] [SKU] [SKU] **
 		Ability to add multiple skus at a time 
 
 		**!walmart [SKU]** 

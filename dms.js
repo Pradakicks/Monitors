@@ -31,28 +31,29 @@ function SKUADD(clients, triggerText, replyText) {
         const { group, isValidated } = await checkIfUserValidated(message);
         console.log(group);
         if (isValidated) {
-          let space = content.split(` `)
           const site = content.split(' ')[1];
+          // let spaces = content.split(' ')
+          // if(spaces.length)
           let original = content.split(`${site} `)[1];
           let SKU = content.split(' ')[2];
-          if (content.includes('[') && site.toUpperCase() !== 'TARGETNEW') {
-            pricerange = content.split('[')[1].split(']')[0];
-          }
-          if (site.toUpperCase() == 'TARGETNEW') {
-            let kwArray = content.split('[')[1].split(']')[0];
-            console.log(kwArray);
-            let eachItem = kwArray.split(',');
-            eachItem.forEach((e) => {
-              kw.push(e);
-            });
-          }
-          
+          // if (content.includes('[') && site.toUpperCase() !== 'TARGETNEW') {
+          //   pricerange = content.split('[')[1].split(']')[0];
+          // }
+
+          // if (site.toUpperCase() == 'TARGETNEW') {
+          //   let kwArray = content.split('[')[1].split(']')[0];
+          //   console.log(kwArray);
+          //   let eachItem = kwArray.split(',');
+          //   eachItem.forEach((e) => {
+          //     kw.push(e);
+          //   });
+          // }
+
           console.log(site);
           console.log(SKU);
           console.log(content);
           console.log(original);
           console.log(pricerange);
-
           if (SKU.length > 1 && site.length > 1) {
             let isContinue = true;
             let skuBank = await getSkuBank();
@@ -228,7 +229,6 @@ function SKUADD(clients, triggerText, replyText) {
               message.channel.send(`${SKU} Added to ${site}`);
             }
           }
-
         } else {
           message.channel.send(`${message.author} is not a validated user`);
         }
@@ -252,70 +252,80 @@ function deleteSku(clients, triggerText, replyText) {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
         const content = message.content;
         const site = content.split(' ')[1];
-        const SKU = content.split(' ')[2];
-        console.log(site);
-        console.log(`SKU - ${SKU}`);
-        console.log(content);
-        let skuBank = await getSkuBank();
-        let caseSite = site.toUpperCase();
-        let currentBody = skuBank[caseSite][SKU];
-        const { group, isValidated } = await checkIfUserValidated(message);
 
-        if (isValidated) {
-          if (currentBody === undefined) {
-            console.log('undefined body');
-            message.channel.send(
-              `${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(
-                site
-              )}`
-            );
-          } else {
-            console.log('Current length');
-            console.log(currentBody.companies.length);
-            message.channel.send(
-              `Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`
-            );
-            if (currentBody.companies.length > 1) {
-              for (let i = 0; i < currentBody.companies.length; i++) {
-                if ((currentBody.companies[i].company = group)) {
-                  console.log(currentBody.companies);
-                  currentBody.companies.splice(i, 1);
-                  console.log(currentBody.companies);
-                  skuBank[caseSite][SKU].companies = currentBody.companies;
-                  await updateSku(site, SKU, skuBank[caseSite][SKU]);
-                }
-                message.channel.send(
-                  `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
-                );
-              }
+        let spaceLength = content.split(" ")
+        console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`)
+        spaceLength.splice(0, 1)
+        spaceLength.splice(0, 1)
+        console.log(`Space : ${spaceLength} : ${spaceLength.length}`)
+
+        spaceLength.forEach(async SKU => {
+          console.log(site);
+          console.log(`SKU - ${SKU}`);
+          console.log(content);
+          let skuBank = await getSkuBank();
+          let caseSite = site.toUpperCase();
+  
+          let currentBody = skuBank[caseSite][SKU];
+          const { group, isValidated } = await checkIfUserValidated(message);
+  
+          if (isValidated) {
+            if (currentBody === undefined) {
+              console.log('undefined body');
+              message.channel.send(
+                `${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(
+                  site
+                )}`
+              );
             } else {
-              currentBody.stop = true;
-              console.log(currentBody);
-              if (group == currentBody.companies[0].company) {
-                console.log('Perm Delete');
-
-                await updateSku(site, SKU, currentBody);
-                await delay(10000);
-                await deleteSkuEnd(site, SKU);
-                message.channel.send(
-                  `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
-                );
+              console.log('Current length');
+              console.log(currentBody.companies.length);
+              message.channel.send(
+                `Deleting ${SKU} from ${replaceWithTheCapitalLetter(site)}...`
+              );
+              if (currentBody.companies.length > 1) {
+                for (let i = 0; i < currentBody.companies.length; i++) {
+                  if ((currentBody.companies[i].company = group)) {
+                    console.log(currentBody.companies);
+                    currentBody.companies.splice(i, 1);
+                    console.log(currentBody.companies);
+                    skuBank[caseSite][SKU].companies = currentBody.companies;
+                    await updateSku(site, SKU, skuBank[caseSite][SKU]);
+                  }
+                  message.channel.send(
+                    `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
+                  );
+                }
               } else {
-                console.log(`${group} is not present for this sku`);
-                message.channel.send(
-                  `${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(
-                    site
-                  )}`
-                );
-                message.channel.send(
-                  `If this is an error please contact developer`
-                );
+                currentBody.stop = true;
+                console.log(currentBody);
+                if (group == currentBody.companies[0].company) {
+                  console.log('Perm Delete');
+  
+                  await updateSku(site, SKU, currentBody);
+                  await delay(10000);
+                  await deleteSkuEnd(site, SKU);
+                  message.channel.send(
+                    `${SKU} Deleted From ${replaceWithTheCapitalLetter(site)}`
+                  );
+                } else {
+                  console.log(`${group} is not present for this sku`);
+                  message.channel.send(
+                    `${SKU} Not Present \nCannot Delete ${SKU} from ${replaceWithTheCapitalLetter(
+                      site
+                    )}`
+                  );
+                  message.channel.send(
+                    `If this is an error please contact developer`
+                  );
+                }
               }
             }
+          } else {
+            message.channel.send(`${message.author} is not a validated user`);
           }
-        } else {
-          message.channel.send(`${message.author} is not a validated user`);
-        }
+        })
+        // const SKU = content.split(' ')[2];
         return;
       }
     });
@@ -443,14 +453,21 @@ async function startGoMonitor(currentBody, site) {
 }
 
 async function mass(string, content, message, groupName) {
-  const site = content?.split(' ')[1]?.split('\n')[0].trim();
-  console.log(content?.split(' ')[1]?.split('\n')[0].length);
-  console.log(site.toUpperCase().length);
+  let spaceLength = content.split(" ")
+  console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`)
+  spaceLength.splice(0, 1)
+  spaceLength.splice(0, 1)
+  console.log(`Space : ${spaceLength} : ${spaceLength.length}`)
+  const site = content?.split(' ')[1]
+  // console.log(content?.split(' ')[1].length);
+  // console.log(site.toUpperCase().length);
   console.log(site);
+  
   let validatedIds = await getValidatedIds();
   let parsed = JSON.parse(validatedIds);
   let isValidated = false;
   let group;
+
   if (message) {
     parsed.forEach((e) => {
       let id = e?.split('-')[0];
@@ -467,7 +484,7 @@ async function mass(string, content, message, groupName) {
   if (isValidated) {
     //	const SKU = content.split(' ')[2];
     //	console.log(site)
-    let g = string.split('\n');
+    let g = spaceLength
     //	console.log(g)
     for (let i = 0; i < g.length; i++) {
       if (!g[i].toUpperCase().includes('!MASSADD')) {
