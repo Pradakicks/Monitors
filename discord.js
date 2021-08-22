@@ -20,14 +20,33 @@ client.once('ready', () => {
 	console.log(bot_info.version);
 
 	findCommand(client, '!Add', 'Enter SKU like this\n[!]SKUAdd [SKU-NOBRACKETS]');
+	// Add Skus
 	SKUADD(client, '!skuadd', 'Testing');
+	SKUADD(client, '!add', 'Testing');
+	SKUADD(client, '!a', 'Testing');
+	// Remove
 	deleteSku(client, '!deleteSku', 'Deleted')
+	deleteSku(client, '!rm', 'Deleted')
+	deleteSku(client, '!remove', 'Deleted')
+	deleteSku(client, '!delete', 'Deleted')
 	deleteSku(client, '!skudelete', 'Deleted')
 	deleteSku(client, '!skuremove', 'Deleted')
 	deleteSku(client, '!removesku', 'Deleted')
+
+	// Checking Bank
 	checkBank(client, '!checkBank', 'Returned')
+	checkBank(client, '!check', 'Returned')
+	checkBank(client, '!bank', 'Returned')
+	checkBank(client, '!running', 'Returned')
+	checkBank(client, '!list', 'Returned')
+
+	// Mass Add
 	massAdd(client, '!massAdd', 'Returned')
+	massAdd(client, '!madd', 'Returned')
+	massAdd(client, '!mass', 'Returned')
+
 	validateUser(client, '!validate', 'Returned')
+	
 	walmartScraper(client, '!walmart', 'Returned')
 	
 	client.users.fetch('202862796965150720').then((user) => {
@@ -58,18 +77,23 @@ client.on("message", (msg) => {
 		.setColor('#24223a')
 		.setTitle('Command List')
 		.setDescription(`\n
-		!validate [apikey] - *Validates User*
-		!skuadd [SITE] [SKU] - *Add product to site*
-		!deletesku [SITE] [SKU] - *Delete product from site*
-		!checkbank - *Returns running products*
+		**!validate [apikey]**
+		Validates User
 
-		!massAdd [site]
-		[SKU]
-		[SKU]
-		[SKU] 
-		*Ability to add multiple skus at a time *
+		**!add [SITE] [SKU] **
+		Add product to site
 
-		!walmart [SKU] - *Scrapes Specific Walmart Product*
+		**!remove [SITE] [SKU]** 
+	 	Delete product from site
+
+		**!list** 
+		Returns running products
+
+		**!massAdd [site] [SKU] [SKU] [SKU] **
+		Ability to add multiple skus at a time 
+
+		**!walmart [SKU]** 
+		Scrapes Specific Walmart Product
 
 		*Without brackets and replace SITE and SKU.*
 		*If you have any issues feel to ask questions in tickets.*

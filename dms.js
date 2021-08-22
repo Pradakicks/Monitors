@@ -31,6 +31,7 @@ function SKUADD(clients, triggerText, replyText) {
         const { group, isValidated } = await checkIfUserValidated(message);
         console.log(group);
         if (isValidated) {
+          let space = content.split(` `)
           const site = content.split(' ')[1];
           let original = content.split(`${site} `)[1];
           let SKU = content.split(' ')[2];
@@ -45,12 +46,13 @@ function SKUADD(clients, triggerText, replyText) {
               kw.push(e);
             });
           }
-
+          
           console.log(site);
           console.log(SKU);
           console.log(content);
           console.log(original);
           console.log(pricerange);
+
           if (SKU.length > 1 && site.length > 1) {
             let isContinue = true;
             let skuBank = await getSkuBank();
@@ -226,6 +228,7 @@ function SKUADD(clients, triggerText, replyText) {
               message.channel.send(`${SKU} Added to ${site}`);
             }
           }
+
         } else {
           message.channel.send(`${message.author} is not a validated user`);
         }
