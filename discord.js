@@ -117,7 +117,7 @@ client.on("message", (msg) => {
 		.setColor('#24223a')
 		.setTitle('Command List')
 		.setDescription(`\n
-		**!validate [apikey]**
+		**!validate apikey-[apikey]**
 		Validates User
 
 		**!add [SITE] [SKU] **
