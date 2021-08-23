@@ -51,11 +51,48 @@ client.once('ready', () => {
 	validateUser(client, '!validate', 'Returned')
 	
 	walmartScraper(client, '!walmart', 'Returned')
+	testPage(client, '!test', 'Returned')
 	
 	client.users.fetch('202862796965150720').then((user) => {
 		user.send('Hello World');
 	});
-});
+
+	function testPage(clients, triggerText, replyText) {
+		try {
+		  clients.on('message', async (message) => {
+			if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
+			  // message.author.send(replyText);
+			  const Pagination = require('discord-paginationembed');
+			  const embeds = [];
+			  for (let i = 1; i <= 5; ++i)
+			  embeds.push(new Discord.MessageEmbed().addField('Page', i));
+			  
+			  const myImage = message.author.displayAvatarURL();
+			  
+			  new Pagination.Embeds()
+			  .setArray(embeds)
+			  .setAuthorizedUsers([message.author.id])
+			  .setChannel(message.channel)
+			  .setPageIndicator(true)
+			  .setPage(3)
+			  // Methods below are for customising all embeds
+			  .setImage(myImage)
+			  .setThumbnail(myImage)
+			  .setTitle('Test Title')
+			  .setDescription('Test Description')
+			  .setFooter('Prada Monitors')
+			  .setURL(myImage)
+			  .setColor(0xFF00AE)
+			  .addField('\u200b', '\u200b')
+			  .build();
+			}
+		  });
+		} catch (error) {
+		  console.log(error);
+		}
+	  }
+	
+		});
 
 
 client.on('message', async  msg => {

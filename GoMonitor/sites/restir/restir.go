@@ -315,13 +315,13 @@ func (m *CurrentMonitor) sendWebhook(sku string, name string, price string, link
 	fmt.Println("Testing Here : ", m.Monitor.MonitorProduct.Name, "Here")
 	t := time.Now().UTC()
 
-	// for _, comp := range m.Monitor.CurrentCompanies {
+	for _, comp := range m.Monitor.CurrentCompanies {
 	// fmt.Println(comp.Company)
-	currentCompany := Types.Company{Company: "Test", Webhook: "https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW", Color: "1752220", CompanyImage: "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"}
+	// currentCompany := Types.Company{Company: "Test", Webhook: "https://discord.com/api/webhooks/797249480410923018/NPL3ktXS78z5EHo_cpYyrtFl_2iB0ARgz9IW5kwAZA-UkiseiinnBmUPJZlGgxw8TZiW", Color: "1752220", CompanyImage: "https://cdn.discordapp.com/attachments/802755133582475315/842627264482508820/unknown.png"}
 
-	go m.webHookSend(currentCompany, sku, m.Monitor.Config.Site, name, price, link, t, image)
-	// go m.webHookSend(comp, sku, m.Monitor.Config.Site, name, price, link, t, image)
-	// }
+	// go m.webHookSend(currentCompany, sku, m.Monitor.Config.Site, name, price, link, t, image)
+	go m.webHookSend(comp, sku, m.Monitor.Config.Site, name, price, link, t, image)
+	}
 	return nil
 }
 

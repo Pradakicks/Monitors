@@ -174,6 +174,7 @@ function SKUADD(clients, triggerText, replyText) {
                 case 'BIGLOTS':
                 case 'HOMEDEPOT':
                 case 'SHOPIFY':
+                case 'SHOPIFY':
                 case 'FANATICSNEWPRODUCTS':
                   await pushSku(currentObj);
                   startGoMonitor(currentBody, site.toUpperCase());
@@ -253,23 +254,23 @@ function deleteSku(clients, triggerText, replyText) {
         const content = message.content;
         const site = content.split(' ')[1];
 
-        let spaceLength = content.split(" ")
-        console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`)
-        spaceLength.splice(0, 1)
-        spaceLength.splice(0, 1)
-        console.log(`Space : ${spaceLength} : ${spaceLength.length}`)
+        let spaceLength = content.split(' ');
+        console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`);
+        spaceLength.splice(0, 1);
+        spaceLength.splice(0, 1);
+        console.log(`Space : ${spaceLength} : ${spaceLength.length}`);
 
-        spaceLength.forEach(async SKU => {
+        spaceLength.forEach(async (SKU) => {
           console.log(site);
           console.log(`SKU - ${SKU}`);
           console.log(content);
           let skuBank = await getSkuBank();
           let caseSite = site.toUpperCase();
-  
+
           let currentBody = skuBank[caseSite][SKU];
           // console.log(skuBank[caseSite]);
           const { group, isValidated } = await checkIfUserValidated(message);
-  
+
           if (isValidated) {
             if (currentBody === undefined) {
               console.log('undefined body');
@@ -302,7 +303,7 @@ function deleteSku(clients, triggerText, replyText) {
                 console.log(currentBody);
                 if (group == currentBody.companies[0].company) {
                   console.log('Perm Delete');
-  
+
                   await updateSku(site, SKU, currentBody);
                   await delay(10000);
                   await deleteSkuEnd(site, SKU);
@@ -325,7 +326,7 @@ function deleteSku(clients, triggerText, replyText) {
           } else {
             message.channel.send(`${message.author} is not a validated user`);
           }
-        })
+        });
         // const SKU = content.split(' ')[2];
         return;
       }
@@ -454,16 +455,16 @@ async function startGoMonitor(currentBody, site) {
 }
 
 async function mass(string, content, message, groupName) {
-  let spaceLength = content.split(" ")
-  console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`)
-  spaceLength.splice(0, 1)
-  spaceLength.splice(0, 1)
-  console.log(`Space : ${spaceLength} : ${spaceLength.length}`)
-  const site = content?.split(' ')[1]
+  let spaceLength = content.split(' ');
+  console.log(`Space Length : ${spaceLength} : ${spaceLength.length}`);
+  spaceLength.splice(0, 1);
+  spaceLength.splice(0, 1);
+  console.log(`Space : ${spaceLength} : ${spaceLength.length}`);
+  const site = content?.split(' ')[1];
   // console.log(content?.split(' ')[1].length);
   // console.log(site.toUpperCase().length);
   console.log(site);
-  
+
   let validatedIds = await getValidatedIds();
   let parsed = JSON.parse(validatedIds);
   let isValidated = false;
@@ -485,7 +486,7 @@ async function mass(string, content, message, groupName) {
   if (isValidated) {
     //	const SKU = content.split(' ')[2];
     //	console.log(site)
-    let g = spaceLength
+    let g = spaceLength;
     //	console.log(g)
     for (let i = 0; i < g.length; i++) {
       if (!g[i].toUpperCase().includes('!MASSADD')) {
@@ -607,12 +608,14 @@ async function mass(string, content, message, groupName) {
             case 'SLICK':
             case 'SLICKDEAL':
             case 'BIGLOTS':
-            case 'BIGLOTS': {
+            case 'HOMEDEPOT':
+            case 'SHOPIFY':
+            case 'SHOPIFY':
+            case 'FANATICSNEWPRODUCTS':
+            case 'RESTIR':
               await pushSku(currentObj);
-              console.log(currentBody);
               startGoMonitor(currentBody, site.toUpperCase());
               break;
-            }
             case 'NEWEGG': {
               await pushSku(currentObj);
               currentBody['skuName'] = await getSku(SKU, proxyList);
@@ -811,7 +814,7 @@ async function validateUser(clients, triggerText, replyText) {
     clients.on('message', async (message) => {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
         let content = message.content.split('!validate')[1];
-        let apikey = content?.split('apikey-')[1]
+        let apikey = content?.split('apikey-')[1];
         if (apikey == undefined) {
           message.reply('Please Submit Valid Api Key!');
         } else {
