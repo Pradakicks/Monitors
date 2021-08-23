@@ -814,11 +814,11 @@ async function validateUser(clients, triggerText, replyText) {
     clients.on('message', async (message) => {
       if (message.content.toLowerCase().includes(triggerText.toLowerCase())) {
         let content = message.content.split('!validate')[1];
-        let apikey = content?.split('apikey-')[1];
+        let apikey = content?.split('apikey-')[1].trim()
         if (apikey == undefined) {
           message.reply('Please Submit Valid Api Key!');
         } else {
-          console.log(apikey);
+          console.log(`Api Key : ${apikey}`);
           let isPresent = false;
           const discordIdsDB = await getValidatedIds();
           Object.keys(config.groups).forEach(async (e) => {
