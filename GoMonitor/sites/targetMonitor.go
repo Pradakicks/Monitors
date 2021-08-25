@@ -162,6 +162,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *CurrentMonito
 	m.Monitor.MonitorProduct.StockNumberInt = 10
 	m.Monitor.MonitorProduct.Price = 0
 	m.Monitor.MonitorProduct.Image = "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png"
+	m.IsLoaded = false
 	m.getProductImage(sku)
 	proxyList := FetchProxies.Get()
 	i := true
