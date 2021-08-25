@@ -162,7 +162,7 @@ func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *CurrentMonito
 	m.Monitor.MonitorProduct.StockNumberInt = 10
 	m.Monitor.MonitorProduct.Price = 0
 	m.Monitor.MonitorProduct.Image = "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png"
-	m.IsLoaded = false
+	m.IsLoaded = true
 	m.getProductImage(sku)
 	proxyList := FetchProxies.Get()
 	i := true
@@ -217,7 +217,7 @@ func (m *CurrentMonitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Target - Status Code %d : %t : %s :  Milliseconds elapsed: %v \n", res.StatusCode, m.Monitor.AvailabilityBool, m.Monitor.Config.Sku, watch.Milliseconds())
+		fmt.Printf("Target - Status Code %d : %t : %s : Loaded : %t Milliseconds elapsed: %v \n", res.StatusCode, m.Monitor.AvailabilityBool, m.Monitor.Config.Sku, m.IsLoaded, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -272,7 +272,7 @@ func webHookSend(c Types.Company, site string, sku string, name string, price in
 		"content": null,
 		"embeds": [
 		  {
-			"title": "%s CurrentMonitor",
+			"title": "%s Monitor",
 			"url": "https://www.target.com/p/prada/-/A-%s",
 			"color": %s,
 			"fields": [
