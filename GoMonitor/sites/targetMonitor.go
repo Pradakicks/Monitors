@@ -6,10 +6,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/bradhe/stopwatch"
+	"github.com/elgs/gojq"
+	"github.com/nickname32/discordhook"
+	"github.com/pkg/errors"
+	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
 )
@@ -141,8 +146,10 @@ type Company struct {
 	CompanyImage string `json:"companyImage"`
 }
 type CurrentMonitor struct {
-	Monitor  Types.Monitor
-	IsLoaded bool
+	Monitor            Types.Monitor
+	IsLoaded           bool
+	IsRedCardExclusive bool
+	PromotionMessage string
 }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *CurrentMonitor {
@@ -258,7 +265,17 @@ func (m *CurrentMonitor) monitor() error {
 		if m.Monitor.MonitorProduct.Image == "https://assets.targetimg1.com/ui/images/349988df76a1d9bf0ccc60310d50d3a5_Basket2x.png" {
 			m.getProductImage(m.Monitor.Config.Sku)
 			go m.sendWebhook()
+		} else {
+			if !m.IsRedCardExclusive{
+				m.getProductImage(m.Monitor.Config.Sku)
+				if m.IsRedCardExclusive {
+					go m.sendWebhook()
+				}
+			}
 		}
+			
+			
+		
 	}
 	if m.Monitor.AvailabilityBool && !m.Monitor.CurrentAvailabilityBool {
 		fmt.Println("Item Out Of Stock")
@@ -267,77 +284,6 @@ func (m *CurrentMonitor) monitor() error {
 	return nil
 }
 
-func webHookSend(c Types.Company, site string, sku string, name string, price int, stockNum int, time string, image string) {
-	payload := strings.NewReader(fmt.Sprintf(`{
-		"content": null,
-		"embeds": [
-		  {
-			"title": "%s Monitor",
-			"url": "https://www.target.com/p/prada/-/A-%s",
-			"color": %s,
-			"fields": [
-			  {
-				"name": "Product Name",
-				"value": "%s"
-			  },
-			  {
-				"name": "Product Availability",
-				"value": "In Stock",
-				"inline": true
-			  },
-			  {
-				"name": "Price",
-				"value": "%d",
-				"inline": true
-			  },
-			  {
-				"name": "Tcin",
-				"value": "%s",
-				"inline": true
-			  },
-			  {
-				"name": "Stock Number",
-				"value": "%d"
-			  },
-			  {
-				"name": "Links",
-				"value": "[Product](https://www.target.com/p/prada/-/A-%s) | [Cart](https://www.target.com/co-cart)"
-			  }
-			],
-			"footer": {
-			  "text": "Prada#4873"
-			},
-			"timestamp": "%s",
-			"thumbnail": {
-			  "url": "%s"
-			}
-		  }
-		],
-		"avatar_url": "%s"
-	  }`, site, sku, c.Color, name, price, sku, stockNum, sku, time, image, c.CompanyImage))
-	req, err := http.NewRequest("POST", c.Webhook, payload)
-	if err != nil {
-		fmt.Println(err)
-	}
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("dnt", "1")
-	req.Header.Add("accept-language", "en")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36")
-	req.Header.Add("content-type", "application/json")
-	req.Header.Add("sec-fetch-site", "cross-site")
-	req.Header.Add("sec-fetch-mode", "cors")
-	req.Header.Add("sec-fetch-dest", "empty")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer res.Body.Close()
-	fmt.Println(res)
-	fmt.Println(payload)
-	return
-}
 func (m *CurrentMonitor) sendWebhook() error {
 	defer func() {
 		if r := recover(); r != nil {
@@ -349,12 +295,14 @@ func (m *CurrentMonitor) sendWebhook() error {
 			m.Monitor.MonitorProduct.Name = strings.Replace(m.Monitor.MonitorProduct.Name, `"`, "", -1)
 		}
 	}
-	t := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+	t := time.Now().UTC()
 
 	for _, comp := range m.Monitor.CurrentCompanies {
 		fmt.Println(comp.Company)
-		fmt.Println(comp.Company)
-		go webHookSend(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, m.Monitor.MonitorProduct.StockNumberInt, t, m.Monitor.MonitorProduct.Image)
+		// fmt.Println(comp.Company)
+		link := fmt.Sprintf("https://www.target.com/p/prada/-/A-%s", m.Monitor.Config.Sku)
+		go m.sendWeb(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, link, t, m.Monitor.MonitorProduct.Image, m.Monitor.MonitorProduct.StockNumberInt,)
+		// go webHookSend(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, m.Monitor.MonitorProduct.StockNumberInt, t, m.Monitor.MonitorProduct.Image)
 	}
 	return nil
 }
@@ -394,18 +342,97 @@ func (m *CurrentMonitor) getProductImage(tcin string) {
 	fmt.Println(res.StatusCode)
 	var realBody MyJsonName
 	err = json.Unmarshal(body, &realBody)
-	res.Body.Close()
 	if err != nil {
-		fmt.Println(err)
-		return
+		fmt.Println(err, "line 403")
 	}
+	parser, err := gojq.NewStringQuery(string(body))
+	if err != nil {
+		fmt.Println(err, "line 401")
+	}
+	r, err := parser.QueryToString("data.product.promotions.[0].pdp_message")
+	if err != nil {
+		fmt.Println(err, "line 344")
+		m.IsRedCardExclusive = false
+		// fmt.Println(v)
+		// return
+	} else {
+		m.IsRedCardExclusive = true
+		m.PromotionMessage = r
+		fmt.Println(r)
+	}
+	res.Body.Close()
+
 	m.Monitor.MonitorProduct.Name = realBody.Data.Product.Item.ProductDescription.Title
 	m.Monitor.MonitorProduct.Image = realBody.Data.Product.Item.Enrichment.Images.PrimaryImageURL
 	m.Monitor.MonitorProduct.Price = int(realBody.Data.Product.Price.CurrentRetail)
 	fmt.Println(m.Monitor.MonitorProduct.Image)
-	return
 }
 
+func (m *CurrentMonitor) sendWeb(c Types.Company, site string, sku string, name string, price int, link string, currentTime time.Time, image string, Qty int) {
+	Color, err := strconv.Atoi(c.Color)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println(errors.Cause(err))
+		return
+	}
+	Quantity := strconv.Itoa(Qty)
+	Price := fmt.Sprintf("%d", price)
+	var currentFields []*discordhook.EmbedField
+	currentFields = append(currentFields, &discordhook.EmbedField{
+		Name:   "Product Name",
+		Value:  name,
+		Inline: false,
+	})
+	currentFields = append(currentFields, &discordhook.EmbedField{
+		Name:   "Tcin",
+		Value:  sku,
+		Inline: false,
+	})
+	currentFields = append(currentFields, &discordhook.EmbedField{
+		Name:   "Price",
+		Value:  Price,
+		Inline: true,
+	})
+	currentFields = append(currentFields, &discordhook.EmbedField{
+		Name:   "Stock #",
+		Value:  Quantity,
+		Inline: true,
+	})
+	if m.IsRedCardExclusive {
+		currentFields = append(currentFields, &discordhook.EmbedField{
+			Name:   "Promotions",
+			Value:  m.PromotionMessage,
+			Inline: true,
+		})
+	}
+
+	currentFields = append(currentFields, &discordhook.EmbedField{
+		Name:  "Links",
+		Value: "[Product](" + link + ") | [Cart](https://www.target.com/co-cart)",
+	})
+	var discordParams discordhook.WebhookExecuteParams = discordhook.WebhookExecuteParams{
+		Content: "",
+		Embeds: []*discordhook.Embed{
+			{
+				Title:  site + " Monitor",
+				URL:    link,
+				Color:  Color,
+				Fields: currentFields,
+				Footer: &discordhook.EmbedFooter{
+					Text: "Prada#4873",
+				},
+				Timestamp: &currentTime,
+				Thumbnail: &discordhook.EmbedThumbnail{
+					URL: image,
+				},
+				Provider: &discordhook.EmbedProvider{
+					URL: c.CompanyImage,
+				},
+			},
+		},
+	}
+	go Webhook.SendWebhook(c.Webhook, &discordParams)
+}
 func Target(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL)
 	w.Header().Set("Content-Type", "application/json")

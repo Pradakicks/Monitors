@@ -211,10 +211,9 @@ func getProxies(w http.ResponseWriter, r *http.Request) {
 				for k, values := range jsonMap {
 					if k == "proxies" {
 						var proxyList = make([]string, 0)
-						for _, proxies := range values.(map[string]interface{}) {
-							proxyList = append(proxyList, proxies.(string))
+						for _, proxy := range values.([]interface{}) {
+							proxyList = append(proxyList, proxy.(string))
 						}
-
 						var currentResponse Types.ProxyResponseType = Types.ProxyResponseType{
 							Proxies: proxyList,
 						}

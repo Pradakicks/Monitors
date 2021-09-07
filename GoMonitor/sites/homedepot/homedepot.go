@@ -138,7 +138,7 @@ func (m *CurrentMonitor) monitor() error {
 	}
 	payload := bytes.NewReader(payloadBytes)
 
-	req, err := http.NewRequest("POST", "https://www.homedepot.com/product-information/model?opname=mediaPriceInventory", payload)
+	req, err := http.NewRequest("post", "https://www.homedepot.com/product-information/model?opname=mediaPriceInventory", payload)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println(errors.Cause(err))
@@ -157,7 +157,7 @@ func (m *CurrentMonitor) monitor() error {
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Pragma", "no-cache")
 	req.Header.Add("Cache-Control", "no-cache")
-	req.Header.Add("TE", "Trailers")
+	// req.Header.Add("TE", "Trailers")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -189,25 +189,33 @@ func (m *CurrentMonitor) monitor() error {
 		fmt.Println(errors.Cause(err))
 		return nil
 	}
-	productQuantity := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].OnlineInventory.TotalQuantity
-	Price := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].Pricing.Value
-	Image := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].ImageLocation
-	Link := fmt.Sprintf("https://www.homedepot.com/p/prada/%s", m.Monitor.Config.Sku)
-	// productName := strings.Split(jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].ImageLocation, "")
-	if productQuantity > 0 {
-		m.Monitor.CurrentAvailabilityBool = true
+	fmt.Println(string(body))
+	fmt.Println(len(jsonResponse.Data.MediaPriceInventory.ProductDetailsList))
+
+	if len(jsonResponse.Data.MediaPriceInventory.ProductDetailsList) > 0 {
+		fmt.Println("Here")
+		productQuantity := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].OnlineInventory.TotalQuantity
+		Price := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].Pricing.Value
+		Image := jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].ImageLocation
+		Link := fmt.Sprintf("https://www.homedepot.com/p/prada/%s", m.Monitor.Config.Sku)
+		// productName := strings.Split(jsonResponse.Data.MediaPriceInventory.ProductDetailsList[0].ImageLocation, "")
+		if productQuantity > 0 {
+			m.Monitor.CurrentAvailabilityBool = true
+		} else {
+			m.Monitor.CurrentAvailabilityBool = false
+		}
+	
+		if !m.Monitor.AvailabilityBool && m.Monitor.CurrentAvailabilityBool {
+			fmt.Println("In Stock: ", productQuantity)
+			go m.sendWebhook(m.Monitor.Config.Sku, "Test", Price, Link, Image, productQuantity)
+		}
+	
+		m.Monitor.AvailabilityBool = m.Monitor.CurrentAvailabilityBool
 	} else {
 		m.Monitor.CurrentAvailabilityBool = false
+		m.Monitor.AvailabilityBool = m.Monitor.CurrentAvailabilityBool
 	}
-
-
-	if !m.Monitor.AvailabilityBool && m.Monitor.CurrentAvailabilityBool {
-		fmt.Println("In Stock: ", productQuantity)
-		go m.sendWebhook(m.Monitor.Config.Sku, "Test", Price, Link, Image, productQuantity)
-	}
-
-
-	m.Monitor.AvailabilityBool = m.Monitor.CurrentAvailabilityBool
+	
 	return nil
 }
 
