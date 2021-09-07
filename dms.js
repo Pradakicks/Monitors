@@ -19,7 +19,6 @@ let firstServer = `http://104.249.128.37`; // 12 Core z 24GB
 let secondServer = `http://104.249.128.207`;
 var proxyList = [];
 // let thirdSfirstServererver = `http://64.227.28.51`;
-getProxies();
 function SKUADD(clients, triggerText, replyText) {
   try {
     clients.on('message', async (message) => {
@@ -728,6 +727,7 @@ if (os.platform() == 'win32' || os.platform() == 'darwin') {
 } else {
   checkPresentSkus();
 }
+getProxies();
 
 async function getSkuBank() {
   let getbank = await rp.get({
@@ -1131,9 +1131,9 @@ async function getProxies() {
     return proxyList;
   } catch (err) {
     console.error(err);
-    fs.appendFileSync('./errors.txt', err.toString() + '\n', (err) => {
-      console.log(err);
-    });
+    // fs.appendFileSync('./errors.txt', err.toString() + '\n', (err) => {
+    //   console.log(err);
+    // });
   }
 }
 async function sendWebhook(body, webhook) {
