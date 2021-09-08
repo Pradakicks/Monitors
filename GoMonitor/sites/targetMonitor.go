@@ -149,7 +149,7 @@ type CurrentMonitor struct {
 	Monitor            Types.Monitor
 	IsLoaded           bool
 	IsRedCardExclusive bool
-	PromotionMessage string
+	PromotionMessage   string
 }
 
 func NewMonitor(sku string, priceRangeMin int, priceRangeMax int) *CurrentMonitor {
@@ -266,16 +266,14 @@ func (m *CurrentMonitor) monitor() error {
 			m.getProductImage(m.Monitor.Config.Sku)
 			go m.sendWebhook()
 		} else {
-			if !m.IsRedCardExclusive{
+			if !m.IsRedCardExclusive {
 				m.getProductImage(m.Monitor.Config.Sku)
 				if m.IsRedCardExclusive {
 					go m.sendWebhook()
 				}
 			}
 		}
-			
-			
-		
+
 	}
 	if m.Monitor.AvailabilityBool && !m.Monitor.CurrentAvailabilityBool {
 		fmt.Println("Item Out Of Stock")
@@ -301,7 +299,7 @@ func (m *CurrentMonitor) sendWebhook() error {
 		fmt.Println(comp.Company)
 		// fmt.Println(comp.Company)
 		link := fmt.Sprintf("https://www.target.com/p/prada/-/A-%s", m.Monitor.Config.Sku)
-		go m.sendWeb(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, link, t, m.Monitor.MonitorProduct.Image, m.Monitor.MonitorProduct.StockNumberInt,)
+		go m.sendWeb(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, link, t, m.Monitor.MonitorProduct.Image, m.Monitor.MonitorProduct.StockNumberInt)
 		// go webHookSend(comp, m.Monitor.Config.Site, m.Monitor.Config.Sku, m.Monitor.MonitorProduct.Name, m.Monitor.MonitorProduct.Price, m.Monitor.MonitorProduct.StockNumberInt, t, m.Monitor.MonitorProduct.Image)
 	}
 	return nil
