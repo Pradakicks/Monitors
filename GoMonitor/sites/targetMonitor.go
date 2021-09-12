@@ -224,7 +224,7 @@ func (m *CurrentMonitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Target - Status Code %d : %t : %s : Loaded : %t Milliseconds elapsed: %v \n", res.StatusCode, m.Monitor.AvailabilityBool, m.Monitor.Config.Sku, m.IsLoaded, watch.Milliseconds())
+		fmt.Printf("Target - Status Code %d : %t  : %s :Loaded : %t %s Milliseconds elapsed: %v \n", res.StatusCode, m.Monitor.AvailabilityBool, m.Monitor.Config.Sku, m.IsLoaded, res.Header["X-Cache"], watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
