@@ -28,6 +28,8 @@ import (
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
 	RestirMonitor "github.con/prada-monitors-go/sites/restir"
 	Shopify "github.con/prada-monitors-go/sites/shopify"
+	ShopifyLink "github.con/prada-monitors-go/sites/shopifyLink"
+	Amazon "github.con/prada-monitors-go/sites/amazon"
 	ShopifyProduct "github.con/prada-monitors-go/sites/shopifyProduct"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
@@ -571,10 +573,14 @@ func handleRequests() {
 	router.HandleFunc("/GAMESTOP", GameStopMonitor.GameStop).Methods("POST")
 	router.HandleFunc("/WALMARTNEW", WalmartNew.WalmartNew).Methods("POST")
 	router.HandleFunc("/SHOPIFY", Shopify.Shopify).Methods("POST")
+	router.HandleFunc("/SHOPIFYLINK", ShopifyLink.Shopify).Methods("POST")
 	router.HandleFunc("/HOMEDEPOT", HomeDepot.HomeDepot).Methods("POST")
 	router.HandleFunc("/SHOPIFYPRODUCT", ShopifyProduct.ShopifyProduct).Methods("POST")
 	router.HandleFunc("/FANATICSNEWPRODUCTS", FanaticsMonitor.FanaticsNewProducts).Methods("POST")
 	router.HandleFunc("/RESTIR", RestirMonitor.Restir).Methods("POST")
+
+	router.HandleFunc("/AMAZON", Amazon.Amazon).Methods("POST")
+	router.HandleFunc("/AMAZONSESSION", Amazon.AmazonSession).Methods("POST")
 
 	// Helper Routes
 	router.HandleFunc("/", getPage).Methods("GET")

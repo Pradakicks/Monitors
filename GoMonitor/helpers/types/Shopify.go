@@ -2,6 +2,7 @@ package Types
 
 type ShopifyNewProduct struct {
 	Store     string `json:"store,omitempty"`
+	Link     string `json:"link,omitempty"`
 	BodyHTML  string `json:"body_html,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 	Handle    string `json:"handle,omitempty"`

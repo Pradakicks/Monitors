@@ -3,6 +3,7 @@ const delay = require('delay');
 const fs = require('fs').promises;
 const config = require('./config.json');
 const os = require('os');
+const AmazonMod = require('./testamazon')
 //  var skuBank = []
 let pushEndpoint = 'https://monitors-9ad2c-default-rtdb.firebaseio.com/monitor';
 let discordIds =
@@ -261,6 +262,9 @@ function deleteSku(clients, triggerText, replyText) {
 
         spaceLength.forEach(async (SKU) => {
           console.log(site);
+          if(site.toLowerCase().includes("shopifylink")){
+            SKU = SKU.split("https://")[1]
+          }
           console.log(`SKU - ${SKU}`);
           console.log(content);
           let skuBank = await getSkuBank();
@@ -498,7 +502,9 @@ async function mass(string, content, message, groupName) {
           pricerange = g[i].split('[')[1].split(']')[0];
           SKU = g[i].split(' ')[0];
         }
-
+        if(site.toLowerCase().includes("shopifylink")){
+          SKU = SKU.split("https://")[1]
+        }
         console.log(`Site : ${site.toUpperCase()} : SKU : ${SKU} : Pos : ${i}`);
         let skuBank = await getSkuBank();
         let caseSite = site.toUpperCase();
@@ -609,7 +615,6 @@ async function mass(string, content, message, groupName) {
             case 'BIGLOTS':
             case 'HOMEDEPOT':
             case 'SHOPIFY':
-            case 'SHOPIFY':
             case 'FANATICSNEWPRODUCTS':
             case 'RESTIR':
               await pushSku(currentObj);
@@ -622,6 +627,25 @@ async function mass(string, content, message, groupName) {
               startGoMonitor(currentBody, site.toUpperCase());
               break;
             }
+            case 'AMAZON': {
+              await pushSku(currentObj);
+              let oid = SKU.split(":")[1]
+              let asin = SKU.split(":")[0]
+              currentBody['skuName'] = oid
+              currentBody['sku'] = asin
+              console.log(currentBody, SKU.split(":"));
+              await runAmazon(asin, oid)
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+            case 'SHOPIFYLINK':{
+              // currentObj.sku = currentObj.sku.split("https://")[1]
+              // currentBody.sku = currentBody.sku.split("https://")[1]
+              await pushSku(currentObj);
+              startGoMonitor(currentBody, site.toUpperCase());
+              break;
+            }
+
             case 'WALMART': {
               await pushSku(currentObj);
               console.log(currentBody);
@@ -1147,6 +1171,28 @@ async function sendWebhook(body, webhook) {
     console.log(error);
     return error?.statusCode;
   }
+}
+
+async function runAmazon(asin, oid){
+  let proxy1 = proxyList[Math.floor(Math.random() * proxyList.length)];
+
+  const task = { 
+    password: '',
+    proxy: `http://${proxy1.userAuth}:${proxy1.userPass}@${proxy1.ip}:${proxy1.port}`,
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
+    localUrl: `${firstServer}:${port}`,
+    taskInfo: {
+        asin: asin,
+        offerId: oid,
+        // productUrl: 'https://www.amazon.com/gp/product/B09979GS5W',
+        // priceRange: 1729.99,
+        // monitorDelay: 500,
+      // dom: ''
+    }
+}
+// console.log(task)
+  const d = new AmazonMod(task);
+  await d.run()
 }
 
 module.exports = {

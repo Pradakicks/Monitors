@@ -37,7 +37,29 @@ func ConnectDB() *mongo.Collection {
 	fmt.Println(databases)
 	return collection
 }
+func ConnectDBShopifyLink() *mongo.Collection {
 
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb+srv://main-monitor-users:FTqBIZL7HRkhsaL2@cluster0.yikgy.mongodb.net/monitorDB?retryWrites=true&w=majority")
+	// clientOptions := options.Client().ApplyURI("mongodb+srv://vibris-User:eIDpR4kttFu57FHE@vibris.jyxhh.mongodb.net/testing?retryWrites=true&w=majority")
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB Shopify!")
+
+	collection := client.Database("monitorDB").Collection("ShopifyLink")
+	databases, err := client.ListDatabaseNames(context.TODO(), bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(databases)
+	return collection
+}
 func ConnectDBMain() *mongo.Collection {
 
 	// Set client options
