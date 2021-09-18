@@ -67,8 +67,8 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 	proxyList := FetchProxies.Get()
 
 	time.Sleep(15000 * (time.Millisecond))
-	go m.Monitor.CheckStop()
-	time.Sleep(3000 * (time.Millisecond))
+	// go m.Monitor.CheckStop()
+	// time.Sleep(3000 * (time.Millisecond))
 
 	i := true
 	jar, _ := cookiejar.New(nil)
