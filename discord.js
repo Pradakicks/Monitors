@@ -54,7 +54,7 @@ client.once('ready', () => {
 	testPage(client, '!test', 'Returned')
 	
 	client.users.fetch('202862796965150720').then((user) => {
-		user.send('Hello World');
+		user.send('Run Amazon Skus');
 	});
 
 	function testPage(clients, triggerText, replyText) {
