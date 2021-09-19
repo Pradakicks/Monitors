@@ -90,7 +90,7 @@ class amazon {
       this.name = $('#productTitle').text();
       this.smid = $('input[id="merchantID"]').attr('value');
       this.sid = $('input[id="session-id"]').attr('value');
-      console.log(this.sid);
+      console.log(this.sid, this.image, this.name, this.smid);
     } catch (error) {
       console.log(error);
       await this.delay(this.taskInfo.monitorDelay);
@@ -176,6 +176,8 @@ class amazon {
         json: {
           sid: this.sid,
           csrf: this.csrftoke,
+          // image: this.image,
+          // name: this.name
         },
       });
       console.log(res.body)
