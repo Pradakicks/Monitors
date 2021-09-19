@@ -41,9 +41,9 @@ type AmazonResponse struct {
 }
 
 type CookieMonitorResponse struct {
-	Sid     string `json:"sid"`
+	Sid string `json:"sid"`
 	// cookies string `json:"cookies,omitempty"`
-	Csrf    string `json:"csrf"`
+	Csrf string `json:"csrf"`
 }
 
 // var client http.Client
@@ -159,12 +159,12 @@ func (m *CurrentMonitor) monitor() error {
 		watch.Stop()
 		fmt.Printf("Amazon %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
 	}()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(errors.Cause(err))
-		return nil
-	}
+	// body, err := ioutil.ReadAll(res.Body)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	fmt.Println(errors.Cause(err))
+	// 	return nil
+	// }
 
 	// var realBody AmazonResponse
 	// json.Unmarshal(body, &realBody)
@@ -188,7 +188,7 @@ func (m *CurrentMonitor) monitor() error {
 		currentC.CompanyImage = "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png"
 		t := time.Now().UTC()
 		go m.sendRestockNotification(m.oid, m.Monitor.Config.Sku, "Amazon Product")
-		go m.webHookSend(currentC, "Amazon", "Test Product", 999, "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png",t,"https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png", 1)
+		go m.webHookSend(currentC, "Amazon", "Test Product", 999, "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png", t, "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png", 1)
 	}
 
 	m.Monitor.AvailabilityBool = m.Monitor.CurrentAvailabilityBool
