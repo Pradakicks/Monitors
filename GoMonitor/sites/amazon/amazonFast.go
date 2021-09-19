@@ -157,7 +157,7 @@ func (m *CurrentMonitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		// fmt.Printf("Home Depot %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Amazon %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
 	}()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -170,8 +170,8 @@ func (m *CurrentMonitor) monitor() error {
 	// json.Unmarshal(body, &realBody)
 	// fmt.Println(realBody)
 
-	fmt.Println(res.StatusCode)
-	fmt.Println(string(body))
+	// fmt.Println(res.StatusCode)
+	// fmt.Println(string(body))
 
 	if res.StatusCode == 200 {
 		m.Monitor.CurrentAvailabilityBool = true
