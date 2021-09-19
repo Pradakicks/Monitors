@@ -124,7 +124,7 @@ func (m *CurrentMonitor) monitor() error {
 	url := "https://data.amazon.com/api/marketplaces/ATVPDKIKX0DER/cart/carts/retail/items?ref=aod_dpdsk_used_1"
 
 	payload := strings.NewReader(fmt.Sprintf("{\"items\":[{\"asin\":\"%s\",\"offerListingId\":\"%s\",\"quantity\":1}]}", m.Monitor.Config.Sku, m.oid))
-	fmt.Println(m.sid, m.csrf, m.Monitor.Config.Sku, m.oid)
+	// fmt.Println(m.sid, m.csrf, m.Monitor.Config.Sku, m.oid)
 	req, _ := http.NewRequest("POST", url, payload)
 
 	// req.Header.Add("Connection", "keep-alive")
