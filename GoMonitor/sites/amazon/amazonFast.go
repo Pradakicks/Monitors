@@ -71,10 +71,10 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 	// time.Sleep(3000 * (time.Millisecond))
 
 	i := true
-	jar, _ := cookiejar.New(nil)
-	m.Monitor.Client = http.Client{
-		Jar: jar,
-	}
+	// jar, _ := cookiejar.New(nil)
+	// m.Monitor.Client = http.Client{
+	// 	Jar: jar,
+	// }
 	// m.getCookies()
 	// m.getCookies()
 
@@ -99,7 +99,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 				Proxy: http.ProxyURL(proxyUrl),
 			}
 			m.Monitor.Client = http.Client{
-				Jar:       jar,
+				// Jar:       jar,
 				Transport: defaultTransport,
 			}
 			m.monitor()
