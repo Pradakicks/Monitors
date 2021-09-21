@@ -634,7 +634,7 @@ async function mass(string, content, message, groupName) {
               currentBody['skuName'] = oid
               currentBody['sku'] = asin
               console.log(currentBody, SKU.split(":"));
-              await runAmazon(asin, oid)
+              // await runAmazon(asin, oid)
               startGoMonitor(currentBody, site.toUpperCase());
               break;
             }
