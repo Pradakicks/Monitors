@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"strconv"
 	"strings"
@@ -190,7 +189,7 @@ func (m *CurrentMonitor) monitor() error {
 		go m.sendRestockNotification(m.oid, m.Monitor.Config.Sku, "Amazon Product")
 		go m.webHookSend(currentC, "Amazon", "Test Product", 999, fmt.Sprintf("https://www.amazon.com/gp/product/%s", m.Monitor.Config.Sku), t, "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png", 1)
 		time.Sleep(15000 * time.Millisecond)
-		
+
 	}
 
 	m.Monitor.AvailabilityBool = m.Monitor.CurrentAvailabilityBool
