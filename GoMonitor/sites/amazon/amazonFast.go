@@ -15,6 +15,7 @@ import (
 	"github.com/bradhe/stopwatch"
 	"github.com/nickname32/discordhook"
 	"github.com/pkg/errors"
+	"github.com/PuerkitoBio/goquery"
 
 	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
@@ -65,7 +66,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 	m.Monitor.Client = http.Client{Timeout: 10 * time.Second}
 	proxyList := FetchProxies.Get()
 
-	time.Sleep(15000 * (time.Millisecond))
+	// time.Sleep(15000 * (time.Millisecond))
 	// go m.Monitor.CheckStop()
 	// time.Sleep(3000 * (time.Millisecond))
 
@@ -76,7 +77,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 	// }
 	// m.getCookies()
 	// m.getCookies()
-
+		m.getHome()
 	for i {
 		defer func() {
 			if r := recover(); r != nil {
@@ -101,6 +102,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 				// Jar:       jar,
 				Transport: defaultTransport,
 			}
+			
 			m.monitor()
 			// time.Sleep(500 * (tixme.Millisecond))
 		} else {
@@ -114,8 +116,8 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 
 func (m *CurrentMonitor) monitor() error {
 	watch := stopwatch.Start()
-	m.sid = sid
-	m.csrf = csrf
+	// m.sid = sid
+	// m.csrf = csrf
 	// oid := "f9FL%2FHvb8mR%2Fj3J361zTxy2J87piw0thjhoprF8qOayYYFTZsg1cIfDAEcG5D8tXKxNQiQsTBT%2F53D4%2FhW1Kgt1ruMYpP6XrgF5pie3MZfHXZ0xLMVgGaTUrNS9DOrabFGjD3TIzGMTMlDoz%2FKmCzA%3D%3D"
 	// fmt.Println("HERE", fmt.Sprintf("session-id=%s;", m.sid), fmt.Sprintf(`"{\"items\":[{\"asin\":\"%s\",\"offerListingId\":\"%s\",\"quantity\":1}]}"`, m.Monitor.Config.Sku, m.oid))
 	// payload := strings.NewReader(fmt.Sprintf(`marketplaceId=ATVPDKIKX0DER&asin=%v&customerId=&sessionId=%v&accessoryItemAsin=B002M40VJM&accessoryItemOfferingId=%v&languageOfPreference=en_US&accessoryItemQuantity=1&accessoryItemPrice=9.99&accessoryMerchantId=ATVPDKIKX0DER&accessoryProductGroupId=8652000`, m.Monitor.Config.Sku, m.sid, oid))
@@ -176,6 +178,8 @@ func (m *CurrentMonitor) monitor() error {
 		m.Monitor.CurrentAvailabilityBool = true
 	} else if res.StatusCode == 422 {
 		m.Monitor.CurrentAvailabilityBool = false
+	} else if res.StatusCode == 404 {
+		m.getHome()
 	}
 
 	if !m.Monitor.AvailabilityBool && m.Monitor.CurrentAvailabilityBool {
@@ -285,6 +289,7 @@ func Amazon(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&currentMonitor)
 	fmt.Println(currentMonitor)
 	go NewMonitor(currentMonitor.Sku, currentMonitor.SkuName)
+	// go NewMonitor(currentMonitor.Sku, currentMonitor.SkuName)
 	json.NewEncoder(w).Encode(currentMonitor)
 }
 
@@ -298,9 +303,9 @@ func AmazonSession(w http.ResponseWriter, r *http.Request) {
 	var currentBody CookieMonitorResponse
 	_ = json.NewDecoder(r.Body).Decode(&currentBody)
 	fmt.Println(currentBody)
-	sid = currentBody.Sid
-	csrf = currentBody.Csrf
-	fmt.Println(sid, csrf)
+	// sid = currentBody.Sid
+	// csrf = currentBody.Csrf
+	// fmt.Println(sid, csrf)
 	// fmt.Println(r.Response.Body)
 	json.NewEncoder(w).Encode(currentBody)
 }
@@ -396,29 +401,54 @@ func (m *CurrentMonitor) getHome() error {
 		watch.Stop()
 		// fmt.Printf("Home Depot %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
 	}()
-	// body, err := ioutil.ReadAll(res.Body)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	fmt.Println(errors.Cause(err))
-	// 	return nil
-	// }
-	// if res.StatusCode != 200 {
-	// 	time.Sleep(10 * time.Second)
-	// 	return nil
+	// // body, err := ioutil.ReadAll(res.Body)
+	// // if err != nil {
+	// // 	fmt.Println(err)
+	// // 	fmt.Println(errors.Cause(err))
+	// // 	return nil
+	// // }
+	// // if res.StatusCode != 200 {
+	// // 	time.Sleep(10 * time.Second)
+	// // 	return nil
 
-	// }
+	// // }
+	// fmt.Println(res.StatusCode)
+	// // for i, v := range res.Header {
+	// // 	if i == "Set-Cookie" {
+	// // 		fmt.Println(v)
+	// // 		if strings.Contains(v[0], "session-id=") {
+	// // 			m.sid = strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0]
+	// // 			fmt.Println(strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0])
+	// // 		}
+
+	// // 	}
+	// // }
 	fmt.Println(res.StatusCode)
-	// for i, v := range res.Header {
-	// 	if i == "Set-Cookie" {
-	// 		fmt.Println(v)
-	// 		if strings.Contains(v[0], "session-id=") {
-	// 			m.sid = strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0]
-	// 			fmt.Println(strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0])
-	// 		}
+	if res.StatusCode != 200 {
+				time.Sleep(time.Millisecond * time.Duration(500))
+				m.getHome()
+			}
+	var page *goquery.Document
 
-	// 	}
-	// }
+	if res != nil {
+		page, err = goquery.NewDocumentFromReader(res.Body)
+		if err != nil {
+			fmt.Println(err)
+			return errors.New("Error Parsing Doc")
+		}
+		res.Body.Close()
+	}
 
+	var ok bool
+	if sid, ok = page.Find("input[id='session-id']").Attr("value"); !ok {
+		fmt.Println("Something missing 1")
+		return errors.New("Error Parsing Doc")
+	}
+	// m.si
+	fmt.Println(sid, "TESTING")
+	fmt.Println(sid, "TESTING")
+	m.sid = sid
+		m.getCSRF()
 	return nil
 }
 func (m *CurrentMonitor) getCSRF() error {
@@ -449,6 +479,7 @@ func (m *CurrentMonitor) getCSRF() error {
 	req.Header.Add("sec-fetch-user", "?1")
 	req.Header.Add("sec-fetch-dest", "document")
 	req.Header.Add("accept-language", "en-US,en;q=0.9")
+	req.Header.Add("cookie", fmt.Sprintf("session-id=%s;", sid))
 	// req.Header.Add("cookie", "ubid-main=132-7199499-9402615; lc-main=en_US; s_vnum=2055786480819%26vn%3D1; s_fid=085844D920902910-0DB536AAEB684C2B; aws-target-data=%7B%22support%22%3A%221%22%7D; aws-target-visitor-id=1623792154921-241206.34_0; aws-ubid-main=172-3048843-7260845; remember-account=false; regStatus=registered; awsc-color-theme=light; s_vn=1655867630274%26vn%3D1; s_dslv=1624331690698; s_nr=1624331690710-Repeat; x-main=ZIE86NWu1jB5HxfuG0qVxaU08jqV6sGBp2DA9tsu928OHZhsC2qT9C43prcuqzeA; at-main=Atza|IwEBIKXGflTuoexerWYqIsnUV3p9wik3OPXv7v2EJ3qT5QZcN1hIG0FguU0zlYCut1lKB29gF7TV70OO9ZGqDwC_sKWGnpSdyfcy8xrCYEC1WLUHAGY63bQFmRfeqMrtKIz05d9Ik6rmDVoHURLgrsefT9dx6Muxe1vdUXrANNcx6P5PiM0N5Gd4WnE4P_asSodtZakEim9GXwYYRRNjQO8GVox2; sess-at-main=\"Xdkcueks4+wSSK6zT0h1mv7AkUcMz53Pk31NyOT7CfY=\"; sst-main=Sst1|PQEN0NQUJ894Zthy9VGLmzrRCQaDdSIA3GIXq5hTe4BPG3e0w-PyJrrCn_fZ5Wc8qK4u5c57XsmADeArS5YQBweKHWSB8T0wSfCPlrL4KhpM1LWuQsyUTASxbFkeIsMLy1PZfL3MsDjRHsFhrJfkjWkqdb2t9WbYMgGGY-p-WjhzNC8eSXpqujMbzXkA7oBsf189_3sy3u3o645DZ2uhRSKh-UNygWmTtd5YJLcvi9O95BT-T4s2JvMN8QIvC9KSYsBKwCQd4q0ENdNI9nucKNTyQjOZ0kzWSIwd6xCTqFaqNqM; i18n-prefs=USD; session-id-apay=145-1370814-2780545; session-id=131-7297596-5151307; session-id-time=2082787201l; aws-userInfo-signed=eyJ0eXAiOiJKV1MiLCJrZXlSZWdpb24iOiJ1cy1lYXN0LTEiLCJhbGciOiJFUzM4NCIsImtpZCI6ImFiMWE2OTgwLTQzMDAtNGQ3Yy1iMzRlLTYzZWFiODJhYTA4NyJ9.eyJzdWIiOiIiLCJzaWduaW5UeXBlIjoiUFVCTElDIiwiaXNzIjoiaHR0cDpcL1wvc2lnbmluLmF3cy5hbWF6b24uY29tXC9zaWduaW4iLCJrZXliYXNlIjoiQ2kwZDI5eU9cL2pPbXo2aTRMdU9xNE1DcHNldUxqaFlOWjhVMDFGUXNPZXM9IiwiYXJuIjoiYXJuOmF3czppYW06OjEwNTMwMzA1MzQxNzpyb290IiwidXNlcm5hbWUiOiJQcmFkYUtpY2tzIn0.Oxi7dsCC28WdyqXBxEl1VICR_NEHAmWRvOjDr6cKWFgpa-SsEKS9bu9F4ZVwhBzbZNs4Q7uuzjER6nbbo0yPlIQpMXiDTemlCICY89VIIGCOdKC_YvHNInN7OMlj9MUj; aws-userInfo=%7B%22arn%22%3A%22arn%3Aaws%3Aiam%3A%3A105303053417%3Aroot%22%2C%22alias%22%3A%22%22%2C%22username%22%3A%22PradaKicks%22%2C%22keybase%22%3A%22Ci0d29yO%2FjOmz6i4LuOq4MCpseuLjhYNZ8U01FQsOes%5Cu003d%22%2C%22issuer%22%3A%22http%3A%2F%2Fsignin.aws.amazon.com%2Fsignin%22%2C%22signinType%22%3A%22PUBLIC%22%7D; csd-key=eyJ3YXNtVGVzdGVkIjp0cnVlLCJ3YXNtQ29tcGF0aWJsZSI6dHJ1ZSwid2ViQ3J5cHRvVGVzdGVkIjpmYWxzZSwidiI6MSwia2lkIjoiOTI5ZDY4Iiwia2V5IjoiR0dRS3hoZ1l1VXVPbjNjQmRTbDdkTy80a2Z1MjI2WnpKTGdXS09OQng4QlRDRGtReDVWYnFxU3htcXQrSzRkdDU0TWh3bENpbWFGQm5ReEJwRjIwblBsU1pqZGgyNVpCcTVjemI2aEwzSDMwcFVKZXZtUVJKaVZrZThNc29lcTFrdDh1TGp3ODhmaHpyTUtnaWlKQlhvUWlQaFNPSFZxbXFqTUg1bFpKR2lnWGFhMUl0YXliTHpxVUU2OTZ0bWVuU1k1OFRVNDU2Z3NMWEdBU2lUTnZyK29Ja1RhckFBN2w1cUxROUp1Z2JvRHI2bzBzb2puMjVTMGZSWE1lcUNuTUM4SWFQT082OTg1UVZGTkIxd0pjelRycFVzQjZFeEg4cXBjdVBIYlJUeEs1UzNxSnY5K1Z2VUR0a29RNnVVTkErQzJYand2cEFWVkFFa1V3djZaT3JBPT0ifQ==; session-token=\"rKnsqVM2fzGbIN1bkI8rxANamaoKq2H3kT6Orvj6eLMK1KsuRsseHXOIvweaC6QZiauxj6vf3pod003PxBvKzkgNnshnB74Oh/CARufVe6dmS+K/LsdFPbjjLIQpj3kHtTqa8ABB05EQTVgTPeF6LuefVnH3LzLol0AaiFRlFDnkVA/nunNWilHMHE10US7NMf2iZmWZgBbP71bQrfjRrQ==\"; csm-hit=tb:SARMPC92MC0MJX8GH41R+b-29F64KJKMRJ6M6QSV7Y9|1631583069455&t:1631583069455&adb:adblk_no")
 	res, err := m.Monitor.Client.Do(req)
 	if err != nil {
@@ -461,31 +492,23 @@ func (m *CurrentMonitor) getCSRF() error {
 		watch.Stop()
 		// fmt.Printf("Home Depot %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
 	}()
+	var page *goquery.Document
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println(errors.Cause(err))
-		return nil
-	}
-	// if res.StatusCode != 200 {
-	// 	time.Sleep(10 * time.Second)
-	// 	return nil
-	// }
-
-	test := strings.Split(string(body), "aod-atc-csrf-token")[0]
-	fmt.Println(test)
-	fmt.Println(res.StatusCode)
-	for i, v := range res.Header {
-		if i == "Set-Cookie" {
-			fmt.Println(v)
-			if strings.Contains(v[0], "session-id=") {
-				m.sid = strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0]
-				fmt.Println(strings.Split(strings.Split(v[0], "session-id=")[1], ";")[0])
-			}
-
+	if res != nil {
+		page, err = goquery.NewDocumentFromReader(res.Body)
+		if err != nil {
+			fmt.Println(err)
+			return errors.New("Error Parsing Doc")
 		}
+		res.Body.Close()
 	}
+	var ok bool
+	if csrf, ok = page.Find("input[id='aod-atc-csrf-token']").Attr("value"); !ok {
+		fmt.Println("Something missing 1")
+		return errors.New("Error Parsing Doc")
+	}
+	fmt.Println(csrf, "TESTING")
+	m.csrf = csrf
 
 	return nil
 }
