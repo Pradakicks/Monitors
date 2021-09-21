@@ -103,8 +103,8 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 				Transport: defaultTransport,
 			}
 			
-			m.monitor()
-			// time.Sleep(500 * (tixme.Millisecond))
+			go m.monitor()
+			time.Sleep(100 * (time.Millisecond))
 		} else {
 			fmt.Println(m.Monitor.Config.Sku, "STOPPED STOPPED STOPPED")
 			i = false
