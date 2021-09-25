@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/bradhe/stopwatch"
 	"github.com/nickname32/discordhook"
 	"github.com/pkg/errors"
-	"github.com/PuerkitoBio/goquery"
 
 	Webhook "github.con/prada-monitors-go/helpers/discordWebhook"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
@@ -77,7 +77,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 	// }
 	// m.getCookies()
 	// m.getCookies()
-		m.getHome()
+	m.getHome()
 	for i {
 		defer func() {
 			if r := recover(); r != nil {
@@ -102,7 +102,7 @@ func NewMonitor(sku string, oid string) *CurrentMonitor {
 				// Jar:       jar,
 				Transport: defaultTransport,
 			}
-			
+
 			go m.monitor()
 			time.Sleep(100 * (time.Millisecond))
 		} else {
@@ -158,7 +158,7 @@ func (m *CurrentMonitor) monitor() error {
 	defer res.Body.Close()
 	defer func() {
 		watch.Stop()
-		fmt.Printf("Amazon %s - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, res.StatusCode, watch.Milliseconds())
+		fmt.Printf("Amazon %s - InStock : %t - Code : %d Milli elapsed: %v\n", m.Monitor.Config.Sku, m.Monitor.AvailabilityBool, res.StatusCode, watch.Milliseconds())
 	}()
 	// body, err := ioutil.ReadAll(res.Body)
 	// if err != nil {
@@ -192,7 +192,7 @@ func (m *CurrentMonitor) monitor() error {
 		t := time.Now().UTC()
 		go m.sendRestockNotification(m.oid, m.Monitor.Config.Sku, "Amazon Product")
 		go m.webHookSend(currentC, "Amazon", "Test Product", 999, fmt.Sprintf("https://www.amazon.com/gp/product/%s", m.Monitor.Config.Sku), t, "https://cdn.discordapp.com/attachments/843905652790263838/871833603770810489/3.png", 1)
-		time.Sleep(30000 * time.Millisecond)
+		time.Sleep(60000 * time.Millisecond)
 
 	}
 
@@ -425,9 +425,9 @@ func (m *CurrentMonitor) getHome() error {
 	// // }
 	fmt.Println(res.StatusCode)
 	if res.StatusCode != 200 {
-				time.Sleep(time.Millisecond * time.Duration(500))
-				m.getHome()
-			}
+		time.Sleep(time.Millisecond * time.Duration(500))
+		m.getHome()
+	}
 	var page *goquery.Document
 
 	if res != nil {
@@ -442,13 +442,15 @@ func (m *CurrentMonitor) getHome() error {
 	var ok bool
 	if sid, ok = page.Find("input[id='session-id']").Attr("value"); !ok {
 		fmt.Println("Something missing 1")
-		return errors.New("Error Parsing Doc")
-	}
+		m.getCSRF()
+		return nil
+		// return errors.New("Error Parsing Doc")
+	} 
 	// m.si
 	fmt.Println(sid, "TESTING")
 	fmt.Println(sid, "TESTING")
 	m.sid = sid
-		m.getCSRF()
+	m.getCSRF()
 	return nil
 }
 func (m *CurrentMonitor) getCSRF() error {
