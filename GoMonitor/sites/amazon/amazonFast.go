@@ -506,8 +506,9 @@ func (m *CurrentMonitor) getCSRF() error {
 	}
 	var ok bool
 	if csrf, ok = page.Find("input[id='aod-atc-csrf-token']").Attr("value"); !ok {
-		fmt.Println("Something missing 1")
-		return errors.New("Error Parsing Doc")
+		fmt.Println("Something missing 2")
+		m.getCSRF()
+		return nil
 	}
 	fmt.Println(csrf, "TESTING")
 	m.csrf = csrf
