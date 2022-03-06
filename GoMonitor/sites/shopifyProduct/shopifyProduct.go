@@ -13,9 +13,9 @@ import (
 
 	"github.com/bradhe/stopwatch"
 
-	Shopify "github.con/prada-monitors-go/sites/shopify"
 	FetchProxies "github.con/prada-monitors-go/helpers/proxy"
 	Types "github.con/prada-monitors-go/helpers/types"
+	Shopify "github.con/prada-monitors-go/sites/shopify"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -336,7 +336,7 @@ func (m *Monitor) checkStop() error {
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.skuName))
 		  fmt.Println("Contract", strings.ToUpper(m.Config.site), m.Config.skuName)
-		url := "http://104.249.128.207:7243/DB"
+		url := "http://localhost:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)

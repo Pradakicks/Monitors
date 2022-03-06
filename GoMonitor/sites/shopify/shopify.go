@@ -88,6 +88,7 @@ type ProductsItem struct {
 	Store       string
 	Handle      string
 }
+
 var Collection = helper.ConnectDB()
 
 func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
@@ -111,60 +112,60 @@ func NewMonitor(sku string, collection *mongo.Collection) *Monitor {
 	m.monitorProduct.stockNumber = ""
 
 	proxyList := FetchProxies.Get()
-	
 
 	switch strings.ToUpper(m.Config.sku) {
 	case "MOUNTAINDEW":
 	case "GORILLAMIND":
 	case "MONDOSHOP":
-		 {
-		m.Keywords = append(m.Keywords, "Turke")
-		m.Keywords = append(m.Keywords, "sterone")
-		m.Keywords = append(m.Keywords, "Turkesterone")
-		m.Keywords = append(m.Keywords, "a")
-		m.Keywords = append(m.Keywords, "d")
-		m.Keywords = append(m.Keywords, "b")
-		m.Keywords = append(m.Keywords, "d")
-		m.Keywords = append(m.Keywords, "o")
-		m.Keywords = append(m.Keywords, "g")
-		m.Keywords = append(m.Keywords, "l")
-		m.Keywords = append(m.Keywords, "p")
-		m.Keywords = append(m.Keywords, "f")
-		m.Keywords = append(m.Keywords, "n")
-	}
-	default:{
-		m.Keywords = append(m.Keywords, "jordan")
-		m.Keywords = append(m.Keywords, "air")
-		m.Keywords = append(m.Keywords, "yeezy")
-		m.Keywords = append(m.Keywords, "adidas")
-		m.Keywords = append(m.Keywords, "Nike")
-		m.Keywords = append(m.Keywords, "New")
-		m.NegKeywords = append(m.NegKeywords, "Fleece")
-		m.NegKeywords = append(m.NegKeywords, "Tee")
-		m.NegKeywords = append(m.NegKeywords, "Accessories")
-		m.NegKeywords = append(m.NegKeywords, "Hat")
-		m.NegKeywords = append(m.NegKeywords, "Pant")
-		m.NegKeywords = append(m.NegKeywords, "Track Jacket")
-		m.NegKeywords = append(m.NegKeywords, "Ultraboost")
-		m.NegKeywords = append(m.NegKeywords, "Sock")
-		m.NegKeywords = append(m.NegKeywords, "Presto")
-		m.NegKeywords = append(m.NegKeywords, "Jeans")
-		m.NegKeywords = append(m.NegKeywords, "T-Shirt")
-		m.NegKeywords = append(m.NegKeywords, "Snapback")
-		m.NegKeywords = append(m.NegKeywords, "Leggings")
-		m.NegKeywords = append(m.NegKeywords, "Mesh Top")
-		m.NegKeywords = append(m.NegKeywords, "Max Aura")
-		m.NegKeywords = append(m.NegKeywords, "Leggings")
-		m.NegKeywords = append(m.NegKeywords, "Air Structure")
-		m.NegKeywords = append(m.NegKeywords, "Huarache")
-		m.NegKeywords = append(m.NegKeywords, "Cargo Short")
-		m.NegKeywords = append(m.NegKeywords, "Court Polo")
-		m.NegKeywords = append(m.NegKeywords, "Jacket")
-		m.NegKeywords = append(m.NegKeywords, "Dress")
-		m.NegKeywords = append(m.NegKeywords, "Short")
-		m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
-		m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
-	}
+		{
+			m.Keywords = append(m.Keywords, "Turke")
+			m.Keywords = append(m.Keywords, "sterone")
+			m.Keywords = append(m.Keywords, "Turkesterone")
+			m.Keywords = append(m.Keywords, "a")
+			m.Keywords = append(m.Keywords, "d")
+			m.Keywords = append(m.Keywords, "b")
+			m.Keywords = append(m.Keywords, "d")
+			m.Keywords = append(m.Keywords, "o")
+			m.Keywords = append(m.Keywords, "g")
+			m.Keywords = append(m.Keywords, "l")
+			m.Keywords = append(m.Keywords, "p")
+			m.Keywords = append(m.Keywords, "f")
+			m.Keywords = append(m.Keywords, "n")
+		}
+	default:
+		{
+			m.Keywords = append(m.Keywords, "jordan")
+			m.Keywords = append(m.Keywords, "air")
+			m.Keywords = append(m.Keywords, "yeezy")
+			m.Keywords = append(m.Keywords, "adidas")
+			m.Keywords = append(m.Keywords, "Nike")
+			m.Keywords = append(m.Keywords, "New")
+			m.NegKeywords = append(m.NegKeywords, "Fleece")
+			m.NegKeywords = append(m.NegKeywords, "Tee")
+			m.NegKeywords = append(m.NegKeywords, "Accessories")
+			m.NegKeywords = append(m.NegKeywords, "Hat")
+			m.NegKeywords = append(m.NegKeywords, "Pant")
+			m.NegKeywords = append(m.NegKeywords, "Track Jacket")
+			m.NegKeywords = append(m.NegKeywords, "Ultraboost")
+			m.NegKeywords = append(m.NegKeywords, "Sock")
+			m.NegKeywords = append(m.NegKeywords, "Presto")
+			m.NegKeywords = append(m.NegKeywords, "Jeans")
+			m.NegKeywords = append(m.NegKeywords, "T-Shirt")
+			m.NegKeywords = append(m.NegKeywords, "Snapback")
+			m.NegKeywords = append(m.NegKeywords, "Leggings")
+			m.NegKeywords = append(m.NegKeywords, "Mesh Top")
+			m.NegKeywords = append(m.NegKeywords, "Max Aura")
+			m.NegKeywords = append(m.NegKeywords, "Leggings")
+			m.NegKeywords = append(m.NegKeywords, "Air Structure")
+			m.NegKeywords = append(m.NegKeywords, "Huarache")
+			m.NegKeywords = append(m.NegKeywords, "Cargo Short")
+			m.NegKeywords = append(m.NegKeywords, "Court Polo")
+			m.NegKeywords = append(m.NegKeywords, "Jacket")
+			m.NegKeywords = append(m.NegKeywords, "Dress")
+			m.NegKeywords = append(m.NegKeywords, "Short")
+			m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
+			m.NegKeywords = append(m.NegKeywords, "Sweatshirt")
+		}
 	}
 
 	// fmt.Println(timeout)
@@ -433,7 +434,7 @@ func (m *Monitor) monitor() error {
 
 			}
 		}
- 
+
 		// Add Keywords
 		for _, val := range m.Keywords {
 			if strings.Contains(value.Title, val) || strings.Contains(value.Handle, val) {
@@ -441,14 +442,14 @@ func (m *Monitor) monitor() error {
 				continue
 			}
 		}
-		
+
 		for _, val := range m.NegKeywords {
 			if strings.Contains(value.Title, val) || strings.Contains(value.Handle, val) {
 				containsNegativeKeywords = true
 				continue
 			}
 		}
-		
+
 		if !isPresent && containsKeywords && !containsNegativeKeywords {
 			newList = append(newList, ProductsItem{ID: value.ID, UpdatedTime: value.UpdatedAt, Variants: value.Variants, Store: value.Store, Handle: value.Handle})
 			go func(value Types.ShopifyNewProduct) {
@@ -523,7 +524,6 @@ func (m *Monitor) sendWebhook(site string, name string, price string, link strin
 	// now := time.Now()
 	// currentTime := strings.Split(now.String(), "-0400")[0]
 	t := time.Now().UTC()
-
 
 	for _, comp := range m.CurrentCompanies {
 		fmt.Println("Company ", comp.Company)
@@ -610,7 +610,7 @@ func (m *Monitor) checkStop() error {
 			"site" : "%s",
 			"sku" : "%s"
 		  }`, strings.ToUpper(m.Config.site), m.Config.sku))
-		url := "http://104.249.128.207:7243/DB"
+		url := "http://localhost:7243/DB"
 		req, err := http.NewRequest("POST", url, getDBPayload)
 		if err != nil {
 			fmt.Println(err)
@@ -676,7 +676,6 @@ func (m *Monitor) restockedVariants(oldVariants []Types.Variant, newVariants []T
 
 	return returnArray
 }
-
 
 func Shopify(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL)

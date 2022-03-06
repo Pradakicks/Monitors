@@ -8,7 +8,8 @@ const {
 	bot_age,
 	bot_info,
 } = require('./config.json');
-const {SKUADD , findCommand , deleteSku, checkBank, massAdd, validateUser, walmartScraper} = require('./dms');
+const { rp } = require('./discordHelpers/helper')
+const {findCommand , deleteSku, checkBank, massAdd, validateUser, walmartScraper} = require('./dms');
 const fs = require('fs')
 
 client.once('ready', () => {
@@ -199,11 +200,15 @@ client.on("message", (msg) => {
   });
 
 console.log(os.platform())
-if(os.platform() == "win32" || os.platform() == "darwin"){
-	console.log("Development Environment")
-	client.login(development)
-} else {
-	console.log("Production Environment")
-	client.login(token);
+// if(os.platform() == "win32" || os.platform() == "darwin"){
+// 	console.log("Development Environment")
+// 	client.login(development)
+// } else {
+// 	// console.log("Production Environment")
+// 	console.log("Development Environment")
+// 	// client.login(token);
+// 	client.login(development)
+// }
 
-}
+console.log("TESTING Environment")
+client.login(development)

@@ -20,21 +20,16 @@ import (
 	TargetMonitor "github.con/prada-monitors-go/sites"
 	BigLotsMonitor "github.con/prada-monitors-go/sites/BigLots"
 	AcademyMonitor "github.con/prada-monitors-go/sites/academy"
-	AmdMonitor "github.con/prada-monitors-go/sites/amd"
 	BestBuyMonitor "github.con/prada-monitors-go/sites/bestBuy"
-	FanaticsMonitor "github.con/prada-monitors-go/sites/fanatics"
 	GameStopMonitor "github.con/prada-monitors-go/sites/gameStop"
 	HomeDepot "github.con/prada-monitors-go/sites/homedepot"
 	NewEggMonitor "github.con/prada-monitors-go/sites/newEgg"
-	RestirMonitor "github.con/prada-monitors-go/sites/restir"
 	Shopify "github.con/prada-monitors-go/sites/shopify"
 	ShopifyLink "github.con/prada-monitors-go/sites/shopifyLink"
-	Amazon "github.con/prada-monitors-go/sites/amazon"
 	ShopifyProduct "github.con/prada-monitors-go/sites/shopifyProduct"
 	SlickDealsMonitor "github.con/prada-monitors-go/sites/slickDeals"
 	TargetNewTradingCards "github.con/prada-monitors-go/sites/targetNew"
 	WalmartMonitor "github.con/prada-monitors-go/sites/walmart"
-	WalmartNew "github.con/prada-monitors-go/sites/walmartNew"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -91,6 +86,7 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, "Deals Monitor")
 }
+
 func getDB(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Request Sent")
 
@@ -289,7 +285,7 @@ func handleShopifyProducts() {
 		}
 		// fmt.Println(product)
 		go func() {
-			url := "http://104.249.128.207:7243/SHOPIFYPRODUCT"
+			url := "http://localhost:7243/SHOPIFYPRODUCT"
 
 			var jsonData = []byte(fmt.Sprintf(`{
 				"site": "%s",
@@ -567,20 +563,13 @@ func handleRequests() {
 	router.HandleFunc("/TARGETNEW", TargetNewTradingCards.TargetNew).Methods("POST")
 	router.HandleFunc("/ACADEMY", AcademyMonitor.Academy).Methods("POST")
 	router.HandleFunc("/BESTBUY", BestBuyMonitor.BestBuy).Methods("POST")
-	router.HandleFunc("/AMD", AmdMonitor.Amd).Methods("POST")
 	router.HandleFunc("/SLICK", SlickDealsMonitor.SlickDeals).Methods("POST")
 	router.HandleFunc("/SLICKDEALS", SlickDealsMonitor.SlickDeals).Methods("POST")
 	router.HandleFunc("/GAMESTOP", GameStopMonitor.GameStop).Methods("POST")
-	router.HandleFunc("/WALMARTNEW", WalmartNew.WalmartNew).Methods("POST")
 	router.HandleFunc("/SHOPIFY", Shopify.Shopify).Methods("POST")
 	router.HandleFunc("/SHOPIFYLINK", ShopifyLink.Shopify).Methods("POST")
 	router.HandleFunc("/HOMEDEPOT", HomeDepot.HomeDepot).Methods("POST")
 	router.HandleFunc("/SHOPIFYPRODUCT", ShopifyProduct.ShopifyProduct).Methods("POST")
-	router.HandleFunc("/FANATICSNEWPRODUCTS", FanaticsMonitor.FanaticsNewProducts).Methods("POST")
-	router.HandleFunc("/RESTIR", RestirMonitor.Restir).Methods("POST")
-
-	router.HandleFunc("/AMAZON", Amazon.Amazon).Methods("POST")
-	router.HandleFunc("/AMAZONSESSION", Amazon.AmazonSession).Methods("POST")
 
 	// Helper Routes
 	router.HandleFunc("/", getPage).Methods("GET")
